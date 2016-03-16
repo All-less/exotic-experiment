@@ -1,2 +1,2 @@
-# exotic-experiment
-Course project for Embedded System
+# Exotic Experiment
+Course project for *Embedded System*.
