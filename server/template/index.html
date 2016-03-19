@@ -1,0 +1,32 @@
+<html>
+<body>
+    <h1>Welcome, {{username}}</h1>
+    <script src='/static/server.js'></script>
+    <script>
+        window.addEventListener('keydown', function(event){
+            server.keyDown(event.keyCode);
+        })
+        window.addEventListener('keyup', function(evnet){
+            server.keyUp(event.keyCode);
+        })
+        function newMessage(msg){
+            var div  = document.createElement('div');
+            div.innerHTML = msg;
+            document.body.appendChild(div);
+        }
+        server.remote.setKeyDown(function(code){
+            newMessage('Key Down ' + code);
+        });
+        server.remote.setKeyUp(function(code){
+            newMessage('Key Up ' + code);
+        });
+        server.remote.setSwitchPress(function(id){
+            newMessage('Switch Press ' + id);
+        });
+        server.remote.setUserChange(function(user){
+            newMessage('user Change to ' + user);
+            console.log(user);
+        });
+    </script>
+</body>
+</html>
