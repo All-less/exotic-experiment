@@ -1,9 +1,9 @@
-#! /usr/bin/env python
-#coding=utf-8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import tornado.web
 import tornado.ioloop
 import tornado.websocket
-from tornado.tcpserver import TCPServer
+import tornado.tcpserver
 import thread
 import os
 import json
@@ -76,7 +76,7 @@ class LiveShowHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         try:
-            print message
+            print len(message), message
             obj = json.loads(message)
             action = obj.get('action', None)
             if action == Type.user:
@@ -88,16 +88,22 @@ class LiveShowHandler(tornado.websocket.WebSocketHandler):
             else:
                 if LiveShowHandler.userValid(self):
                     LiveShowHandler.sendall(message)
-        except e:
+                    Connection.send(message)
+        except Exception as e:
             print e
             pass
 
     def on_close(self):
         LiveShowHandler.clients.remove(self)
         LiveShowHandler.userRelease(self)
-'''
+
 class Connection(object):
     client = None
+
+    @classmethod
+    def send(cls, message):
+        if not cls.client is None:
+            cls.client.send_message(str(message))
 
     def __init__(self, stream, address):
         if Connection.client is not None:
@@ -111,16 +117,11 @@ class Connection(object):
         print "A new Liver", address
 
     def read_message(self):
-        print 'read message'
-        self._stream.read_until('\r\n\000', self.broadcast_messages)
+        self._stream.read_until('\n', self.broadcast_messages)
 
     def broadcast_messages(self, data):
-        #print "User said:", data[:-1], self._address
-        #for conn in Connection.clients:
-        #    conn.send_message(data)=
-        text = base64.b64encode(data)
-        LiveShowHandler.sendall(text)
-        print len(text), len(data)
+        data = data[:-1]
+        LiveShowHandler.sendall(data)
         self.read_message()
 
     def send_message(self, data):
@@ -130,11 +131,10 @@ class Connection(object):
         print "Liver left", self._address
         Connection.client = None
 
-class ChatServer(TCPServer):
+class FPGAServer(tornado.tcpserver.TCPServer):
     def handle_stream(self, stream, address):
         print "New connection :", address, stream
         Connection(stream, address)
-'''
 
 settings = dict(
     cookie_secret = "XmuwPAt8wHdnik4Xvc3GXmbXLifVmPZYhoc9Tx4x1iZ",
@@ -151,6 +151,6 @@ if __name__ == '__main__':
         **settings
     )
     app.listen(8080)
-    #server = ChatServer()
-    #server.listen(8000)
+    server = FPGAServer()
+    server.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
