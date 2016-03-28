@@ -1,5 +1,5 @@
-    var server = (function(){
-    var socket = new WebSocket('ws://' + window.location.host + '/socket/liveshow');
+var server = (function(){
+    var socket = new WebSocket('ws://' + window.location.host + '/socket' + window.location.pathname);
     var pass = function(){};
 
     Type = {
@@ -13,7 +13,8 @@
         keyDown : pass,
         keyUp : pass,
         switchPress : pass,
-        userChange : pass
+        userChange : pass,
+        leave : pass
     }
 
     console.table(socket);
@@ -21,7 +22,10 @@
         obj = JSON.parse(event.data);
         switch(obj.action){
             case Type.user:
-                Remote.userChange(obj.change);
+                if (obj.behave == 'liver_leave')
+                    Remote.leave()
+                else if (obj.behave == 'user_change')
+                    Remote.userChange(obj.change);
                 break;
             case Type.keyDown:
                 Remote.keyDown(obj.code);
@@ -50,10 +54,10 @@
 
     return {
         user : {
-            require : function(){
+            acquire : function(){
                 send({
                     'action' : Type.user,
-                    'behave' : 'require'
+                    'behave' : 'acquire'
                 });
             },
             release : function(){
@@ -93,6 +97,9 @@
             },
             setUserChange : function(func){
                 Remote.userChange = func;
+            },
+            setLeave : function(func){
+                Remote.leave = func;
             }
         }
     }
