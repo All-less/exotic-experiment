@@ -5,9 +5,10 @@
         <ul>
         {% for item in status %}
             <li>
-                <a href='/live/{{item['index']}}'>{{item['index']}}</a>
-                <span>{{item['admin']}}</span>
-                <span>{{item['user_number']}}</span>
+                <a href='/live/{{item['index']}}/'>index : {{item['index']}}</a>
+                <div>has admin? : {{item['admin']}}</div>
+                <div>users in this room{{item['user_number']}}</div>
+                <div>file upload: {{item['file']}}</div>
             </li>
         {% end %}
         </ul>

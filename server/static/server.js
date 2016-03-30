@@ -14,7 +14,9 @@ var server = (function(){
         keyUp : pass,
         switchPress : pass,
         userChange : pass,
-        leave : pass
+        leave : pass,
+        fileUpload : pass,
+        fileProgram : pass
     }
 
     console.table(socket);
@@ -26,6 +28,10 @@ var server = (function(){
                     Remote.leave()
                 else if (obj.behave == 'user_change')
                     Remote.userChange(obj.change);
+                else if (obj.behave == 'file_upload')
+                    Remote.fileUpload(obj.info);
+                else if (obj.behave == 'file_program')
+                    Remote.fileProgram()
                 break;
             case Type.keyDown:
                 Remote.keyDown(obj.code);
@@ -100,6 +106,12 @@ var server = (function(){
             },
             setLeave : function(func){
                 Remote.leave = func;
+            },
+            setFileUpload : function(func){
+                Remote.fileUpload = func;
+            },
+            setFileProgram : function(func){
+                Remote.fileProgram = func;
             }
         }
     }

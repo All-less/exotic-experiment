@@ -11,6 +11,9 @@ import thread
 import os
 import json
 import re
+import md5
+import random
+import base64
 
 from tornado.options import define, options
 from KeepList import KeepList
@@ -18,6 +21,7 @@ from KeepList import KeepList
 define('_user', default='user', help='cookie name of user')
 define('webport', default=8080, type=int, help='port at running web server at')
 define('socketport', default=8081, type=int, help='port that running socket server at')
+define('filesize', default=1024 * 1024, type=int, help='the maximun file size of user can upload')
 
 class BaseHttpHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
@@ -27,7 +31,10 @@ class BaseHttpHandler(tornado.web.RequestHandler):
         self.set_header('x-content-type-options', 'nosniff')
 
     def get_current_user(self):
-        return self.get_secure_cookie(options._user, None)
+        identity = self.get_secure_cookie('identity')
+        if identity is not None and len(identity) == 32:
+            return self.get_secure_cookie(options._user)
+        return None
 
     def set_current_user(self, user):
         self.set_secure_cookie(options._user, user)
@@ -52,6 +59,11 @@ class LoginHandler(BaseHttpHandler):
         user = self.get_argument('user', None)
         if user is not None:
             self.set_current_user(user)
+            m = md5.new()
+            m.update(user)
+            m.update(str(random.random()))
+            print m.hexdigest(), len(m.hexdigest())
+            self.set_secure_cookie('identity', m.hexdigest())
             self.redirect(self.get_argument('next', '/'))
         else:
             self.redirect(setting.login_url)
@@ -70,9 +82,58 @@ class LivePage(BaseHttpHandler):
         user = self.get_current_user()
         self.render('live.html', username=user)
 
+class LivePageFile(BaseHttpHandler):
+
+    def get(self, index = None):
+        if not Connection.client_valid(index):
+            raise tornado.web.HTTPError(404)
+        index = int(index)
+        status = Connection.client[index].file_status()
+        if self.get_argument('download', None) is not None:
+            if (status['valid']):
+                self.set_header('Content-Type', 'application/force-download')
+                self.set_header ('Content-Length', status['size'])
+                self.set_header ('Content-Disposition', 'attachment; filename=%s' % str(status['name']))
+                self.write(Connection.client[index]._file['body'])
+            else:
+                raise tornado.web.HTTPError(404)
+        else:
+            self.write(json.dumps(Connection.client[index].file_status()))
+        self.finish()
+
+    def post(self, index = None):
+        if not Connection.client_valid(index):
+            raise tornado.web.HTTPError(404)
+        index = int(index)
+        if not Connection.client[index].admin_identity_check(self.get_secure_cookie('identity')):
+            raise tornado.web.HTTPError(403)
+        try:
+            contentlength = int(self.request.headers.get('Content-Length'))
+        except:
+            contentlength = options.filesize
+        if contentlength < options.filesize:
+            file_metas = self.request.files.get('file', [])
+            for meta in file_metas:
+                filename = meta['filename']
+                Connection.client[index].file_add(filename, meta['body'])
+            broadcast = dict(
+                action = Type.user,
+                behave = 'file_upload',
+                info = Connection.client[index].file_status()
+            )
+            Connection.client[index].broadcast_JSON(broadcast)
+            broadcast['file'] =  base64.encodestring(Connection.client[index]._file['body'])
+            Connection.client[index].send_message(json.dumps(broadcast))
+        else:
+            raise tornado.web.HTTPError(403)
+
 class LiveShowHandler(tornado.websocket.WebSocketHandler):
+
     def get_current_user(self):
-        return self.get_secure_cookie(options._user, None)
+        identity = self.get_secure_cookie('identity')
+        if identity is not None and len(identity) == 32:
+            return self.get_secure_cookie(options._user)
+        return None
 
     def open(self, index):
         username = self.get_current_user()
@@ -80,12 +141,13 @@ class LiveShowHandler(tornado.websocket.WebSocketHandler):
             self.close()
         self._liver = Connection.client[int(index)]
         self.username = username
+        self.identity = self.get_secure_cookie('identity', None)
         self._liver.user_add(self)
         print 'New web client: %s@%d' % (username, self._liver._index)
 
     def on_message(self, message):
         try:
-            print '%s@%d%s:' % (self.get_current_user(), self._liver._index, '#' if self._liver.user_valid(self) else '$'), message
+            print '%s@%d%s:' % (self.get_current_user(), self._liver._index, '#' if self._liver.admin_handle_check(self) else '$'), message
             message = str(message)
             obj = json.loads(message)
             action = obj.get('action', None)
@@ -96,7 +158,7 @@ class LiveShowHandler(tornado.websocket.WebSocketHandler):
                 elif behave == 'release':
                     self._liver.admin_release(self)
             else:
-                if self._liver.user_valid(self):
+                if self._liver.admin_handle_check(self):
                     self._liver.broadcast_messages(message)
                     self._liver.send_message(message)
         except Exception as e:
@@ -116,26 +178,11 @@ class Connection(object):
                 status = dict(
                     index = index,
                     admin = client._user['admin'] is not None,
-                    user_number = len(client._user['user'])
+                    user_number = len(client._user['user']),
+                    file = client._file is not None
                 )
                 l.append(status)
         return l
-
-    def __init__(self, stream, address):
-        self._stream = stream
-        self._address = address
-        self._stream.set_close_callback(self.on_close)
-        self.send_message("hello!!!")
-        self.read_message()
-
-        self._index = Connection.client.append(self)
-        self._user = dict(
-            admin = None,
-            lock = thread.allocate_lock(),
-            user = set()
-        )
-
-        print "A new Liver %s at %d" % (self._address, self._index)
 
     @classmethod
     def client_valid(cls, index):
@@ -144,6 +191,29 @@ class Connection(object):
             return cls.client[index] is not None
         except:
             return False
+
+    def __init__(self, stream, address):
+        self._stream = stream
+        self._address = address
+        self._stream.set_close_callback(self.on_close)
+
+        self._index = Connection.client.append(self)
+        self._user = dict(
+            admin = None,
+            lock = thread.allocate_lock(),
+            user = set()
+        )
+        self._file = dict(
+            name = '',
+            body = None
+        )
+
+        self.send_message(json.dumps(dict(
+            index = self._index
+        )))
+        self.read_message()
+
+        print "A new Liver %s at %d" % (self._address, self._index)
 
     def admin_acquire(self, handle):
         if self._user['admin'] is None:
@@ -166,8 +236,24 @@ class Connection(object):
                 'change': None
             })
 
-    def user_valid(self, handle):
+    def admin_identity_check(self, string):
+        return self._user['admin'] is not None and self._user['admin'].identity == string
+
+    def admin_handle_check(self, handle):
         return self._user['admin'] == handle
+
+    def file_add(self, filename, file):
+        self._file['name'] = filename
+        self._file['body'] = file
+
+    def file_status(self):
+        valid = self._file['body'] is not None
+        size = len(self._file['body']) if valid else 0
+        return dict(
+            valid = valid,
+            size = size,
+            name = self._file['name']
+        )
 
     def user_add(self, handle):
         self._user['user'].add(handle)
@@ -226,8 +312,10 @@ if __name__ == '__main__':
     app = tornado.web.Application([
             (r'/', HomePage),
             (r'/login', LoginHandler),
-            (r'/live/(.*)', LivePage),
-            (r'/socket/live/(.*)', LiveShowHandler),
+            (r'/live/(.*)/', LivePage),
+            (r'/live/(.*)/file', LivePageFile),
+            (r'/live/(.*)/file/download', LivePageFile),
+            (r'/socket/live/(.*)/', LiveShowHandler),
             (r'/api/livelist', ApiLiveListHandler),
         ],
         **settings

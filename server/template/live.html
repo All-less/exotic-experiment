@@ -3,6 +3,12 @@
     <h1>Welcome, {{username}}</h1>
     <button onclick='server.user.acquire()'>acquire</button>
     <button onclick='server.user.release()'>release</button>
+    <form action='./file' enctype="multipart/form-data" method='post' target= "hframe">
+        <input type='file' name='file' id='file' />
+        <input type='submit' name='submit' value='Upload'/>
+        <iframe name ="hframe" id="hframe" style=" display: none" ></iframe >
+    </form>
+    <a href='./file?download'>Download uploaded file</a>
     <script src='/static/server.js'></script>
     <script>
         window.addEventListener('keydown', function(event){
@@ -31,6 +37,12 @@
         });
         server.remote.setLeave(function(){
             newMessage('RPI leave');
+        });
+        server.remote.setFileUpload(function(info){
+            newMessage('file received with size: ' + info.size);
+        });
+        server.remote.setFileProgram(function(){
+            newMessage('file program.');
         });
     </script>
 </body>

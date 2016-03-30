@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import socket, select, string, sys
+import socket, select, string, sys, json, base64
 
 def prompt() :
     sys.stdout.write('<You> ')
@@ -45,10 +45,26 @@ if __name__ == "__main__":
                     print '\nDisconnected from chat server'
                     sys.exit()
                 else :
-                    #print data
-                    print '\n Server: ', 
-                    sys.stdout.write(data)
-                    print
+                    #print datan
+                    remain = ''
+                    datalist = data.split('}')[:-1]
+                    for data in datalist:
+                        data = remain + data + '}'
+                        print '\n Server: ',
+                        try:
+                            data = json.loads(data)
+                        except ValueError, e:
+                            remain += data
+                            continue
+
+                        sys.stdout.write(json.dumps(data))
+
+                        if data.get('action', None) == 0 and data['behave'] == 'file_upload':
+                            s.send(json.dumps(dict(
+                                action = 0, # user type
+                                behave = 'file_program'
+                            )) + '\n')
+                        print
                     prompt()
 
             #user entered a message
