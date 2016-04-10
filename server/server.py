@@ -17,6 +17,7 @@ import base64
 
 from tornado.options import define, options
 from KeepList import KeepList
+from ExDict import ExDict, DefaultDict
 
 define('_user', default='user', help='cookie name of user')
 define('webport', default=8080, type=int, help='port at running web server at')
@@ -84,17 +85,17 @@ class LivePage(BaseHttpHandler):
 
 class LivePageFile(BaseHttpHandler):
 
-    def get(self, index = None):
+    def get(self, index = None, action = None):
         if not Connection.client_valid(index):
             raise tornado.web.HTTPError(404)
         index = int(index)
         status = Connection.client[index].file_status()
-        if self.get_argument('download', None) is not None:
-            if (status['valid']):
+        if action == 'download':
+            if status.valid:
                 self.set_header('Content-Type', 'application/force-download')
-                self.set_header ('Content-Length', status['size'])
-                self.set_header ('Content-Disposition', 'attachment; filename=%s' % str(status['name']))
-                self.write(Connection.client[index]._file['body'])
+                self.set_header('Content-Length', status.size)
+                self.set_header('Content-Disposition', 'attachment; filename=%s' % str(status.name))
+                self.write(Connection.client[index]._file.body)
             else:
                 raise tornado.web.HTTPError(404)
         else:
@@ -122,7 +123,6 @@ class LivePageFile(BaseHttpHandler):
                 info = Connection.client[index].file_status()
             )
             Connection.client[index].broadcast_JSON(broadcast)
-            broadcast['file'] =  base64.encodestring(Connection.client[index]._file['body'])
             Connection.client[index].send_message(json.dumps(broadcast))
         else:
             raise tornado.web.HTTPError(403)
@@ -177,9 +177,9 @@ class Connection(object):
             if client is not None:
                 status = dict(
                     index = index,
-                    admin = client._user['admin'] is not None,
-                    user_number = len(client._user['user']),
-                    file = client._file is not None
+                    admin = client._user.admin is not None,
+                    user_number = len(client._user.user),
+                    file = client._file.body is not None
                 )
                 l.append(status)
         return l
@@ -198,38 +198,40 @@ class Connection(object):
         self._stream.set_close_callback(self.on_close)
 
         self._index = Connection.client.append(self)
-        self._user = dict(
+        self._user = DefaultDict(
             admin = None,
             lock = thread.allocate_lock(),
             user = set()
         )
-        self._file = dict(
+        self._file = DefaultDict(
             name = '',
             body = None
         )
 
         self.send_message(json.dumps(dict(
-            index = self._index
+            index = self._index,
+            webport = options.webport,
+            filelink = '/live/%d/file/download' % self._index
         )))
         self.read_message()
 
         print "A new Liver %s at %d" % (self._address, self._index)
 
     def admin_acquire(self, handle):
-        if self._user['admin'] is None:
-            self._user['lock'].acquire()
-            if self._user['admin'] is None:
-                self._user['admin'] = handle
+        if self._user.admin is None:
+            self._user.lock.acquire()
+            if self._user.admin is None:
+                self._user.admin = handle
                 self.broadcast_JSON({
                     'action': Type.user,
                     'behave': 'user_change',
                     'change': handle.username
                 })
-            self._user['lock'].release()
+            self._user.lock.release()
 
     def admin_release(self, handle):
-        if (self._user['admin'] == handle):
-            self._user['admin'] = None
+        if self._user.admin == handle:
+            self._user.admin = None
             self.broadcast_JSON({
                 'action': Type.user,
                 'behave': 'user_change',
@@ -237,29 +239,29 @@ class Connection(object):
             })
 
     def admin_identity_check(self, string):
-        return self._user['admin'] is not None and self._user['admin'].identity == string
+        return self._user.admin is not None and self._user.admin.identity == string
 
     def admin_handle_check(self, handle):
-        return self._user['admin'] == handle
+        return self._user.admin == handle
 
     def file_add(self, filename, file):
-        self._file['name'] = filename
-        self._file['body'] = file
+        self._file.name = filename
+        self._file.body = file
 
     def file_status(self):
-        valid = self._file['body'] is not None
-        size = len(self._file['body']) if valid else 0
-        return dict(
+        valid = self._file.body is not None
+        size = len(self._file.body) if valid else 0
+        return DefaultDict(
             valid = valid,
             size = size,
-            name = self._file['name']
+            name = self._file.name
         )
 
     def user_add(self, handle):
-        self._user['user'].add(handle)
+        self._user.user.add(handle)
 
     def user_remove(self, handle):
-        self._user['user'].remove(handle)
+        self._user.user.remove(handle)
         self.admin_release(handle)
 
     def read_message(self):
@@ -277,7 +279,7 @@ class Connection(object):
         self.broadcast_messages(json.dumps(data))
 
     def broadcast_messages(self, data):
-        for user in self._user['user']:
+        for user in self._user.user:
             user.write_message(data)
 
     def on_close(self):
@@ -286,7 +288,7 @@ class Connection(object):
             'action': Type.user,
             'behave': 'liver_leave'
         })
-        for user in self._user['user']:
+        for user in self._user.user:
             user.close()
         Connection.client.remove(self._index)
 
@@ -314,7 +316,7 @@ if __name__ == '__main__':
             (r'/login', LoginHandler),
             (r'/live/(.*)/', LivePage),
             (r'/live/(.*)/file', LivePageFile),
-            (r'/live/(.*)/file/download', LivePageFile),
+            (r'/live/(.*)/file/(.*)', LivePageFile),
             (r'/socket/live/(.*)/', LiveShowHandler),
             (r'/api/livelist', ApiLiveListHandler),
         ],
