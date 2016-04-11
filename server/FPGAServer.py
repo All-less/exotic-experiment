@@ -8,7 +8,10 @@ import thread, json
 import tornado.tcpserver
 from KeepList import KeepList
 from ExDict import ExDict, DefaultDict
+from models import FPGA
 
+class NotFoundException(Exception):
+	pass
 
 class Type:
 	user = 0
@@ -18,6 +21,12 @@ class Type:
 
 class Connection(object):
 	client = KeepList()
+	unauth = DefaultDict(
+		head = None,
+		tail = None,
+		len = 0,
+		lock = thread.allocate_lock()
+	)
 
 	@classmethod
 	def status(cls):
@@ -26,6 +35,7 @@ class Connection(object):
 			if client is not None:
 				status = dict(
 					index = index,
+					device_id = client.device_id,
 					admin = client._user.admin is not None,
 					user_number = len(client._user.user),
 					file = client._file.body is not None
@@ -41,30 +51,95 @@ class Connection(object):
 		except:
 			return False
 
-	def __init__(self, stream, address):
-		self._stream = stream
-		self._address = address
-		self._stream.set_close_callback(self.on_close)
+	@classmethod
+	def unauth_add(cls, handle):
+		if cls.unauth.len >= config.unauthsize:
+			cls.unauth_pop()
+		print 'add'
+		cls.unauth.lock.acquire()
+		print cls.unauth
+		handle._pre = cls.unauth.tail
+		if cls.unauth.head == None:
+			cls.unauth.head = handle
+		if cls.unauth.tail is not None:
+			cls.unauth.tail._nex = handle
+		cls.unauth.tail = handle
+		cls.unauth.len += 1
+		cls.unauth.lock.release()
+		print cls.unauth
 
-		self._index = Connection.client.append(self)
-		self._user = DefaultDict(
+	@classmethod
+	def unauth_pop(cls):
+		head = cls.unauth.head
+		if head is not None:
+			print 'closing'
+			head.send_JSON(dict(
+				status = 2,
+				message = 'Not authorized exit.'
+			))
+			print dir(head)
+			head.close()
+		else:
+			print "empty head"
+
+	@classmethod
+	def unauth_remove(cls, handle):
+		print 'remove'
+		cls.unauth.lock.acquire()
+		pre = handle._pre
+		nex = handle._nex
+		if pre is not None:
+			pre._nex = nex
+		if nex is not None:
+			nex._pre = pre
+		if handle == cls.unauth.head:
+			cls.unauth.head = nex
+		if handle == cls.unauth.tail:
+			cls.unauth.tail = pre
+		handle._pre = None
+		handle._nex = None
+		cls.unauth.len -= 1
+		cls.unauth.lock.release()
+		print cls.unauth
+
+	@classmethod
+	def client_add(cls, handle):
+		index = cls.client.append(handle)
+		handle._index = index
+		handle._user = DefaultDict(
 			admin = None,
 			lock = thread.allocate_lock(),
 			user = set()
 		)
-		self._file = DefaultDict(
+		handle._file = DefaultDict(
 			name = '',
 			body = None
 		)
 
-		self.send_message(json.dumps(dict(
-			index = self._index,
+		handle.send_message(json.dumps(dict(
+			status = 0,
+			index = index,
 			webport = config.webport,
-			filelink = '/live/%d/file/download' % self._index
+			filelink = '/live/%d/file/download' % handle._index
 		)))
-		self.read_message()
+		handle.authed = True
 
-		print "A new Liver %s at %d" % (self._address, self._index)
+		print "A new Liver %s at %d" % (handle._address, handle._index)
+
+	def __init__(self, stream, address):
+		self._stream = stream
+		self._address = address
+		self._stream.set_close_callback(self.on_close)
+		self._nex = None
+		self._pre = None
+		self.authed = False
+		self.device_id = None
+
+		self._index = -1
+		self._user = None
+		self._file = None
+		Connection.unauth_add(self)
+		self.read_message()
 
 	def admin_acquire(self, handle):
 		if self._user.admin is None:
@@ -117,9 +192,32 @@ class Connection(object):
 		self._stream.read_until('\n', self.on_read)
 
 	def on_read(self, data):
+		broadcast = True
 		print 'RPi-%d: ' % (self._index), data[:-1]
-		self.broadcast_messages(data[:-1])
+		try:
+			d = json.loads(data)
+			if not self.authed and d['action'] == 0 and d['behave'] == 'authorization':
+				fpga = FPGA.find_first("where device_id=? and auth_key=?", d['device_id'], d['auth_key'])
+				if fpga is not None:
+					broadcast = False
+					Connection.unauth_remove(self)
+					Connection.client_add(self)
+					self.device_id = d['device_id']
+				else:
+					raise NotFoundException('Not found User')
+		except NotFoundException, e:
+			self.send_JSON(dict(
+				status = 1,
+				message = 'not found'
+			))
+		except:
+			pass
+		if broadcast and self.authed:
+			self.broadcast_messages(data[:-1])
 		self.read_message()
+
+	def send_JSON(self, dic):
+		self.send_message(json.dumps(dic))
 
 	def send_message(self, data):
 		self._stream.write(data)
@@ -131,15 +229,21 @@ class Connection(object):
 		for user in self._user.user:
 			user.write_message(data)
 
+	def close(self):
+		self._stream.close()
+
 	def on_close(self):
 		print "Liver %d@%s left" % (self._index, self._address)
-		self.broadcast_JSON({
-			'action': Type.user,
-			'behave': 'liver_leave'
-		})
-		for user in self._user.user:
-			user.close()
-		Connection.client.remove(self._index)
+		if self.authed:
+			self.broadcast_JSON({
+				'action': Type.user,
+				'behave': 'liver_leave'
+			})
+			for user in self._user.user:
+				user.close()
+			Connection.client.remove(self._index)
+		else:
+			Connection.unauth_remove(self)
 
 class FPGAServer(tornado.tcpserver.TCPServer):
 	def handle_stream(self, stream, address):

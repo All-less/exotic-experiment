@@ -26,12 +26,19 @@ def downloadend(resp_headers, content):
         size = len(content)
     )) + '\n')
 
-if(len(sys.argv) < 3) :
+if len(sys.argv) < 3:
     print 'Usage : python ', __file__,' hostname port'
     sys.exit()
 
 host = sys.argv[1]
 port = int(sys.argv[2])
+device_id = 'test'
+auth_key = '8f5aff8cb424d2cf39b206619f8d1461'
+
+if len(sys.argv) > 4:
+    device_id = sys.argv[3]
+    auth_key = sys.argv[4]
+
 filelink = None
 webport = None
 
@@ -47,8 +54,9 @@ except :
 
 
 print 'Connected to remote host. Start sending messages'
+print "Input 'auth', 'keyup code', 'keydown code', 'switch id' to send default message"
+print "Or you can send message directly."
 prompt()
-
 
 while 1:
     rlist = [sys.stdin, s]
@@ -79,12 +87,12 @@ while 1:
 
                     sys.stdout.write(json.dumps(data))
 
-                    if data.get("filelink", None) is not None:
+                    if data.get("status", None) == 0:
                         filelink = data.get("filelink")
                         webport = data.get("webport")
-                        filethread = FileDownload(host, webport, filelink, downloadend)
 
                     if data.get('action', None) == 0 and data['behave'] == 'file_upload':
+                        filethread = FileDownload(host, webport, filelink, downloadend)
                         filethread.start()
                     print
                 prompt()
@@ -93,5 +101,31 @@ while 1:
         else :
             msg = sys.stdin.readline()
             msg = msg[:-1]
-            s.send(msg + '\n')
+            if msg == 'auth':
+                s.send(json.dumps(dict(
+                    action = 0,
+                    behave = 'authorization',
+                    device_id = device_id,
+                    auth_key = auth_key
+                )) + '\n')
+            elif msg.startswith('keyup'):
+                a, b = msg.split(' ')
+                s.send(json.dumps(dict(
+                    action = 1,
+                    code = b
+                )) + '\n')
+            elif msg.startswith('keydown'):
+                a, b = msg.split(' ')
+                s.send(json.dumps(dict(
+                    action = 2,
+                    code = b
+                )) + '\n')
+            elif msg.startswith('switch'):
+                a, b = msg.split(' ')
+                s.send(json.dumps(dict(
+                    action = 3,
+                    id = b
+                )) + '\n')
+            else:
+                s.send(msg + '\n')
             prompt()
