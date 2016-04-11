@@ -55,9 +55,7 @@ class Connection(object):
 	def unauth_add(cls, handle):
 		if cls.unauth.len >= config.unauthsize:
 			cls.unauth_pop()
-		print 'add'
 		cls.unauth.lock.acquire()
-		print cls.unauth
 		handle._pre = cls.unauth.tail
 		if cls.unauth.head == None:
 			cls.unauth.head = handle
@@ -66,25 +64,19 @@ class Connection(object):
 		cls.unauth.tail = handle
 		cls.unauth.len += 1
 		cls.unauth.lock.release()
-		print cls.unauth
 
 	@classmethod
 	def unauth_pop(cls):
 		head = cls.unauth.head
 		if head is not None:
-			print 'closing'
 			head.send_JSON(dict(
 				status = 2,
 				message = 'Not authorized exit.'
 			))
-			print dir(head)
 			head.close()
-		else:
-			print "empty head"
 
 	@classmethod
 	def unauth_remove(cls, handle):
-		print 'remove'
 		cls.unauth.lock.acquire()
 		pre = handle._pre
 		nex = handle._nex
@@ -100,7 +92,6 @@ class Connection(object):
 		handle._nex = None
 		cls.unauth.len -= 1
 		cls.unauth.lock.release()
-		print cls.unauth
 
 	@classmethod
 	def client_add(cls, handle):
@@ -193,7 +184,7 @@ class Connection(object):
 
 	def on_read(self, data):
 		broadcast = True
-		print 'RPi-%d: ' % (self._index), data[:-1]
+		print 'FPGA-%d: ' % (self._index), data[:-1]
 		try:
 			d = json.loads(data)
 			if not self.authed and d['action'] == 0 and d['behave'] == 'authorization':

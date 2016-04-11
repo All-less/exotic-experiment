@@ -51,7 +51,7 @@ settings = DefaultDict(
     static_path = os.path.join(os.path.dirname(__file__), "static"),
     static_url_prefix = "/static/",
     login_url = '/login',
-    xsrf_cookies = True
+    xsrf_cookies = False
 )
 
 options.parse_command_line()

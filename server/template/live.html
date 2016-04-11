@@ -37,7 +37,7 @@
             console.log(user);
         });
         server.remote.setLeave(function(){
-            newMessage('RPI leave');
+            newMessage('FPGA leave');
         });
         server.remote.setFileUpload(function(info){
             newMessage('file received with size: ' + info.size);

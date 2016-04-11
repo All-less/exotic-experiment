@@ -10,9 +10,9 @@ from models import User
 
 class BaseUserHttpHandler(BaseHttpHandler):
 	def login_as(self, name, password):
-		user = User.find_first("where name=? and password=?", name, models.password_gen(password))
+		user = User.check(name, password)
 		if user is not None:
-			print user
+			self.set_current_name(user.name)
 			self.set_current_user(user.nickname)
 			self.set_secure_cookie(config._identity, models.auth_key(user.name + user.nickname))
 			self.redirect(self.get_argument('next', '/'))

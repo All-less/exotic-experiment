@@ -13,7 +13,6 @@ from FPGAServer import FPGAServer, Connection, Type
 from ExDict import ExDict, DefaultDict
 import models
 from models import User
-import UserHandler
 
 class BaseHttpHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
@@ -22,18 +21,30 @@ class BaseHttpHandler(tornado.web.RequestHandler):
         self.set_header('X-XSS-Protection', '1; mode=block')
         self.set_header('x-content-type-options', 'nosniff')
 
-    def get_current_user(self):
+    def get_current_name(self):
         identity = self.get_secure_cookie(config._identity)
         if identity is not None and len(identity) == 32:
             return self.get_secure_cookie(config._user)
         return None
 
+    def set_current_name(self, name):
+        self.set_secure_cookie(config._user, name)
+
+    def get_current_user(self):
+        identity = self.get_secure_cookie(config._identity)
+        if identity is not None and len(identity) == 32:
+            return self.get_secure_cookie(config._nickname)
+        return None
+
     def set_current_user(self, user):
-        self.set_secure_cookie(config._user, user)
+        self.set_secure_cookie(config._nickname, user)
 
     def is_admin(self):
-        user = User.find_first("where name=?", name=self.get_current_user)
-        return user.admin
+        user = User.get(self.get_current_name())
+        return user is not None and user.admin
+
+import UserHandler
+import AdminHandler
 
 class HomePage(BaseHttpHandler):
     def get(self):
@@ -70,7 +81,7 @@ class LivePageFile(BaseHttpHandler):
         if not Connection.client_valid(index):
             raise tornado.web.HTTPError(404)
         index = int(index)
-        if not Connection.client[index].admin_identity_check(self.get_secure_cookie('identity')):
+        if not Connection.client[index].admin_identity_check(self.get_secure_cookie(config._identity)):
             raise tornado.web.HTTPError(403)
         try:
             contentlength = int(self.request.headers.get('Content-Length'))
@@ -93,9 +104,9 @@ class LivePageFile(BaseHttpHandler):
 
 class LiveShowHandler(tornado.websocket.WebSocketHandler):
     def get_current_user(self):
-        identity = self.get_secure_cookie('identity')
+        identity = self.get_secure_cookie(config._identity)
         if identity is not None and len(identity) == 32:
-            return self.get_secure_cookie(config._user)
+            return self.get_secure_cookie(config._nickname)
         return None
 
     def open(self, index):
@@ -104,7 +115,7 @@ class LiveShowHandler(tornado.websocket.WebSocketHandler):
             self.close()
         self._liver = Connection.client[int(index)]
         self.username = username
-        self.identity = self.get_secure_cookie('identity', None)
+        self.identity = self.get_secure_cookie(config._identity, None)
         self._liver.user_add(self)
         print 'New web client: %s@%d' % (username, self._liver._index)
 
@@ -142,8 +153,8 @@ class ApiStatusHandler(BaseHttpHandler):
         self.finish()
 
 if __name__ == '__main__':
-    db.create_engine(config.database);
     config.show()
+    db.create_engine(config.database)
     app = tornado.web.Application([
             (r'/', HomePage),
             (r'/live/(.*)/', LivePage),
@@ -152,6 +163,9 @@ if __name__ == '__main__':
             (r'/socket/live/(.*)/', LiveShowHandler),
             (r'/api/livelist', ApiLiveListHandler),
             (r'/api/status', ApiStatusHandler),
+            (r'/api/admin/query', AdminHandler.FPGAQueryHttpHandler),
+            (r'/api/admin/add', AdminHandler.FPGAAddHttpHandler),
+            (r'/admin/add', AdminHandler.FPGAAddHttpHandler),
             (r'/register', UserHandler.RegisterHandler),
             (r'/login', UserHandler.LoginHandler),
             (r'/logout', UserHandler.LogoutHandler),
