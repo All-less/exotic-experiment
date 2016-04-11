@@ -8,8 +8,12 @@ import tornado.auth
 import config
 import os, json, md5, random, base64
 
+from lsqlite import db
 from FPGAServer import FPGAServer, Connection, Type
 from ExDict import ExDict, DefaultDict
+import models
+from models import User
+import UserHandler
 
 class BaseHttpHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
@@ -19,7 +23,7 @@ class BaseHttpHandler(tornado.web.RequestHandler):
         self.set_header('x-content-type-options', 'nosniff')
 
     def get_current_user(self):
-        identity = self.get_secure_cookie('identity')
+        identity = self.get_secure_cookie(config._identity)
         if identity is not None and len(identity) == 32:
             return self.get_secure_cookie(config._user)
         return None
@@ -27,34 +31,14 @@ class BaseHttpHandler(tornado.web.RequestHandler):
     def set_current_user(self, user):
         self.set_secure_cookie(config._user, user)
 
-class LoginHandler(BaseHttpHandler):
-    def get(self):
-        if self.get_current_user() is not None:
-            self.redirect('/')
-            return
-        self.render('login.html')
-
-    def post(self):
-        if self.get_current_user():
-            raise tornado.web.HTTPError(403)
-        # check username and password
-        user = self.get_argument('user', None)
-        if user is not None:
-            self.set_current_user(user)
-            m = md5.new()
-            m.update(user)
-            m.update(str(random.random()))
-            print m.hexdigest(), len(m.hexdigest())
-            self.set_secure_cookie('identity', m.hexdigest())
-            self.redirect(self.get_argument('next', '/'))
-        else:
-            self.redirect(setting.login_url)
+    def is_admin(self):
+        user = User.find_first("where name=?", name=self.get_current_user)
+        return user.admin
 
 class HomePage(BaseHttpHandler):
-    @tornado.web.authenticated
     def get(self):
         user = self.get_current_user()
-        self.render('index.html', username=user, status = Connection.status())
+        self.render('index.html', user=user, status = Connection.status())
 
 class LivePage(BaseHttpHandler):
     @tornado.web.authenticated
@@ -155,28 +139,24 @@ class ApiStatusHandler(BaseHttpHandler):
         self.write(json.dumps(dict(
             socketport = config.socketport
         )))
-
-settings = dict(
-    cookie_secret = config.cookie_secret,
-    template_path = os.path.join(os.path.dirname(__file__), "template"),
-    static_path = os.path.join(os.path.dirname(__file__), "static"),
-    static_url_prefix = "/static/",
-    login_url = '/login'
-)
+        self.finish()
 
 if __name__ == '__main__':
+    db.create_engine(config.database);
     config.show()
     app = tornado.web.Application([
             (r'/', HomePage),
-            (r'/login', LoginHandler),
             (r'/live/(.*)/', LivePage),
             (r'/live/(.*)/file', LivePageFile),
             (r'/live/(.*)/file/(.*)', LivePageFile),
             (r'/socket/live/(.*)/', LiveShowHandler),
             (r'/api/livelist', ApiLiveListHandler),
             (r'/api/status', ApiStatusHandler),
+            (r'/register', UserHandler.RegisterHandler),
+            (r'/login', UserHandler.LoginHandler),
+            (r'/logout', UserHandler.LogoutHandler),
         ],
-        **settings
+        **config.settings
     )
     app.listen(config.webport)
     server = FPGAServer()

@@ -6,6 +6,7 @@
     <form action='./file' enctype="multipart/form-data" method='post' target= "hframe">
         <input type='file' name='file' id='file' />
         <input type='submit' name='submit' value='Upload'/>
+		{% raw xsrf_form_html() %}
         <iframe name ="hframe" id="hframe" style=" display: none" ></iframe >
     </form>
     <a href='./file/download'>Download uploaded file</a>

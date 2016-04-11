@@ -1,6 +1,12 @@
 <html>
 <body>
-    <h1>Welcome, {{username}}</h1>
+    <h1>Welcome {% if user is not None%}{{user}}{% end %}</h1>
+    {% if user is not None%}
+    <a href='/logout'>Logout</a>
+    {% else %}
+    <a href='/login'>Login</a>
+    <a href='/register'>Register</a>
+    {% end %}
     {% if len(status) > 0%}
         <ul>
         {% for item in status %}
@@ -13,7 +19,7 @@
         {% end %}
         </ul>
     {% else %}
-        <p>无人直播</p>
+        <p>并没有板子啊！</p>
     {% end %}
 </body>
 </html>
