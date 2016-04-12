@@ -111,13 +111,13 @@ while 1:
             elif msg.startswith('keyup'):
                 a, b = msg.split(' ')
                 s.send(json.dumps(dict(
-                    action = 1,
+                    action = 2,
                     code = b
                 )) + '\n')
             elif msg.startswith('keydown'):
                 a, b = msg.split(' ')
                 s.send(json.dumps(dict(
-                    action = 2,
+                    action = 1,
                     code = b
                 )) + '\n')
             elif msg.startswith('switch'):
