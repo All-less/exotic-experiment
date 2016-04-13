@@ -2,12 +2,12 @@ SRCDIR = src
 BINDIR = bin
 
 SRCS = test_speed.c test_clock.c test_spi.c  
-BINS = $(SRCS:.c=.out)
+BINS = $(SRCS:.c=)
 
 CC = gcc
-CFLAGS = -lwiringPi -Wall 
+CFLAGS = -lwiringPi -Wall -lbcm2835 
 
 # all : $(BINS);
 
-%.out : $(SRCDIR)/%.c
+% : $(SRCDIR)/%.c
 	$(CC) $< -o $(BINDIR)/$@ $(CFLAGS)

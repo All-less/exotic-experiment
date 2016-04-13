@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <wiringPiSPI.h>
+#include <bcm2835.h>
 
 
 #define SIZE_OF_ARRAY(array) ( sizeof( array ) / sizeof( array[0] ) ) 
@@ -37,6 +37,10 @@ void initPins(void) {
 }
 
 
+/*
+ * Measure time spent in executing 'func'.
+ * Return time in unit 'second'.
+ */
 float measureTime(void (*func)(void)){
 
     clock_t start, end;
@@ -49,20 +53,39 @@ float measureTime(void (*func)(void)){
 
 
 /*
- * Attempt to initialize SPI port. It will halt the program
- * if the initialization fails.
- *
- * The parameter 'freq' has unit MHz. 
+ * Initialize and setup spi registers.
+ * It should be called with closeSpi().
  */
-void initSpi(int freq) {
-
-    if (wiringPiSPISetup(0, freq * 100000) < 0) {
-        printf("SPI Setup failed: %s\n", strerror (errno));
-        exit(0);
+void initSpi(void) {
+    if (!bcm2835_init()) {
+      printf("bcm2835_init failed. Are you running as root??\n");
     }
+
+    if (!bcm2835_spi_begin()) {
+      printf("bcm2835_spi_begin failedg. Are you running as root??\n");
+    }
+
+    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
+    bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_32);
+    bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
+    bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
 }
 
 
+/*
+ * End spi setup.
+ * It should be called with initSpi().
+ */
+void closeSpi(void) {
+    bcm2835_spi_end();
+    bcm2835_close();
+}
+
+
+/*
+ * Get error message from errno.h.
+ */
 char *getError(void) {
     return strerror(errno);
 }
