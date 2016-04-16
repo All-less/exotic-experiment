@@ -6,7 +6,7 @@ import tornado.websocket
 import tornado.httpserver
 import tornado.auth
 import config
-import os, json, md5, random, base64
+import os, json, md5, random, base64, logging
 
 from lsqlite import db
 from FPGAServer import FPGAServer, Connection, Type
@@ -57,7 +57,7 @@ class LivePage(BaseHttpHandler):
         if not Connection.client_valid(id):
             raise tornado.web.HTTPError(404)
         user = self.get_current_user()
-        self.render('live.html', username=user)
+        self.render('live.html', nickname=user)
 
 class LivePageFile(BaseHttpHandler):
     def get(self, index = None, action = None):
@@ -110,18 +110,25 @@ class LiveShowHandler(tornado.websocket.WebSocketHandler):
         return None
 
     def open(self, index):
-        username = self.get_current_user()
-        if username is None or not Connection.client_valid(index):
+        nickname = self.get_current_user()
+        if nickname is None or not Connection.client_valid(index):
             self.close()
         self._liver = Connection.client[int(index)]
-        self.username = username
+        self.nickname = nickname
         self.identity = self.get_secure_cookie(config._identity, None)
         self._liver.user_add(self)
-        print 'New web client: %s@%d' % (username, self._liver._index)
+        logging.info('New web client: %s@%d' % (nickname, self._liver._index))
 
     def on_message(self, message):
         try:
-            print '%s@%d%s:' % (self.get_current_user(), self._liver._index, '#' if self._liver.admin_handle_check(self) else '$'), message
+            logging.info(
+                '%s@%d%s: %s' % (
+                    self.get_current_user(),
+                    self._liver._index,
+                    '#' if self._liver.admin_handle_check(self) else '$',
+                    message
+                )
+            )
             message = str(message)
             obj = json.loads(message)
             action = obj.get('action', None)
@@ -131,12 +138,15 @@ class LiveShowHandler(tornado.websocket.WebSocketHandler):
                     self._liver.admin_acquire(self)
                 elif behave == 'release':
                     self._liver.admin_release(self)
+            elif obj.get('broadcast', None) == 1:
+                obj['nickname'] = self.nickname
+                self._liver.broadcast_JSON(obj)
             else:
                 if self._liver.admin_handle_check(self):
                     self._liver.broadcast_messages(message)
                     self._liver.send_message(message)
         except Exception as e:
-            print e
+            logging.info(str(e))
 
     def on_close(self):
         self._liver.user_remove(self)

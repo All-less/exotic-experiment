@@ -35,7 +35,7 @@ class LoginHandler(BaseUserHttpHandler):
 			raise tornado.web.HTTPError(403)
 		# check username and password
 		name = self.get_argument(config._user, None)
-		password = self.get_argument('password', None)
+		password = self.get_argument(config._password, None)
 		self.login_as(name, password)
 
 class RegisterHandler(BaseUserHttpHandler):

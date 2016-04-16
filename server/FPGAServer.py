@@ -4,7 +4,7 @@
 __author__ = 'lmzqwer2'
 
 import config
-import thread, json
+import thread, json, logging
 import tornado.tcpserver
 from KeepList import KeepList
 from ExDict import ExDict, DefaultDict
@@ -115,7 +115,7 @@ class Connection(object):
 		)))
 		handle.authed = True
 
-		print "A new Liver %s at %d" % (handle._address, handle._index)
+		logging.info("A new Liver %s at %d" % (handle._address, handle._index))
 
 	def __init__(self, stream, address):
 		self._stream = stream
@@ -140,7 +140,7 @@ class Connection(object):
 				self.broadcast_JSON({
 					'action': Type.user,
 					'behave': 'user_change',
-					'change': handle.username
+					'change': handle.nickname
 				})
 			self._user.lock.release()
 
@@ -184,7 +184,7 @@ class Connection(object):
 
 	def on_read(self, data):
 		broadcast = True
-		print 'FPGA-%d: ' % (self._index), data[:-1]
+		logging.info('FPGA-%d: %s' % (self._index, data[:-1]))
 		try:
 			d = json.loads(data)
 			if not self.authed and d['action'] == 0 and d['behave'] == 'authorization':
@@ -224,7 +224,7 @@ class Connection(object):
 		self._stream.close()
 
 	def on_close(self):
-		print "Liver %d@%s left" % (self._index, self._address)
+		logging.info("Liver %d@%s left" % (self._index, self._address))
 		if self.authed:
 			self.broadcast_JSON({
 				'action': Type.user,
@@ -238,5 +238,5 @@ class Connection(object):
 
 class FPGAServer(tornado.tcpserver.TCPServer):
 	def handle_stream(self, stream, address):
-		#print "New connection :", address, stream
+		logging.info("New connection: %s" % (address,))
 		Connection(stream, address)

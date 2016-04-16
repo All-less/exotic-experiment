@@ -16,12 +16,17 @@ var server = (function(){
         userChange : pass,
         leave : pass,
         fileUpload : pass,
-        fileProgram : pass
+        fileProgram : pass,
+        broadcast : pass
     }
 
     console.table(socket);
     socket.onmessage = function(event) {
         obj = JSON.parse(event.data);
+        if (obj.broadcast == 1){
+            delete obj.broadcast
+            Remote.broadcast(obj);
+        }
         switch(obj.action){
             case Type.user:
                 if (obj.behave == 'liver_leave')
@@ -73,6 +78,12 @@ var server = (function(){
                 });
             }
         },
+        broadcast: function(message){
+            send({
+                'broadcast' : 1,
+                'message' : message
+            })
+        },
         keyDown : function(key){
             send({
                 'action' : Type.keyDown,
@@ -112,6 +123,9 @@ var server = (function(){
             },
             setFileProgram : function(func){
                 Remote.fileProgram = func;
+            },
+            setBroadcast : function(func){
+                Remote.broadcast = func;
             }
         }
     }

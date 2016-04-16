@@ -1,27 +1,49 @@
 <html>
 <body>
-    <h1>Welcome, {{username}}</h1>
+    <h1>Welcome, {{nickname}}</h1>
     <button onclick='server.user.acquire()'>acquire</button>
     <button onclick='server.user.release()'>release</button>
     <form action='./file' enctype="multipart/form-data" method='post' target= "hframe">
         <input type='file' name='file' id='file' />
         <input type='submit' name='submit' value='Upload'/>
 		{% raw xsrf_form_html() %}
-        <iframe name ="hframe" id="hframe" style=" display: none" ></iframe >
+        <iframe name ="hframe" id="hframe" style=" display: none"></iframe >
     </form>
     <a href='./file/download'>Download uploaded file</a>
+    <form target='_self' onsubmit="return inputMessage()">
+        <span>Say something: </span>
+        <input type='text' id='message'/>
+        <input type='submit' value='Send'/>
+    </form>
+    <div id='messageBox'></div>
     <script src='/static/server.js'></script>
     <script>
+        var messageBox = document.getElementById('messageBox');
+        messageBox.prependChild = function(o){
+            if (this.hasChildNodes()){
+                this.insertBefore(o, this.firstChild);
+            }else{
+                this.appendChild(o);
+            }
+        }
+        var messageText = document.getElementById('message');
         window.addEventListener('keydown', function(event){
-            server.keyDown(event.keyCode);
+            if (messageText != document.activeElement)
+                server.keyDown(event.keyCode);
         })
         window.addEventListener('keyup', function(evnet){
-            server.keyUp(event.keyCode);
+            if (messageText != document.activeElement)
+                server.keyUp(event.keyCode);
         })
+        function inputMessage(){
+            server.broadcast(messageText.value);
+            messageText.value = '';
+            return false;
+        }
         function newMessage(msg){
             var div  = document.createElement('div');
             div.innerHTML = msg;
-            document.body.appendChild(div);
+            messageBox.prependChild(div);
         }
         server.remote.setKeyDown(function(code){
             newMessage('Key Down ' + code);
@@ -44,6 +66,9 @@
         });
         server.remote.setFileProgram(function(){
             newMessage('file program.');
+        });
+        server.remote.setBroadcast(function(messageObj){
+            newMessage(messageObj.nickname + ' : ' + messageObj.message);
         });
     </script>
 </body>
