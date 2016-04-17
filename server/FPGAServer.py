@@ -11,9 +11,6 @@ from ExDict import ExDict, DefaultDict
 from models import FPGA
 from UserCount import UserCount
 
-class NotFoundException(Exception):
-	pass
-
 class Type:
 	user = 0
 	keyDown = 1
@@ -39,7 +36,8 @@ class Connection(object):
 					device_id = client.device_id,
 					admin = client._user.admin is not None,
 					user_number = len(client._user.user),
-					file = client._file.body is not None
+					file = client._file.body is not None,
+					streamName = client._streamName
 				)
 				l.append(status)
 		return l
@@ -107,12 +105,15 @@ class Connection(object):
 			name = '',
 			body = None
 		)
+		handle._streamName = str(index)
 
 		handle.send_message(json.dumps(dict(
 			status = 0,
 			index = index,
 			webport = config.webport,
-			filelink = '/live/%d/file/download' % handle._index
+			filelink = '/live/%d/file/download' % handle._index,
+			rtmpserver = config.rtmpserver,
+			streamName = handle._streamName
 		)))
 		handle.authed = True
 
@@ -130,6 +131,7 @@ class Connection(object):
 		self._index = -1
 		self._user = None
 		self._file = None
+		self._streamName = None
 		Connection.unauth_add(self)
 		self.read_message()
 
@@ -190,21 +192,20 @@ class Connection(object):
 		logging.info('FPGA-%d: %s' % (self._index, data[:-1]))
 		try:
 			d = json.loads(data)
-			if not self.authed and d['action'] == 0 and d['behave'] == 'authorization':
-				fpga = FPGA.find_first("where device_id=? and auth_key=?", d['device_id'], d['auth_key'])
-				if fpga is not None:
-					broadcast = False
-					Connection.unauth_remove(self)
-					Connection.client_add(self)
-					self.device_id = d['device_id']
-				else:
-					raise NotFoundException('Not found User')
-		except NotFoundException, e:
-			self.send_JSON(dict(
-				status = 1,
-				message = 'not found'
-			))
-		except:
+			if d['action'] == 0 and d['behave'] == 'authorization':
+				broadcast = False
+				if not self.authed:
+					fpga = FPGA.find_first("where device_id=? and auth_key=?", d['device_id'], d['auth_key'])
+					if fpga is not None:
+						Connection.unauth_remove(self)
+						Connection.client_add(self)
+						self.device_id = d['device_id']
+					else:
+						self.send_JSON(dict(
+							status = 1,
+							message = 'not found'
+						))
+		except Exception, e:
 			pass
 		if broadcast and self.authed:
 			self.broadcast_messages(data[:-1])

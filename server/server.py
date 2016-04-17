@@ -28,8 +28,14 @@ class LivePage(BaseHttpHandler):
     def get(self, id):
         if not Connection.client_valid(id):
             raise tornado.web.HTTPError(404)
+        id = int(id)
         user = self.get_current_user()
-        self.render('live.html', nickname=user)
+        self.render(
+            'live.html',
+            nickname=user,
+            streamName = Connection.client[id]._streamName,
+            rtmpserver = config.rtmpserver
+        )
 
 class LivePageFile(BaseHttpHandler):
     def get(self, index = None, action = None):
@@ -135,7 +141,9 @@ class ApiLiveListHandler(BaseHttpHandler):
 class ApiStatusHandler(BaseHttpHandler):
     def get(self):
         self.write(json.dumps(dict(
-            socketport = config.socketport
+            socketport = config.socketport,
+            rtmpserver = config.rtmpserver,
+            userCount = UserCount.UserCount._count
         )))
         self.finish()
 

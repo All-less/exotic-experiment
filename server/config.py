@@ -47,6 +47,9 @@ define('socketport',
 define('unauthsize',
     default=32, type=int,
     help='the connection number without authorization kept by server.')
+define('rtmpserver',
+    default='localhost:6666', type=str,
+    help='the RTMP server for push video flow.')
 
 define('userCountSend',
     default=False, type=bool,

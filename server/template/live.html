@@ -1,6 +1,7 @@
 <html>
 <body>
     <h1>Welcome, {{nickname}}</h1>
+    <p>rtmpserver : {{rtmpserver}}, streamName : {{streamName}}</p>
     <button onclick='server.user.acquire()'>acquire</button>
     <button onclick='server.user.release()'>release</button>
     <form action='./file' enctype="multipart/form-data" method='post' target= "hframe">
