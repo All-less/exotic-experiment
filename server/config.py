@@ -37,6 +37,9 @@ define('cookie_secret',
 define('database',
     default='exotic.db', type=str,
     help='the sqlite database file')
+define('messageInterval',
+    default=2, type=int,
+    help='the minimum interval between two message.')
 
 define('socketport',
 	default=8081, type=int,
@@ -44,6 +47,28 @@ define('socketport',
 define('unauthsize',
     default=32, type=int,
     help='the connection number without authorization kept by server.')
+
+define('userCountSend',
+    default=False, type=bool,
+    help='send user number to central server')
+define('sendPeriod',
+    default=5000, type=int,
+    help='the interval of sending')
+define('sendHost',
+    default='localhost', type=str,
+    help='the host of central server')
+define('sendPort',
+    default=8080, type=int,
+    help='the port of central server')
+define('sendURL',
+    default='/api/report', type=str,
+    help='the url that accept user infomation.')
+define('device_id',
+    default=10000, type=int,
+    help='the device_id of this server')
+define('auth_key',
+    default='None', type=str,
+    help='the authenticated key of this server')
 
 settings = DefaultDict(
     cookie_secret = options.cookie_secret,

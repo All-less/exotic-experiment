@@ -6,7 +6,7 @@ __author__ = 'lmzqwer2'
 import tornado.web
 import json
 import config
-from server import BaseHttpHandler
+from BaseHttpHandler import BaseHttpHandler
 import models
 from models import FPGA
 

@@ -68,7 +68,9 @@
             newMessage('file program.');
         });
         server.remote.setBroadcast(function(messageObj){
-            newMessage(messageObj.nickname + ' : ' + messageObj.message);
+            var a = new Date();
+            a.setTime(messageObj.timestamp * 1000);
+            newMessage(a.toLocaleString() + ' ' + messageObj.nickname + ' : ' + messageObj.message);
         });
     </script>
 </body>

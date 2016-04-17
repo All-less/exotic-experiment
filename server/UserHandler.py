@@ -4,7 +4,7 @@
 __author__ = 'lmzqwer2'
 
 import config
-from server import BaseHttpHandler
+from BaseHttpHandler import BaseHttpHandler
 import models
 from models import User
 

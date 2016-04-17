@@ -9,6 +9,7 @@ import tornado.tcpserver
 from KeepList import KeepList
 from ExDict import ExDict, DefaultDict
 from models import FPGA
+from UserCount import UserCount
 
 class NotFoundException(Exception):
 	pass
@@ -173,9 +174,11 @@ class Connection(object):
 		)
 
 	def user_add(self, handle):
+		UserCount.user_add()
 		self._user.user.add(handle)
 
 	def user_remove(self, handle):
+		UserCount.user_leave()
 		self._user.user.remove(handle)
 		self.admin_release(handle)
 

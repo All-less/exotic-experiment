@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import tornado.web
 import tornado.ioloop
 import tornado.websocket
 import tornado.httpserver
 import tornado.auth
 import config
-import os, json, md5, random, base64, logging
+import os, json, md5, random, base64, logging, time
 
 from lsqlite import db
 from FPGAServer import FPGAServer, Connection, Type
@@ -14,37 +13,10 @@ from ExDict import ExDict, DefaultDict
 import models
 from models import User
 
-class BaseHttpHandler(tornado.web.RequestHandler):
-    def set_default_headers(self):
-        self.set_header('Server', 'ExoticServer/0.0.1')
-        self.set_header('X-Frame-Options', 'SAMEORIGIN')
-        self.set_header('X-XSS-Protection', '1; mode=block')
-        self.set_header('x-content-type-options', 'nosniff')
-
-    def get_current_name(self):
-        identity = self.get_secure_cookie(config._identity)
-        if identity is not None and len(identity) == 32:
-            return self.get_secure_cookie(config._user)
-        return None
-
-    def set_current_name(self, name):
-        self.set_secure_cookie(config._user, name)
-
-    def get_current_user(self):
-        identity = self.get_secure_cookie(config._identity)
-        if identity is not None and len(identity) == 32:
-            return self.get_secure_cookie(config._nickname)
-        return None
-
-    def set_current_user(self, user):
-        self.set_secure_cookie(config._nickname, user)
-
-    def is_admin(self):
-        user = User.get(self.get_current_name())
-        return user is not None and user.admin
-
+from BaseHttpHandler import BaseHttpHandler
 import UserHandler
 import AdminHandler
+import UserCount
 
 class HomePage(BaseHttpHandler):
     def get(self):
@@ -117,6 +89,7 @@ class LiveShowHandler(tornado.websocket.WebSocketHandler):
         self.nickname = nickname
         self.identity = self.get_secure_cookie(config._identity, None)
         self._liver.user_add(self)
+        self._timestamp = 0
         logging.info('New web client: %s@%d' % (nickname, self._liver._index))
 
     def on_message(self, message):
@@ -139,8 +112,12 @@ class LiveShowHandler(tornado.websocket.WebSocketHandler):
                 elif behave == 'release':
                     self._liver.admin_release(self)
             elif obj.get('broadcast', None) == 1:
-                obj['nickname'] = self.nickname
-                self._liver.broadcast_JSON(obj)
+                nowtime = int(time.time())
+                if nowtime - self._timestamp >= config.messageInterval:
+                    self._timestamp = nowtime
+                    obj['timestamp'] = nowtime
+                    obj['nickname'] = self.nickname
+                    self._liver.broadcast_JSON(obj)
             else:
                 if self._liver.admin_handle_check(self):
                     self._liver.broadcast_messages(message)
@@ -173,6 +150,7 @@ if __name__ == '__main__':
             (r'/socket/live/(.*)/', LiveShowHandler),
             (r'/api/livelist', ApiLiveListHandler),
             (r'/api/status', ApiStatusHandler),
+            (r'/api/report', UserCount.UserCountHandler),
             (r'/api/admin/query', AdminHandler.FPGAQueryHttpHandler),
             (r'/api/admin/add', AdminHandler.FPGAAddHttpHandler),
             (r'/admin/add', AdminHandler.FPGAAddHttpHandler),
@@ -185,4 +163,5 @@ if __name__ == '__main__':
     app.listen(config.webport)
     server = FPGAServer()
     server.listen(config.socketport)
+    tornado.ioloop.PeriodicCallback(UserCount.UserCount.send, config.sendPeriod).start()
     tornado.ioloop.IOLoop.instance().start()
