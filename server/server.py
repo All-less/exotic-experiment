@@ -33,8 +33,10 @@ class LivePage(BaseHttpHandler):
         self.render(
             'live.html',
             nickname=user,
-            streamName = Connection.client[id]._streamName,
-            rtmpserver = config.rtmpserver
+            rtmpHost = config.rtmpHost,
+            rtmpPullPort = config.rtmpPullPort,
+            rtmpAppName = config.rtmpAppName,
+            streamName = Connection.client[id]._streamName
         )
 
 class LivePageFile(BaseHttpHandler):
@@ -142,7 +144,10 @@ class ApiStatusHandler(BaseHttpHandler):
     def get(self):
         self.write(json.dumps(dict(
             socketport = config.socketport,
-            rtmpserver = config.rtmpserver,
+            rtmpHost = config.rtmpHost,
+            rtmpPushPort = config.rtmpPushPort,
+            rtmpPullPort = config.rtmpPullPort,
+            rtmpAppName = config.rtmpAppName,
             userCount = UserCount.UserCount._count
         )))
         self.finish()

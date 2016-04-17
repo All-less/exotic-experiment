@@ -112,7 +112,8 @@ class Connection(object):
 			index = index,
 			webport = config.webport,
 			filelink = '/live/%d/file/download' % handle._index,
-			rtmpserver = config.rtmpserver,
+			rtmpHost = config.rtmpHost,
+			rtmpPushPort = config.rtmpPushPort,
 			streamName = handle._streamName
 		)))
 		handle.authed = True
