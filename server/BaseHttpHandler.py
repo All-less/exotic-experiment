@@ -5,6 +5,7 @@ __author__ = 'lmzqwer2'
 
 import config
 import tornado.web
+from models import User
 
 class BaseHttpHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
