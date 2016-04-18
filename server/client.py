@@ -24,7 +24,7 @@ def downloadend(resp_headers, content):
         action = 0, # user type
         behave = 'file_program',
         size = len(content)
-    )) + '\n')
+    )) + separator)
 
 if len(sys.argv) < 3:
     print 'Usage : python ', __file__,' hostname port'

@@ -15,7 +15,9 @@ class Type:
 	user = 0
 	keyDown = 1
 	keyUp = 2
-	switchPress = 3
+	switchOn = 3
+	switchOff = 4
+	buttonPress = 5
 
 class Connection(object):
 	client = KeepList()
