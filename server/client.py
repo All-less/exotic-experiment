@@ -34,10 +34,14 @@ host = sys.argv[1]
 port = int(sys.argv[2])
 device_id = 'test'
 auth_key = '8f5aff8cb424d2cf39b206619f8d1461'
+separator = '\0'
 
 if len(sys.argv) > 4:
     device_id = sys.argv[3]
     auth_key = sys.argv[4]
+
+if len(sys.argv) > 5:
+    separator = sys.argv[5]
 
 filelink = None
 webport = None
@@ -58,7 +62,9 @@ print "Input 'auth', 'keyup code', 'keydown code', 'switch id' to send default m
 print "Or you can send message directly."
 prompt()
 
-while 1:
+exit = False
+
+while not exit:
     rlist = [sys.stdin, s]
 
     # Get the list sockets which are readable
@@ -75,14 +81,15 @@ while 1:
             else :
                 #print datan
                 remain = ''
-                datalist = data.split('}')[:-1]
+                datalist = data.split(separator)[:-1]
                 for data in datalist:
-                    data = remain + data + '}'
+                    data = remain + data
                     print '\n Server: ',
                     try:
                         data = json.loads(data)
+                        remain = ''
                     except ValueError, e:
-                        remain += data
+                        remain += separator + data
                         continue
 
                     sys.stdout.write(json.dumps(data))
@@ -101,31 +108,49 @@ while 1:
         else :
             msg = sys.stdin.readline()
             msg = msg[:-1]
-            if msg == 'auth':
-                s.send(json.dumps(dict(
-                    action = 0,
-                    behave = 'authorization',
-                    device_id = device_id,
-                    auth_key = auth_key
-                )) + '\n')
-            elif msg.startswith('keyup'):
-                a, b = msg.split(' ')
-                s.send(json.dumps(dict(
-                    action = 2,
-                    code = b
-                )) + '\n')
-            elif msg.startswith('keydown'):
-                a, b = msg.split(' ')
-                s.send(json.dumps(dict(
-                    action = 1,
-                    code = b
-                )) + '\n')
-            elif msg.startswith('switch'):
-                a, b = msg.split(' ')
-                s.send(json.dumps(dict(
-                    action = 3,
-                    id = b
-                )) + '\n')
-            else:
-                s.send(msg + '\n')
+            try:
+                if msg == 'auth':
+                    s.send(json.dumps(dict(
+                        action = 0,
+                        behave = 'authorization',
+                        device_id = device_id,
+                        auth_key = auth_key
+                    )) + separator)
+                elif msg.startswith('keyup'):
+                    a, b = msg.split(' ')
+                    s.send(json.dumps(dict(
+                        action = 2,
+                        code = b
+                    )) + separator)
+                elif msg.startswith('keydown'):
+                    a, b = msg.split(' ')
+                    s.send(json.dumps(dict(
+                        action = 1,
+                        code = b
+                    )) + separator)
+                elif msg.startswith('switchon'):
+                    a, b = msg.split(' ')
+                    s.send(json.dumps(dict(
+                        action = 3,
+                        id = b
+                    )) + separator)
+                elif msg.startswith('switchoff'):
+                    a, b = msg.split(' ')
+                    s.send(json.dumps(dict(
+                        action = 4,
+                        id = b
+                    )) + separator)
+                elif msg.startswith('buttonpress'):
+                    a, b = msg.split(' ')
+                    s.send(json.dumps(dict(
+                        action = 5,
+                        id = b
+                    )) + separator)
+                elif msg == 'exit':
+                    exit = True
+                else:
+                    s.send(msg + separator)
+            except Exception, e:
+                print e.message
             prompt()
+s.close()

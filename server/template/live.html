@@ -16,6 +16,11 @@
         <input type='text' id='message'/>
         <input type='submit' value='Send'/>
     </form>
+    <button onclick='server.keyUp(1)'>switch 1 On</button>
+    <button onclick='server.keyDown(1)'>switch 1 On</button>
+    <button onclick='server.switchOn(1)'>switch 1 On</button>
+    <button onclick='server.switchOff(1)'>switch 1 Off</button>
+    <button onclick='server.buttonPress(1)'>button 1 press</button>
     <div id='messageBox'></div>
     <script src='/static/server.js'></script>
     <script>
@@ -52,12 +57,17 @@
         server.remote.setKeyUp(function(code){
             newMessage('Key Up ' + code);
         });
-        server.remote.setSwitchPress(function(id){
-            newMessage('Switch Press ' + id);
+        server.remote.setSwitchOn(function(id){
+            newMessage('Switch On ' + id);
+        });
+        server.remote.setSwitchOff(function(id){
+            newMessage('Switch Off ' + id);
+        });
+        server.remote.setButtonPress(function(id){
+            newMessage('Button Press ' + id);
         });
         server.remote.setUserChange(function(user){
             newMessage('user Change to ' + user);
-            console.log(user);
         });
         server.remote.setLeave(function(){
             newMessage('FPGA leave');

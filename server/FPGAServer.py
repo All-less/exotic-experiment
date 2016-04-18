@@ -186,11 +186,12 @@ class Connection(object):
 		self.admin_release(handle)
 
 	def read_message(self):
-		self._stream.read_until('\n', self.on_read)
+		self._stream.read_until(config.separator, self.on_read)
 
 	def on_read(self, data):
 		broadcast = True
-		logging.info('FPGA-%d: %s' % (self._index, data[:-1]))
+		data = data[:-config.separatorLen]
+		logging.info('FPGA-%d: %s' % (self._index, data))
 		try:
 			d = json.loads(data)
 			if d['action'] == 0 and d['behave'] == 'authorization':
@@ -209,14 +210,14 @@ class Connection(object):
 		except Exception, e:
 			pass
 		if broadcast and self.authed:
-			self.broadcast_messages(data[:-1])
+			self.broadcast_messages(data)
 		self.read_message()
 
 	def send_JSON(self, dic):
 		self.send_message(json.dumps(dic))
 
 	def send_message(self, data):
-		self._stream.write(data)
+		self._stream.write(data + config.separator)
 
 	def broadcast_JSON(self, data):
 		self.broadcast_messages(json.dumps(data))

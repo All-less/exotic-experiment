@@ -6,13 +6,17 @@ var server = (function(){
         user : 0,
         keyDown : 1,
         keyUp : 2,
-        switchPress : 3
+        switchOn : 3,
+        switchOff : 4,
+        buttonPress : 5
     };
 
     Remote = {
         keyDown : pass,
         keyUp : pass,
-        switchPress : pass,
+        switchOn : pass,
+        switchOff : pass,
+        buttonPress : pass,
         userChange : pass,
         leave : pass,
         fileUpload : pass,
@@ -44,8 +48,14 @@ var server = (function(){
             case Type.keyUp:
                 Remote.keyUp(obj.code);
                 break;
-            case Type.switchPress:
-                Remote.switchPress(obj.id);
+            case Type.switchOn:
+                Remote.switchOn(obj.id);
+                break;
+            case Type.switchOff:
+                Remote.switchOff(obj.id);
+                break;
+            case Type.buttonPress:
+                Remote.buttonPress(obj.id);
                 break;
         }
     };
@@ -96,11 +106,24 @@ var server = (function(){
                 'code' : key
             });
         },
-        switchPress : function(id){
+        switchOn : function(id){
             send({
-                'action' : Type.switchPress,
+                'action' : Type.switchOn,
                 'id' : id
             });
+        },
+        switchOff : function(id){
+            send({
+                'action' : Type.switchOff,
+                'id' : id
+            });
+        },
+        buttonPress : function(id){
+            send({
+                'action' : Type.buttonPress,
+                'id' : id
+            });
+
         },
         remote : {
             setKeyDown : function(func){
@@ -109,8 +132,14 @@ var server = (function(){
             setKeyUp : function(func){
                 Remote.keyUp = func;
             },
-            setSwitchPress : function(func){
-                Remote.switchPress = func;
+            setSwitchOn : function(func){
+                Remote.switchOn = func;
+            },
+            setSwitchOff : function(func){
+                Remote.switchOff = func;
+            },
+            setButtonPress : function(func){
+                Remote.buttonPress = func;
             },
             setUserChange : function(func){
                 Remote.userChange = func;
