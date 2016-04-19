@@ -195,7 +195,11 @@
 
 # 服务器使用
 
-在使用之前，需要确保含有tornado的包。
+在使用之前，需要确保含有tornado的包。可以使用pip命令安装所有的依赖。
+
+``` shell
+pip install -r requirement.txt
+```
 
 ## 配置
 

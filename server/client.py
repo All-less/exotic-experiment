@@ -13,7 +13,7 @@ class FileDownload(threading.Thread):
         self.callback = callback
 
     def run(self):
-        h = httplib2.Http(timeout = 0.01)
+        h = httplib2.Http(timeout = 1)
         (resp_headers, content) = h.request(self.link, "GET")
         self.callback(resp_headers, content)
 
