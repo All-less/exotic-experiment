@@ -34,7 +34,7 @@ host = sys.argv[1]
 port = int(sys.argv[2])
 device_id = 'test'
 auth_key = '8f5aff8cb424d2cf39b206619f8d1461'
-separator = '\0'
+separator = '\n'
 
 if len(sys.argv) > 4:
     device_id = sys.argv[3]

@@ -48,7 +48,7 @@ define('unauthsize',
     default=32, type=int,
     help='the connection number without authorization kept by server')
 define('separator',
-    default='\0', type=str,
+    default='\n', type=str,
     help='the separator that seperate the message in socket')
 
 define('rtmpHost',

@@ -232,7 +232,7 @@ options =  {
 
     "socketport": 8081,
     "unauthsize": 32,
-    "separator": "\u0000",
+    "separator": "\n",
 
     "rtmpHost": "localhost",
     "rtmpPushPort": 6666,
