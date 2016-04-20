@@ -4,7 +4,10 @@ import exotic
 
 
 def connect_fpga():
-    res = sp.check_output('djtgcfg', shell=True)
+    try:
+        res = sp.check_output('djtgcfg', shell=True)
+    except sp.CalledProcessError as e:
+        res = e.output
     if not res.startswith('ERROR: no command specified'):
         print "The output of command 'djtgcfg' is unexpected. " \
               "Please check whether it is correctly installed or contact" \
