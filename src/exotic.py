@@ -3,14 +3,18 @@ import json
 import sys
 
 
+# Device-related constants
+CABLE_NAME = 'JtagHs2'
+FPGA_NUMBER = 'XC7K160T'
+
 # Web-related parameters
 host = 'exotic.lmin.me'
 port = 9007
 device_id = 'fpga'
 auth_key = 'fc023cab1f61ec4bac259204bf7fe792'
-delimiter ='\0'
+delimiter = '\0'
 
-# Constants
+# Protocol-related constants
 KEY_PRESS = 1
 SWITCH_ON = 3
 SWITCH_OFF = 4
@@ -18,8 +22,8 @@ BUTTON_DOWN = 5
 BUTTON_UP = 6
 
 CODE_CONTROL = 0
-CODE_OPERATIONS = [CODE_CONTROL, KEY_UP, KEY_DOWN, SWITCH_ON, \
-				 SWITCH_OFF, BUTTON_UP, BUTTON_DOWN]
+CODE_OPERATIONS = [CODE_CONTROL, KEY_PRESS, SWITCH_ON,
+                   SWITCH_OFF, BUTTON_UP, BUTTON_DOWN]
 CODE_SUCCESS = 0
 CODE_FAILURE = 1
 
@@ -42,13 +46,13 @@ AUTH_LINK = 'filelink'
 
 # Utility functions
 def jsonfy(arg):
-	return json.dumps(arg) + delimiter
+    return json.dumps(arg) + delimiter
 
 
 def get(obj, key):
-	if key in obj:
-		return obj[key]
-	else:
-		print 'The server returns erroneous data. \
-		Please contact the system administrator.'
-		sys.exit()
+    if key in obj:
+        return obj[key]
+    else:
+        print 'The server returns erroneous data. \
+        Please contact the system administrator.'
+        sys.exit()
