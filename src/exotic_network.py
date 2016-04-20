@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import json
 import exotic
+from tornado.httpclient import AsyncHTTPClient
 import exotic_rpi
 import exotic_rtmp
-import exotic_fpga
+import exotic_fpga as ef
 
 
 param = {'auth': False}
@@ -21,11 +22,22 @@ def handle_initialization(message):
     # TODO: setting up rtmp streaming
 
 
+def handle_download(response):
+    if response.code != 200:
+        print "Failed to download bit file.\n" \
+              "Please check your network status or contact the system administrator."
+    f = open(exotic.TMP_DIR + "/" + exotic.TMP_NAME, "wb")
+    f.write(response.body)
+    f.close()
+    ef.program_fpga(exotic.TMP_DIR + "/" + exotic.TMP_NAME)
+
+
 def handle_control(message):
     behavior = message.get(exotic.MSG_BEHAVIOR)
     if behavior == exotic.BHV_UPLOAD:
-        pass
-        # TODO: download the file to FPGA board
+        print param
+        AsyncHTTPClient().fetch('http://' + exotic.host + ':' + str(param['port']) +
+                                param['link'], handle_download)
 
 
 def handle_operations(message):
@@ -34,16 +46,18 @@ def handle_operations(message):
 
 
 def process(content):
+    print content
     try:
         message = json.loads(content)
     except ValueError:
-        print 'Failed to receive data correctly.'
+        print 'Received data is incorrect.'
         return
 
     if not param['auth']:
         status = message.get(exotic.MSG_STATUS, None)
         if status == exotic.CODE_SUCCESS:
             handle_initialization(message)
+        stream.read_until(exotic.delimiter, process)
         return
 
     action = message.get(exotic.MSG_ACTION, None)
@@ -53,6 +67,7 @@ def process(content):
         handle_operations(message)
     else:
         print 'Illegal action number found in received data.'
+    stream.read_until(exotic.delimiter, process)
 
 
 def init():

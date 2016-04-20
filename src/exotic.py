@@ -3,16 +3,25 @@ import json
 import sys
 
 
+# Temporary file
+TMP_DIR = 'tmp'
+TMP_NAME = 'tmp.bit'
+
+
 # Device-related constants
 CABLE_NAME = 'JtagHs2'
 FPGA_NUMBER = 'XC7K160T'
 
 # Web-related parameters
+"""
 host = 'exotic.lmin.me'
 port = 9007
-device_id = 'fpga'
-auth_key = 'fc023cab1f61ec4bac259204bf7fe792'
-delimiter = '\0'
+"""
+host = '10.214.128.116'
+port = 8081
+device_id = 'test'
+auth_key = '28c037327d10078c881b2b5661d0a36d'
+delimiter = '\n'
 
 # Protocol-related constants
 KEY_PRESS = 1
