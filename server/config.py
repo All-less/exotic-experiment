@@ -40,6 +40,9 @@ define('database',
 define('messageInterval',
     default=2, type=int,
     help='the minimum interval between two message')
+define('fileDir',
+    default='/tmp/exotic_server', type=str,
+    help='the directory to storage the upload file.')
 
 define('socketport',
     default=8081, type=int,
@@ -96,7 +99,33 @@ settings = DefaultDict(
 )
 
 options.parse_command_line()
-separatorLen = len(options.separator)
+
+def checkSeparator():
+    global separatorLen
+    separatorLen = len(options.separator)
+    if separatorLen <= 0:
+        raise ValueError("separator '%s' is invalid" % options.separator)
+
+def checkFileDir():
+    if not os.path.isdir(options.fileDir):
+        if os.path.exists(options.fileDir):
+            raise ValueError("Path %s is not a valid directory" % options.fileDir)
+        os.mkdir(options.fileDir)
+    testFile = os.path.join(options.fileDir, "write_test_file.txt")
+    testText = options.fileDir
+    with open(testFile, "wb") as f:
+        f.write(testText)
+    with open(testFile, "rb") as f:
+        data = f.read()
+    if data != testText:
+        raise ValueError("Write data and read data not match.")
+    os.remove(testFile)
+
+testList = []
+testList.append(checkSeparator)
+testList.append(checkFileDir)
+for func in testList:
+    func()
 
 globals().update(options.as_dict())
 

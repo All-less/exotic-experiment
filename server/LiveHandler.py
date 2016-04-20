@@ -37,7 +37,7 @@ class LivePageFile(BaseHttpHandler):
 				self.set_header('Content-Type', 'application/force-download')
 				self.set_header('Content-Length', status.size)
 				self.set_header('Content-Disposition', 'attachment; filename=%s' % str(status.name))
-				self.write(Connection.client[index]._file.body)
+				self.write(Connection.client[index].file_get())
 			else:
 				raise tornado.web.HTTPError(404)
 		else:

@@ -4,8 +4,9 @@
 __author__ = 'lmzqwer2'
 
 import config
-import thread, json, logging
+import thread, json, logging, os
 import tornado.tcpserver
+from FileManager import FileManager
 from KeepList import KeepList
 from ExDict import ExDict, DefaultDict
 from models import FPGA
@@ -38,7 +39,7 @@ class Connection(object):
 					device_id = client.device_id,
 					admin = client._user.admin is not None,
 					user_number = len(client._user.user),
-					file = client._file.body is not None,
+					file = client.file_status(),
 					streamName = client._streamName
 				)
 				l.append(status)
@@ -105,7 +106,7 @@ class Connection(object):
 		)
 		handle._file = DefaultDict(
 			name = '',
-			body = None
+			size = 0,
 		)
 		handle._streamName = str(index)
 
@@ -165,13 +166,17 @@ class Connection(object):
 	def admin_handle_check(self, handle):
 		return self._user.admin == handle
 
+	def file_get(self):
+		return FileManager.read(self._index)
+
 	def file_add(self, filename, file):
-		self._file.name = filename
-		self._file.body = file
+		self._file.name = os.path.split(filename)[-1]
+		self._file.size = len(file)
+		FileManager.write(self._index, file)
 
 	def file_status(self):
-		valid = self._file.body is not None
-		size = len(self._file.body) if valid else 0
+		size = self._file.size
+		valid = size != 0
 		return DefaultDict(
 			valid = valid,
 			size = size,
