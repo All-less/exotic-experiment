@@ -6,6 +6,7 @@ __author__ = 'lmzqwer2'
 import config
 import tornado.web
 from BaseHttpHandler import BaseHttpHandler
+from FileManager import FileManager
 from FPGAServer import Connection, Type
 from models import User
 import logging, json, time
@@ -26,22 +27,22 @@ class LivePage(BaseHttpHandler):
 			streamName = Connection.client[id]._streamName
 		)
 
+class LivePageFileDownload(tornado.web.StaticFileHandler):
+	@classmethod
+	def get_absolute_path(cls, root, path):
+		return FileManager.getFilePath(path)
+
+	def set_extra_headers(self, path):
+		self.set_header('Content-Disposition', 'attachment;')
+		self.set_header('Content-Type', 'application/force-download')
+
 class LivePageFile(BaseHttpHandler):
 	def get(self, index = None, action = None):
 		if not Connection.client_valid(index):
 			raise tornado.web.HTTPError(404)
 		index = int(index)
 		status = Connection.client[index].file_status()
-		if action == 'download':
-			if status.valid:
-				self.set_header('Content-Type', 'application/force-download')
-				self.set_header('Content-Length', status.size)
-				self.set_header('Content-Disposition', 'attachment; filename=%s' % str(status.name))
-				self.write(Connection.client[index].file_get())
-			else:
-				raise tornado.web.HTTPError(404)
-		else:
-			self.write(json.dumps(Connection.client[index].file_status()))
+		self.write(json.dumps(Connection.client[index].file_status()))
 		self.finish()
 
 	def post(self, index = None):
