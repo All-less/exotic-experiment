@@ -39,7 +39,7 @@ def connect_fpga():
 def program_fpga(file_name):
     index = connect_fpga()
     try:
-        res = sp.check_output('djtgcfg -d ' + exotic.CABLE_NAME + ' --index ' + str(index) +
+        res = sp.check_output('djtgcfg prog -d ' + exotic.CABLE_NAME + ' --index ' + str(index) +
                               ' --file ' + file_name + '| grep "Programming succeeded."', shell=True)
         if len(res) < 1:
             print "Some unexpected error occurs during programming the FPGA board.\n" \

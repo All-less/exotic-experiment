@@ -12,6 +12,7 @@ TMP_NAME = 'tmp.bit'
 CABLE_NAME = 'JtagHs2'
 FPGA_NUMBER = 'XC7K160T'
 
+
 # Web-related parameters
 """
 host = 'exotic.lmin.me'
@@ -20,8 +21,9 @@ port = 9007
 host = '10.214.128.116'
 port = 8081
 device_id = 'test'
-auth_key = '28c037327d10078c881b2b5661d0a36d'
+auth_key = '1074394f3c93a8c6ebba353ad200790e'
 delimiter = '\n'
+
 
 # Protocol-related constants
 KEY_PRESS = 1
@@ -41,6 +43,7 @@ MSG_BEHAVIOR = 'behave'
 MSG_DEVID = 'device_id'
 MSG_AUTHKEY = 'auth_key'
 MSG_STATUS = 'status'
+MSG_ID = 'id'
 
 BHV_AUTH = 'authorization'
 BHV_UPLOAD = 'file_upload'
@@ -51,6 +54,19 @@ AUTH_PUSH = 'rtmpPushPort'
 AUTH_STREAM = 'streamName'
 AUTH_PORT = 'webport'
 AUTH_LINK = 'filelink'
+
+
+# Pin configuration
+PIN_JAI1 = 5
+PIN_JAI2 = 0
+PIN_JAI3 = 3
+PIN_JAI4 = 4
+PIN_JAO1 = 7
+PIN_JAO2 = 0
+PIN_JAO3 = 2
+PIN_JAO4 = 1
+RPI_INPUTS = [PIN_JAO1, PIN_JAO2, PIN_JAO3, PIN_JAO4]
+RPI_OUTPUTS = [PIN_JAI1, PIN_JAI2, PIN_JAI3, PIN_JAI4]
 
 
 # Utility functions

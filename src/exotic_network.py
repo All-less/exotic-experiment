@@ -5,6 +5,7 @@ from tornado.httpclient import AsyncHTTPClient
 import exotic_rpi
 import exotic_rtmp
 import exotic_fpga as ef
+import exotic_rpi as er
 
 
 param = {'auth': False}
@@ -42,6 +43,11 @@ def handle_control(message):
 
 def handle_operations(message):
     operation = message.get(exotic.MSG_ACTION)
+    identifier = message.get(exotic.MSG_ID)
+    if operation == exotic.SWITCH_ON:
+        er.rpi_write(5, 1)
+    elif operation == exotic.SWITCH_OFF:
+        er.rpi_write(5, 0)
     # TODO
 
 
