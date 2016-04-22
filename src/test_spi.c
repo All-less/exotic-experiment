@@ -1,36 +1,34 @@
 #include <stdio.h>
-#include <wiringPiSPI.h>
 #include "commons.h"
 
 
 void func(void) {
     
-    int i;
-    unsigned char data = 0;
+    uint8_t send_data, read_data, expected_data;
+    uint64_t i;
 
-    for (i = 0; i < 10000; i++) {
-        wiringPiSPIDataRW(0, &data, 1);
+    send_data = 0x23;
+    read_data = bcm2835_spi_transfer(send_data);
+
+    for (i = 0; i < 1000000; i++) {
+        expected_data = send_data + 3;
+        send_data += 1;
+        read_data = bcm2835_spi_transfer(send_data);
+        if (read_data != expected_data) {
+            printf("FAILURE! Expected 0x%02X yet received 0x%02X.\n", expected_data, read_data); 
+            return;
+        }
     }
 }
 
 
 int main(void) {
-    
-    int i;
-    unsigned char data;
 
     initPins();
-
-    initSpi(1);
+    initSpi();
     
-    data = 10;
-    for (i = 0; i < 100; i++) {
-        if (wiringPiSPIDataRW(0, &data, 1) == -1) {
-            printf("SPI error occurs: %s\n", getError());
-        } else {
-            printf("Received data %u\n", data);
-        }
-    }
+    printf("Sending 1,000,000 byte takes %f sec.\n", measureTime(func));
     
+    closeSpi();
     return 0;
 }
