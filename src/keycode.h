@@ -1,5 +1,6 @@
 #include <stdint.h>
-uint32_t clk_delay = 100;
+#include <stdio.h>
+#include <wiringPi.h>
 struct hhb_vkey{
 	const char* name;
 	unsigned char vkey;
@@ -471,61 +472,76 @@ const ps2_vkey key_code[] = {
 	{"VK_OEM_CLEAR", 0xfe, 0, "Clear key"},
 	{"(null)", 0xff, 0, "(null)"} };
 
+class PS2Key {
+	private:
+		uint8_t clk_pin, data_pin;
+		uint32_t clk_delay;
 
-bool setup(uint8_t clk_pin, uint8_t data_pin) {
-	if (wiringPiSetup() == -1) {
-		printf("Setup wiringPi failed.\n");
-		return 0;
-	}
-	pinMode(clk_pin, OUTPUT);
-	pinMode(data_pin, OUTPUT);
-	return 1;
-}
+	public:
+		PS2Key() {
+			this->clk_pin = 4;
+			this->data_pin = 5;
+			this->clk_delay = 20;
+		}
+		bool setup(uint8_t clk_pin, uint8_t data_pin, uint32_t clk_dalay) {
+			this->clk_pin = clk_pin;
+			this->data_pin = data_pin;
+			this->clk_delay = clk_delay;
+			if (wiringPiSetup() == -1) {
+				printf("Setup wiringPi failed.\n");
+				return 0;
+			}
+			pinMode(clk_pin, OUTPUT);
+			pinMode(data_pin, OUTPUT);
+			return 1;
+		}
 
-void write_bit(uint8_t bit) {
-	digitalWrite(data_pin, bit & 1);
-	digitalWrite(clk_pin, LOW);
-	delayMicroseconds(clk_delay);
-	digitalWrite(clk_pin, HIGH);
-	delayMicroseconds(clk_delay);
-}
+		void write_bit(uint8_t bit) {
+			digitalWrite(data_pin, bit & 1);
+			digitalWrite(clk_pin, LOW);
+			delayMicroseconds(clk_delay);
+			digitalWrite(clk_pin, HIGH);
+			delayMicroseconds(clk_delay);
+		}
 
-void write_byte(uint8_t byte) {
-	write_bit(0);
-	uint8_t parity;
-	for (int i = 0;i < 8;i++) {
-		parity ^= byte & 1;
-		write_bit(byte & 1);
-		byte >>= 1;
-	}
-	write_bit(parity);
-	write_bit(1);
-}
+		void write_byte(uint8_t byte) {
+			write_bit(0);
+			uint8_t parity;
+			for (int i = 0;i < 8;i++) {
+				parity ^= byte & 1;
+				write_bit(byte & 1);
+				byte >>= 1;
+			}
+			write_bit(parity);
+			write_bit(1);
+		}
 
-void press(uint8_t key) {
-	switch(key_code[key].mode) {
-		case 0:
-			break;
-		case 1:
-			write_byte(key_code[key].code);
-			break;
-		case 2:
-			write_byte(0xe0);
-			write_byte(key_code[key].code);
-			break;
-	}
-}
+		void press(uint8_t key) {
+			switch(key_code[key].mode) {
+				case 0:
+					break;
+				case 1:
+					write_byte(key_code[key].code);
+					break;
+				case 2:
+					write_byte(0xe0);
+					write_byte(key_code[key].code);
+					break;
+			}
+		}
 
-void release(uint8_t key) {
-	switch(key_code[key].mode) {
-		case 0:
-			break;
-		case 1:
-			write_byte(0xf0);
-			write_byte(key_code[key].code);
-		case 2:
-			write_byte(0xe0);
-			write_byte(0xf0);
-			write_byte(key_code[key].code);
-	}
-}
+		void release(uint8_t key) {
+			switch(key_code[key].mode) {
+				case 0:
+					break;
+				case 1:
+					write_byte(0xf0);
+					write_byte(key_code[key].code);
+				case 2:
+					write_byte(0xe0);
+					write_byte(0xf0);
+					write_byte(key_code[key].code);
+			}
+		}
+
+};
