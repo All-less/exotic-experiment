@@ -410,9 +410,7 @@ python config.py --config=config_override.py
 
 * /live/($1)/file/($2)
 
-  $2为对该设备所属的文件进行的行为，未指定即默认显示文件的对应信息。当前有一个行为，download表示下载文件。
-
-  对应每个连入设备在服务器端缓存的用户上传的文件
+  下载该设备所属的文件中类型为$2的文件。
 
 * /socket/live/($1)
 

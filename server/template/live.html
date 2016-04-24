@@ -6,6 +6,10 @@
     <button onclick='server.user.release()'>release</button>
     <form action='./file' enctype="multipart/form-data" method='post' target= "hframe">
         <input type='file' name='file' id='file' />
+        <select name='filetype' id="mySelect">
+            <option>bit</option>
+            <option>disk</option>
+        </select>
         <input type='submit' name='submit' value='Upload'/>
 		{% raw xsrf_form_html() %}
         <iframe name ="hframe" id="hframe" style=" display: none"></iframe >

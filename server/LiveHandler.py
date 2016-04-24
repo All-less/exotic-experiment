@@ -31,7 +31,12 @@ class LivePage(BaseHttpHandler):
 class LivePageFileDownload(tornado.web.StaticFileHandler):
 	@classmethod
 	def get_absolute_path(cls, root, path):
-		return FileManager.getFilePath(path)
+		try:
+			a, b, c = path.split('/')
+		except Exception, e:
+			raise tornado.web.HTTPError(404)
+		print a, b, c
+		return FileManager.getFilePath(a, c)
 
 	def set_extra_headers(self, path):
 		self.set_header('Content-Disposition', 'attachment;')
@@ -58,13 +63,18 @@ class LivePageFile(BaseHttpHandler):
 			contentlength = config.filesize
 		if contentlength < config.filesize:
 			file_metas = self.request.files.get('file', [])
-			for meta in file_metas:
-				filename = meta['filename']
-				Connection.client[index].file_add(filename, meta['body'])
+			filetype = self.get_argument('filetype', None)
+			filemeta = file_metas[-1]
+			filename = filemeta['filename']
+			Connection.client[index].file_add(filename, filetype, filemeta['body'])
 			broadcast = dict(
 				type = Type.status,
 				status = Status.file_upload,
-				file = Connection.client[index].file_status()
+				file = dict(
+					size = len(filemeta['body']),
+					name = filename,
+					type = filetype
+				)
 			)
 			Connection.client[index].broadcast_JSON(broadcast)
 			Connection.client[index].send_message(json.dumps(broadcast))

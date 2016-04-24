@@ -15,9 +15,9 @@ def prompt():
     sys.stdout.flush()
 
 class FileDownload(threading.Thread):
-    def __init__(self, host, webport, link, callback):
+    def __init__(self, host, webport, link, filetype, callback):
         threading.Thread.__init__(self)
-        self.link = 'http://%s:%d%sdownload' % (host, webport, link)
+        self.link = 'http://%s:%d%s%s' % (host, webport, link, filetype)
         self.callback = callback
 
     def run(self):
@@ -111,7 +111,7 @@ while not exit:
                             filelink = data.get("filelink")
                             webport = data.get("webport")
                         elif status == Status.file_upload:
-                            filethread = FileDownload(host, webport, filelink, downloadend)
+                            filethread = FileDownload(host, webport, filelink, data['file']['type'], downloadend)
                             filethread.start()
                     elif messageType == Type.operation:
                         operation = data.get("operation", None)

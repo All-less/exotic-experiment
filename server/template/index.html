@@ -14,7 +14,7 @@
                 <a href='/live/{{item['index']}}/'>index : {{item['index']}}, device_id: {{item['device_id']}}</a>
                 <div>has admin? : {{item['admin']}}</div>
                 <div>users in this room {{item['user_number']}}</div>
-                <div>file upload: {{ str(item['file']['valid']) }} size: {{item['file']['size']}}</div>
+                <div>file status: {{ item['file'] }}</div>
             </li>
         {% end %}
         </ul>

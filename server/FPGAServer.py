@@ -98,8 +98,7 @@ class Connection(object):
 			user = set()
 		)
 		handle._file = DefaultDict(
-			name = '',
-			size = 0,
+			mult = dict()
 		)
 		handle._streamName = str(index)
 
@@ -161,22 +160,19 @@ class Connection(object):
 	def admin_handle_check(self, handle):
 		return self._user.admin == handle
 
-	def file_get(self):
-		return FileManager.read(self._index)
+	def file_get(self, filetype):
+		return FileManager.read(self._index, filetype)
 
-	def file_add(self, filename, file):
-		self._file.name = os.path.split(filename)[-1]
-		self._file.size = len(file)
-		FileManager.write(self._index, file)
+	def file_add(self, filename, filetype, file):
+		filetype = str(filetype)
+		self._file.mult[filetype] = DefaultDict(
+			name = os.path.split(filename)[-1],
+			size = len(file)
+		)
+		FileManager.write(self._index, filetype, file)
 
 	def file_status(self):
-		size = self._file.size
-		valid = size != 0
-		return DefaultDict(
-			valid = valid,
-			size = size,
-			name = self._file.name
-		)
+		return self._file.mult
 
 	def user_add(self, handle):
 		UserCount.user_add()
