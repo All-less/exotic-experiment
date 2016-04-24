@@ -89,6 +89,29 @@ define('auth_key',
     default='None', type=str,
     help='the authenticated key of this server')
 
+version = "0.4.0"
+
+class Type:
+    action = 0
+    status = 1
+    operation = 2
+    info = 3
+
+class Action:
+    acquire = "acquire"
+    release = "release"
+    authorize = "authorize"
+    broadcast = "broadcast"
+
+class Status:
+    authorized = "authorized"
+    auth_failed = "auth_failed"
+    file_upload = "file_upload"
+
+class Info:
+    user_changed = "user_changed"
+    fpga_disconnected = "fpga_disconnected"
+
 settings = DefaultDict(
     cookie_secret = options.cookie_secret,
     template_path = os.path.join(os.path.dirname(__file__), "template"),
@@ -112,7 +135,7 @@ def checkFileDir():
             raise ValueError("Path %s is not a valid directory" % options.fileDir)
         os.mkdir(options.fileDir)
     testFile = os.path.join(options.fileDir, "write_test_file.txt")
-    testText = options.fileDir
+    testText = json.dumps(options.as_dict(), indent = 4)
     with open(testFile, "wb") as f:
         f.write(testText)
     with open(testFile, "rb") as f:
@@ -132,6 +155,7 @@ globals().update(options.as_dict())
 def show():
     print "options = ", json.dumps(options.as_dict(), indent = 4)
     print "settings = ", json.dumps(settings, indent = 4)
+    print "version = %s" % version
 
 if __name__ == '__main__':
 	show()

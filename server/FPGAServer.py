@@ -4,6 +4,7 @@
 __author__ = 'lmzqwer2'
 
 import config
+from config import Type, Action, Status, Info
 import thread, json, logging, os
 import tornado.tcpserver
 from FileManager import FileManager
@@ -11,14 +12,6 @@ from KeepList import KeepList
 from ExDict import ExDict, DefaultDict
 from models import FPGA
 from UserCount import UserCount
-
-class Type:
-	user = 0
-	keyDown = 1
-	keyUp = 2
-	switchOn = 3
-	switchOff = 4
-	buttonPress = 5
 
 class Connection(object):
 	client = KeepList()
@@ -72,8 +65,8 @@ class Connection(object):
 		head = cls.unauth.head
 		if head is not None:
 			head.send_JSON(dict(
-				status = 2,
-				message = 'Not authorized exit.'
+				type = Type.info,
+				info = "no authorization exit."
 			))
 			head.close()
 
@@ -110,15 +103,16 @@ class Connection(object):
 		)
 		handle._streamName = str(index)
 
-		handle.send_message(json.dumps(dict(
-			status = 0,
+		handle.send_JSON(dict(
+			type = Type.status,
+			status = Status.authorized,
 			index = index,
 			webport = config.webport,
-			filelink = '/live/%d/file/download' % handle._index,
-			rtmpHost = config.rtmpHost,
-			rtmpPushPort = config.rtmpPushPort,
-			streamName = handle._streamName
-		)))
+			filelink = '/live/%d/file/' % handle._index,
+			rtmp_host = config.rtmpHost,
+			rtmp_push_port = config.rtmpPushPort,
+			stream_name = handle._streamName
+		))
 		handle.authed = True
 
 		logging.info("A new Liver %s at %d" % (handle._address, handle._index))
@@ -139,26 +133,27 @@ class Connection(object):
 		Connection.unauth_add(self)
 		self.read_message()
 
+	def admin_change_message(self, user):
+		sendData = dict(
+			type = Type.info,
+			info = Info.user_changed,
+			user = user
+		)
+		self.broadcast_JSON(sendData)
+		self.send_JSON(sendData)
+
 	def admin_acquire(self, handle):
 		if self._user.admin is None:
 			self._user.lock.acquire()
 			if self._user.admin is None:
 				self._user.admin = handle
-				self.broadcast_JSON({
-					'action': Type.user,
-					'behave': 'user_change',
-					'change': handle.nickname
-				})
+				self.admin_change_message(handle.nickname)
 			self._user.lock.release()
 
 	def admin_release(self, handle):
 		if self._user.admin == handle:
 			self._user.admin = None
-			self.broadcast_JSON({
-				'action': Type.user,
-				'behave': 'user_change',
-				'change': None
-			})
+			self.admin_change_message(None)
 
 	def admin_identity_check(self, string):
 		return self._user.admin is not None and self._user.admin.identity == string
@@ -201,7 +196,7 @@ class Connection(object):
 		logging.info('FPGA-%d: %s' % (self._index, data))
 		try:
 			d = json.loads(data)
-			if d['action'] == 0 and d['behave'] == 'authorization':
+			if d['type'] == Type.action and d['action'] == Action.authorize:
 				broadcast = False
 				if not self.authed:
 					fpga = FPGA.find_first("where device_id=? and auth_key=?", d['device_id'], d['auth_key'])
@@ -210,12 +205,12 @@ class Connection(object):
 						Connection.client_add(self)
 						self.device_id = d['device_id']
 					else:
-						self.send_JSON(dict(
-							status = 1,
-							message = 'not found'
-						))
+						raise Exception("not found")
 		except Exception, e:
-			pass
+			self.send_JSON(dict(
+				type = Type.status,
+				status = Status.auth_failed
+			))
 		if broadcast and self.authed:
 			self.broadcast_messages(data)
 		self.read_message()
@@ -239,10 +234,10 @@ class Connection(object):
 	def on_close(self):
 		logging.info("Liver %d@%s left" % (self._index, self._address))
 		if self.authed:
-			self.broadcast_JSON({
-				'action': Type.user,
-				'behave': 'liver_leave'
-			})
+			self.broadcast_JSON(dict(
+				type = Type.info,
+				info = Info.fpga_disconnected
+			))
 			for user in self._user.user:
 				user.close()
 			Connection.client.remove(self._index)

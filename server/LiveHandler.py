@@ -4,6 +4,7 @@
 __author__ = 'lmzqwer2'
 
 import config
+from config import Type, Action, Status, Info
 import tornado.web
 from BaseHttpHandler import BaseHttpHandler
 from FileManager import FileManager
@@ -20,7 +21,7 @@ class LivePage(BaseHttpHandler):
 		user = self.get_current_user()
 		self.render(
 			'live.html',
-			nickname=user,
+			nickname = user,
 			rtmpHost = config.rtmpHost,
 			rtmpPullPort = config.rtmpPullPort,
 			rtmpAppName = config.rtmpAppName,
@@ -61,9 +62,9 @@ class LivePageFile(BaseHttpHandler):
 				filename = meta['filename']
 				Connection.client[index].file_add(filename, meta['body'])
 			broadcast = dict(
-				action = Type.user,
-				behave = 'file_upload',
-				info = Connection.client[index].file_status()
+				type = Type.status,
+				status = Status.file_upload,
+				file = Connection.client[index].file_status()
 			)
 			Connection.client[index].broadcast_JSON(broadcast)
 			Connection.client[index].send_message(json.dumps(broadcast))
@@ -98,26 +99,24 @@ class LiveShowHandler(tornado.websocket.WebSocketHandler):
 					message
 				)
 			)
-			message = str(message)
 			obj = json.loads(message)
-			action = obj.get('action', None)
-			if action == Type.user:
-				behave = obj.get('behave', '')
-				if behave == 'acquire':
+			messageType = obj.get("type", None)
+			if messageType == Type.action:
+				action = obj.get("action", "")
+				if action == Action.broadcast:
+					nowtime = int(time.time())
+					if nowtime - self._timestamp >= config.messageInterval:
+						self._timestamp = nowtime
+						obj['timestamp'] = nowtime
+						obj['nickname'] = self.nickname
+						self._liver.broadcast_JSON(obj)
+				elif action == Action.acquire:
 					self._liver.admin_acquire(self)
-				elif behave == 'release':
+				elif action == Action.release:
 					self._liver.admin_release(self)
-			elif obj.get('broadcast', None) == 1:
-				nowtime = int(time.time())
-				if nowtime - self._timestamp >= config.messageInterval:
-					self._timestamp = nowtime
-					obj['timestamp'] = nowtime
-					obj['nickname'] = self.nickname
-					self._liver.broadcast_JSON(obj)
 			else:
 				if self._liver.admin_handle_check(self):
-					self._liver.broadcast_messages(message)
-					self._liver.send_message(message)
+					self._liver.send_message(str(message))
 		except Exception as e:
 			logging.info(str(e))
 

@@ -9,7 +9,7 @@ from models import User
 
 class BaseHttpHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
-        self.set_header('Server', 'ExoticServer/0.3.0')
+        self.set_header('Server', 'ExoticServer/%s' % config.version)
         self.set_header('X-Frame-Options', 'SAMEORIGIN')
         self.set_header('X-XSS-Protection', '1; mode=block')
         self.set_header('x-content-type-options', 'nosniff')

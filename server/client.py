@@ -2,6 +2,14 @@
 # -*- coding: utf-8 -*-
 import socket, select, string, sys, json, base64, threading, httplib2
 
+from config import Type, Action, Status, Info
+OperationReverse = dict()
+OperationReverse['1'] = 'key_pressed'
+OperationReverse['2'] = 'switch_on'
+OperationReverse['3'] = 'switch_off'
+OperationReverse['4'] = 'button_pressed'
+OperationReverse['5'] = 'button_released'
+
 def prompt():
     sys.stdout.write('<You> ')
     sys.stdout.flush()
@@ -9,7 +17,7 @@ def prompt():
 class FileDownload(threading.Thread):
     def __init__(self, host, webport, link, callback):
         threading.Thread.__init__(self)
-        self.link = 'http://%s:%d%s' % (host, webport, link)
+        self.link = 'http://%s:%d%sdownload' % (host, webport, link)
         self.callback = callback
 
     def run(self):
@@ -21,8 +29,8 @@ def downloadend(resp_headers, content):
     #with open("./test", "wb") as f:
     #    f.write(content)
     s.send(json.dumps(dict(
-        action = 0, # user type
-        behave = 'file_program',
+        type = Type.status,
+        status = "bit_file_program",
         size = len(content)
     )) + separator)
 
@@ -93,14 +101,37 @@ while not exit:
                         continue
 
                     sys.stdout.write(json.dumps(data))
+                    messageType = data.get('type', None)
 
-                    if data.get("status", None) == 0:
-                        filelink = data.get("filelink")
-                        webport = data.get("webport")
+                    if messageType == Type.action:
+                        pass
+                    elif messageType == Type.status:
+                        status = data.get("status", None)
+                        if status == Status.authorized:
+                            filelink = data.get("filelink")
+                            webport = data.get("webport")
+                        elif status == Status.file_upload:
+                            filethread = FileDownload(host, webport, filelink, downloadend)
+                            filethread.start()
+                    elif messageType == Type.operation:
+                        operation = data.get("operation", None)
+                        if operation is not None:
+                            status = OperationReverse.get(str(operation), None)
+                            if status is not None:
+                                keyname = 'key_code'
+                                value = data.get("key_code", None)
+                                if value is None:
+                                    value = data.get('id', -1)
+                                    keyname = 'id'
+                                sendDict = dict(
+                                    type = Type.status,
+                                    status = status,
+                                )
+                                sendDict[keyname] = value
+                                s.send(json.dumps(sendDict) + separator)
+                    elif messageType == Type.info:
+                        print 'User change to %s' % data.get('user', None)
 
-                    if data.get('action', None) == 0 and data['behave'] == 'file_upload':
-                        filethread = FileDownload(host, webport, filelink, downloadend)
-                        filethread.start()
                     print
                 prompt()
 
@@ -111,39 +142,49 @@ while not exit:
             try:
                 if msg == 'auth':
                     s.send(json.dumps(dict(
-                        action = 0,
-                        behave = 'authorization',
+                        type = Type.action,
+                        action = Action.authorize,
                         device_id = device_id,
-                        auth_key = auth_key
+                        auth_key = auth_key,
                     )) + separator)
-                elif msg.startswith('keyup'):
+                elif msg.startswith('keypress'):
                     a, b = msg.split(' ')
+                    b = int(b)
                     s.send(json.dumps(dict(
-                        action = 2,
-                        code = b
-                    )) + separator)
-                elif msg.startswith('keydown'):
-                    a, b = msg.split(' ')
-                    s.send(json.dumps(dict(
-                        action = 1,
-                        code = b
+                        type = Type.status,
+                        status = 'key_pressed',
+                        key_code = b
                     )) + separator)
                 elif msg.startswith('switchon'):
                     a, b = msg.split(' ')
+                    b = int(b)
                     s.send(json.dumps(dict(
-                        action = 3,
+                        type = Type.status,
+                        status = 'switch_on',
                         id = b
                     )) + separator)
                 elif msg.startswith('switchoff'):
                     a, b = msg.split(' ')
+                    b = int(b)
                     s.send(json.dumps(dict(
-                        action = 4,
+                        type = Type.status,
+                        status = 'switch_off',
                         id = b
                     )) + separator)
                 elif msg.startswith('buttonpress'):
                     a, b = msg.split(' ')
+                    b = int(b)
                     s.send(json.dumps(dict(
-                        action = 5,
+                        type = Type.status,
+                        status = 'button_pressed',
+                        id = b
+                    )) + separator)
+                elif msg.startswith('buttonrelease'):
+                    a, b = msg.split(' ')
+                    b = int(b)
+                    s.send(json.dumps(dict(
+                        type = Type.status,
+                        status = 'button_released',
                         id = b
                     )) + separator)
                 elif msg == 'exit':

@@ -3,20 +3,47 @@ var server = (function(){
     var pass = function(){};
 
     Type = {
-        user : 0,
-        keyDown : 1,
-        keyUp : 2,
-        switchOn : 3,
-        switchOff : 4,
-        buttonPress : 5
+        action : 0,
+        status : 1,
+        operation : 2,
+        info : 3
+    };
+
+    Action = {
+        acquire : "acquire",
+        release : "release",
+        broadcast : "broadcast"
+    };
+
+    Status = {
+        key_pressed : "key_pressed",
+        switch_on : "switch_on",
+        switch_off : "switch_off",
+        button_pressed : "button_pressed",
+        button_released : "button_released",
+        file_upload : "file_upload",
+        bit_file_program : "bit_file_program"
+    }
+
+    Operation = {
+        key_press : 1,
+        switch_on : 2,
+        switch_off : 3,
+        button_pressed : 4,
+        button_released : 5
+    }
+
+    Info = {
+        user_changed : "user_changed",
+        fpga_disconnected : "fpga_disconnected"
     };
 
     Remote = {
-        keyDown : pass,
-        keyUp : pass,
+        keyPress : pass,
         switchOn : pass,
         switchOff : pass,
         buttonPress : pass,
+        buttonRelease : pass,
         userChange : pass,
         leave : pass,
         fileUpload : pass,
@@ -31,31 +58,46 @@ var server = (function(){
             delete obj.broadcast
             Remote.broadcast(obj);
         }
-        switch(obj.action){
-            case Type.user:
-                if (obj.behave == 'liver_leave')
-                    Remote.leave()
-                else if (obj.behave == 'user_change')
-                    Remote.userChange(obj.change);
-                else if (obj.behave == 'file_upload')
-                    Remote.fileUpload(obj.info);
-                else if (obj.behave == 'file_program')
-                    Remote.fileProgram()
+        switch(obj.type){
+            case Type.action:
+                switch (obj.action){
+                    case Action.broadcast:
+                        Remote.broadcast(obj);
+                        break;
+                }
                 break;
-            case Type.keyDown:
-                Remote.keyDown(obj.code);
+            case Type.status:
+                switch (obj.status){
+                    case Status.key_pressed:
+                        Remote.keyPress(obj.key_code);
+                        break;
+                    case Status.switch_on:
+                        Remote.switchOn(obj.id);
+                        break;
+                    case Status.switch_off:
+                        Remote.switchOff(obj.id);
+                        break;
+                    case Status.button_pressed:
+                        Remote.buttonPress(obj.id);
+                        break;
+                    case Status.button_released:
+                        Remote.buttonRelease(obj.id);
+                        break;
+                    case Status.file_upload:
+                        Remote.fileUpload(obj.file);
+                        break;
+                    case Status.bit_file_program:
+                        Remote.fileProgram(obj.size);
+                        break;
+                }
                 break;
-            case Type.keyUp:
-                Remote.keyUp(obj.code);
+            case Type.operation:
                 break;
-            case Type.switchOn:
-                Remote.switchOn(obj.id);
-                break;
-            case Type.switchOff:
-                Remote.switchOff(obj.id);
-                break;
-            case Type.buttonPress:
-                Remote.buttonPress(obj.id);
+            case Type.info:
+                if (obj.info == Info.fpga_disconnected)
+                    Remote.leave();
+                else if (obj.info == Info.user_changed)
+                    Remote.userChange(obj.user);
                 break;
         }
     };
@@ -77,60 +119,62 @@ var server = (function(){
         user : {
             acquire : function(){
                 send({
-                    'action' : Type.user,
-                    'behave' : 'acquire'
+                    'type' : Type.action,
+                    'action' : 'acquire'
                 });
             },
             release : function(){
                 send({
-                    'action' : Type.user,
-                    'behave' : 'release'
+                    'type' : Type.action,
+                    'action' : 'release'
                 });
             }
         },
         broadcast: function(message){
             send({
-                'broadcast' : 1,
-                'message' : message
-            })
-        },
-        keyDown : function(key){
-            send({
-                'action' : Type.keyDown,
-                'code' : key
+                'type' : Type.action,
+                'action' : Action.broadcast,
+                'content' : message
             });
         },
-        keyUp : function(key){
+        keyPress : function(key){
             send({
-                'action' : Type.keyUp,
-                'code' : key
+                'type' : Type.operation,
+                'operation' : Operation.key_press,
+                'key_code' : key
             });
         },
         switchOn : function(id){
             send({
-                'action' : Type.switchOn,
+                'type' : Type.operation,
+                'operation' : Operation.switch_on,
                 'id' : id
             });
         },
         switchOff : function(id){
             send({
-                'action' : Type.switchOff,
+                'type' : Type.operation,
+                'operation' : Operation.switch_off,
                 'id' : id
             });
         },
         buttonPress : function(id){
             send({
-                'action' : Type.buttonPress,
+                'type' : Type.operation,
+                'operation' : Operation.button_pressed,
                 'id' : id
             });
-
+        },
+        buttonRelease : function(id){
+            send({
+                'type' : Type.operation,
+                'operation' : Operation.button_released,
+                'id' : id
+            });
         },
         remote : {
-            setKeyDown : function(func){
-                Remote.keyDown = func;
-            },
-            setKeyUp : function(func){
-                Remote.keyUp = func;
+            setKeyPress : function(func){
+                Remote.keyPress = func;
             },
             setSwitchOn : function(func){
                 Remote.switchOn = func;
@@ -140,6 +184,9 @@ var server = (function(){
             },
             setButtonPress : function(func){
                 Remote.buttonPress = func;
+            },
+            setButtonRelease : function(func){
+                Remote.buttonRelease = func;
             },
             setUserChange : function(func){
                 Remote.userChange = func;

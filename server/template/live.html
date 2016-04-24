@@ -16,11 +16,11 @@
         <input type='text' id='message'/>
         <input type='submit' value='Send'/>
     </form>
-    <button onclick='server.keyDown(1)'>key 1 down</button>
-    <button onclick='server.keyUp(1)'>key 1 up</button>
+    <button onclick='server.keyPress(1)'>key 1 down</button>
     <button onclick='server.switchOn(2)'>switch 2 On</button>
     <button onclick='server.switchOff(2)'>switch 2 Off</button>
     <button onclick='server.buttonPress(3)'>button 3 press</button>
+    <button onclick='server.buttonRelease(3)'>button 3 Release</button>
     <div id='messageBox'></div>
     <script src='/static/server.js'></script>
     <script>
@@ -33,14 +33,10 @@
             }
         }
         var messageText = document.getElementById('message');
-        window.addEventListener('keydown', function(event){
+        window.addEventListener('keypress', function(event){
             if (messageText != document.activeElement)
-                server.keyDown(event.keyCode);
-        })
-        window.addEventListener('keyup', function(evnet){
-            if (messageText != document.activeElement)
-                server.keyUp(event.keyCode);
-        })
+                server.keyPress(event.keyCode);
+        });
         function inputMessage(){
             server.broadcast(messageText.value);
             messageText.value = '';
@@ -51,11 +47,8 @@
             div.innerHTML = msg;
             messageBox.prependChild(div);
         }
-        server.remote.setKeyDown(function(code){
-            newMessage('Key Down ' + code);
-        });
-        server.remote.setKeyUp(function(code){
-            newMessage('Key Up ' + code);
+        server.remote.setKeyPress(function(code){
+            newMessage('Key Press ' + code);
         });
         server.remote.setSwitchOn(function(id){
             newMessage('Switch On ' + id);
@@ -66,6 +59,9 @@
         server.remote.setButtonPress(function(id){
             newMessage('Button Press ' + id);
         });
+        server.remote.setButtonRelease(function(id){
+            newMessage('Button Release ' + id);
+        });
         server.remote.setUserChange(function(user){
             newMessage('user Change to ' + user);
         });
@@ -75,13 +71,13 @@
         server.remote.setFileUpload(function(info){
             newMessage('file received with size: ' + info.size);
         });
-        server.remote.setFileProgram(function(){
-            newMessage('file program.');
+        server.remote.setFileProgram(function(size){
+            newMessage('file programed success with size: ' + size);
         });
         server.remote.setBroadcast(function(messageObj){
             var a = new Date();
             a.setTime(messageObj.timestamp * 1000);
-            newMessage(a.toLocaleString() + ' ' + messageObj.nickname + ' : ' + messageObj.message);
+            newMessage(a.toLocaleString() + ' ' + messageObj.nickname + ' : ' + messageObj.content);
         });
     </script>
 </body>
