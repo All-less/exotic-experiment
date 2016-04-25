@@ -14,7 +14,14 @@
 		{% raw xsrf_form_html() %}
         <iframe name ="hframe" id="hframe" style=" display: none"></iframe >
     </form>
-    <a href='./file/download'>Download uploaded file</a>
+    <div>
+        <label for="filetypeSelect">下载文件类型：</label>
+        <select name='filetype' id="filetypeSelect" onchange="linkchange()">
+            <option>bit</option>
+            <option>disk</option>
+        </select>
+        <a id='download' href='./file/'></a>
+    </div>
     <form target='_self' onsubmit="return inputMessage()">
         <span>Say something: </span>
         <input type='text' id='message'/>
@@ -37,6 +44,8 @@
             }
         }
         var messageText = document.getElementById('message');
+        var filetypeSelect = document.getElementById('filetypeSelect');
+        var download = document.getElementById('download')
         window.addEventListener('keypress', function(event){
             if (messageText != document.activeElement)
                 server.keyPress(event.keyCode);
@@ -51,6 +60,12 @@
             div.innerHTML = msg;
             messageBox.prependChild(div);
         }
+        function linkchange(){
+            type = filetypeSelect.value;
+            download.href = "./file/" + type;
+            download.innerHTML = "Download uploaded " + type + " file";
+        }
+        linkchange();
         server.remote.setKeyPress(function(code){
             newMessage('Key Press ' + code);
         });

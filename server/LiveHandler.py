@@ -116,6 +116,9 @@ class LiveShowHandler(tornado.websocket.WebSocketHandler):
 				if action == Action.broadcast:
 					nowtime = int(time.time())
 					if nowtime - self._timestamp >= config.messageInterval:
+						obj['type'] = Type.info
+						del obj['action']
+						obj['info'] = Info.broadcast
 						self._timestamp = nowtime
 						obj['timestamp'] = nowtime
 						obj['nickname'] = self.nickname

@@ -21,8 +21,8 @@ var server = (function(){
         switch_off : "switch_off",
         button_pressed : "button_pressed",
         button_released : "button_released",
-        file_upload : "file_upload",
-        bit_file_program : "bit_file_program"
+        file_upload : "file_uploaded",
+        bit_file_program : "bit_file_programmed"
     }
 
     Operation = {
@@ -35,7 +35,8 @@ var server = (function(){
 
     Info = {
         user_changed : "user_changed",
-        fpga_disconnected : "fpga_disconnected"
+        fpga_disconnected : "fpga_disconnected",
+        broadcast : "broadcast",
     };
 
     Remote = {
@@ -54,17 +55,8 @@ var server = (function(){
     console.table(socket);
     socket.onmessage = function(event) {
         obj = JSON.parse(event.data);
-        if (obj.broadcast == 1){
-            delete obj.broadcast
-            Remote.broadcast(obj);
-        }
         switch(obj.type){
             case Type.action:
-                switch (obj.action){
-                    case Action.broadcast:
-                        Remote.broadcast(obj);
-                        break;
-                }
                 break;
             case Type.status:
                 switch (obj.status){
@@ -94,10 +86,17 @@ var server = (function(){
             case Type.operation:
                 break;
             case Type.info:
-                if (obj.info == Info.fpga_disconnected)
-                    Remote.leave();
-                else if (obj.info == Info.user_changed)
-                    Remote.userChange(obj.user);
+                switch (obj.info){
+                    case Info.fpga_disconnected:
+                        Remote.leave();
+                        break;
+                    case Info.user_changed:
+                        Remote.userChange(obj.user);
+                        break;
+                    case Info.broadcast:
+                        Remote.broadcast(obj);
+                        break;
+                }
                 break;
         }
     };

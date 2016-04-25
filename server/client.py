@@ -30,7 +30,7 @@ def downloadend(resp_headers, content):
     #    f.write(content)
     s.send(json.dumps(dict(
         type = Type.status,
-        status = "bit_file_program",
+        status = "bit_file_programmed",
         size = len(content)
     )) + separator)
 
@@ -65,9 +65,21 @@ except :
     sys.exit()
 
 
-print 'Connected to remote host. Start sending messages'
-print "Input 'auth', 'keyup code', 'keydown code', 'switch id' to send default message"
-print "Or you can send message directly."
+print '''
+Connected to remote host. Start sending messages
+1 Input
+  'auth'
+  to send authorization message,
+2 Input
+  'keypress code',
+  'switchon id', 'switchoff id',
+  'buttonpress id' 'buttonrelease id'
+  to send status message.
+3 Or you can just input message and this message would be sent directly.
+4 Input
+  'exit'
+  to exit this program.
+'''
 prompt()
 
 exit = False

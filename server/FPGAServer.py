@@ -203,10 +203,11 @@ class Connection(object):
 					else:
 						raise Exception("not found")
 		except Exception, e:
-			self.send_JSON(dict(
-				type = Type.status,
-				status = Status.auth_failed
-			))
+			if not broadcast:
+				self.send_JSON(dict(
+					type = Type.status,
+					status = Status.auth_failed
+				))
 		if broadcast and self.authed:
 			self.broadcast_messages(data)
 		self.read_message()

@@ -89,7 +89,7 @@ define('auth_key',
     default='None', type=str,
     help='the authenticated key of this server')
 
-version = "0.4.0"
+version = "0.4.1"
 
 class Type:
     action = 0
@@ -106,11 +106,12 @@ class Action:
 class Status:
     authorized = "authorized"
     auth_failed = "auth_failed"
-    file_upload = "file_upload"
+    file_upload = "file_uploaded"
 
 class Info:
     user_changed = "user_changed"
     fpga_disconnected = "fpga_disconnected"
+    broadcast = "broadcast"
 
 settings = DefaultDict(
     cookie_secret = options.cookie_secret,
