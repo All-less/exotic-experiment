@@ -27,23 +27,24 @@ delimiter = '\n'
 
 # Protocol-related constants
 KEY_PRESS = 1
-SWITCH_ON = 3
-SWITCH_OFF = 4
-BUTTON_DOWN = 5
-BUTTON_UP = 6
+SWITCH_ON = 2
+SWITCH_OFF = 3
+BUTTON_DOWN = 4
+BUTTON_UP = 5
 
-CODE_CONTROL = 0
-CODE_OPERATIONS = [CODE_CONTROL, KEY_PRESS, SWITCH_ON,
-                   SWITCH_OFF, BUTTON_UP, BUTTON_DOWN]
-CODE_SUCCESS = 0
-CODE_FAILURE = 1
+TYPE_ACTION = 0
+TYPE_STATUS = 1
+TYPE_OPERATION = 2
+TYPE_INFO = 3
 
-MSG_ACTION = 'action'
-MSG_BEHAVIOR = 'behave'
-MSG_DEVID = 'device_id'
-MSG_AUTHKEY = 'auth_key'
-MSG_STATUS = 'status'
-MSG_ID = 'id'
+FIELD_ACTION = 'action'
+FIELD_STATUS = 'status'
+FIELD_INFO = 'info'
+FIELD_OPERATION = 'operation'
+
+FIELD_DEVID = 'device_id'
+FIELD_AUTHKEY = 'auth_key'
+FIELD_ID = 'id'
 
 BHV_AUTH = 'authorization'
 BHV_UPLOAD = 'file_upload'

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
-import exotic
 from tornado.httpclient import AsyncHTTPClient
-import exotic_rpi
+import exotic as ex
 import exotic_rtmp
 import exotic_fpga as ef
 import exotic_rpi as er
@@ -13,12 +12,12 @@ stream = None
 
 
 def handle_initialization(message):
-    param['index'] = exotic.get(message, exotic.AUTH_INDEX)
-    param['rtmp_host'] = exotic.get(message, exotic.AUTH_HOST)
-    param['rtmp_port'] = exotic.get(message, exotic.AUTH_PUSH)
-    param['stream_name'] = exotic.get(message, exotic.AUTH_STREAM)
-    param['link'] = exotic.get(message, exotic.AUTH_LINK)
-    param['port'] = exotic.get(message, exotic.AUTH_PORT)
+    param['index'] = ex.get(message, ex.AUTH_INDEX)
+    param['rtmp_host'] = ex.get(message, ex.AUTH_HOST)
+    param['rtmp_port'] = ex.get(message, ex.AUTH_PUSH)
+    param['stream_name'] = ex.get(message, ex.AUTH_STREAM)
+    param['link'] = ex.get(message, ex.AUTH_LINK)
+    param['port'] = ex.get(message, ex.AUTH_PORT)
     param['auth'] = True
     # TODO: setting up rtmp streaming
 
@@ -27,62 +26,59 @@ def handle_download(response):
     if response.code != 200:
         print "Failed to download bit file.\n" \
               "Please check your network status or contact the system administrator."
-    f = open(exotic.TMP_DIR + "/" + exotic.TMP_NAME, "wb")
+    f = open(ex.TMP_DIR + "/" + ex.TMP_NAME, "wb")
     f.write(response.body)
     f.close()
-    ef.program_fpga(exotic.TMP_DIR + "/" + exotic.TMP_NAME)
+    ef.program_fpga(ex.TMP_DIR + "/" + ex.TMP_NAME)
 
 
 def handle_control(message):
-    behavior = message.get(exotic.MSG_BEHAVIOR)
-    if behavior == exotic.BHV_UPLOAD:
+    behavior = message.get(ex.MSG_BEHAVIOR)
+    if behavior == ex.BHV_UPLOAD:
         print param
-        AsyncHTTPClient().fetch('http://' + exotic.host + ':' + str(param['port']) +
+        AsyncHTTPClient().fetch('http://' + ex.host + ':' + str(param['port']) +
                                 param['link'], handle_download)
 
 
 def handle_operations(message):
-    operation = message.get(exotic.MSG_ACTION)
-    identifier = message.get(exotic.MSG_ID)
-    if operation == exotic.SWITCH_ON:
+    operation = message.get(ex.MSG_ACTION)
+    identifier = message.get(ex.MSG_ID)
+    if operation == ex.SWITCH_ON:
         er.rpi_write(5, 1)
-    elif operation == exotic.SWITCH_OFF:
+    elif operation == ex.SWITCH_OFF:
         er.rpi_write(5, 0)
     # TODO
 
 
-def process(content):
-    print content
+def handle_data(data):
+    print data
     try:
-        message = json.loads(content)
+        message = json.loads(data)
     except ValueError:
         print 'Received data is incorrect.'
         return
 
     if not param['auth']:
-        status = message.get(exotic.MSG_STATUS, None)
-        if status == exotic.CODE_SUCCESS:
+        status = message.get(ex.MSG_STATUS, None)
+        if status == ex.CODE_SUCCESS:
             handle_initialization(message)
-        stream.read_until(exotic.delimiter, process)
         return
 
-    action = message.get(exotic.MSG_ACTION, None)
-    if action == exotic.CODE_CONTROL:
+    action = message.get(ex.MSG_ACTION, None)
+    if action == ex.CODE_CONTROL:
         handle_control(message)
-    elif action in exotic.CODE_OPERATIONS:
+    elif action in ex.CODE_OPERATIONS:
         handle_operations(message)
     else:
         print 'Illegal action number found in received data.'
-    stream.read_until(exotic.delimiter, process)
 
 
 def init():
-    stream.write(exotic.jsonfy({
-        exotic.MSG_ACTION: exotic.CODE_CONTROL,
-        exotic.MSG_BEHAVIOR: exotic.BHV_AUTH,
-        exotic.MSG_DEVID: exotic.device_id,
-        exotic.MSG_AUTHKEY: exotic.auth_key
+    stream.write(ex.jsonfy({
+        ex.MSG_ACTION: ex.CODE_CONTROL,
+        ex.MSG_BEHAVIOR: ex.BHV_AUTH,
+        ex.MSG_DEVID: ex.device_id,
+        ex.MSG_AUTHKEY: ex.auth_key
     }))
-    stream.read_until(exotic.delimiter, process)
 
 
