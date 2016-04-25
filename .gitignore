@@ -69,3 +69,6 @@ target/
 
 # IDE
 .idea
+
+# swap file
+*.swp
