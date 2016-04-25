@@ -63,3 +63,9 @@ target/
 
 # Compilation Output
 # *.out
+
+# MacOS
+.DS_Store
+
+# IDE
+.idea
