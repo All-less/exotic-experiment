@@ -37,22 +37,40 @@ TYPE_STATUS = 1
 TYPE_OPERATION = 2
 TYPE_INFO = 3
 
+FIELD_TYPE = 'type'
 FIELD_ACTION = 'action'
 FIELD_STATUS = 'status'
 FIELD_INFO = 'info'
 FIELD_OPERATION = 'operation'
-
-FIELD_DEVID = 'device_id'
-FIELD_AUTHKEY = 'auth_key'
 FIELD_ID = 'id'
+FIELD_FILE = 'file'
 
-BHV_AUTH = 'authorization'
-BHV_UPLOAD = 'file_upload'
+FIELD_SIZE = 'size'
+FIELD_TYPE = 'type'
+FIELD_NAME = 'name'
 
+ACT_AUTH = 'authorize'
+
+STAT_AUTHED = 'authorized'
+STAT_AUTHFAIL = 'auth_failed'
+STAT_UPLOADED = 'file_uploaded'
+STAT_PROGRAMMED = 'bit_file_programmed'
+STAT_DOWNLOADED = 'disk_file_downloaded'
+STAT_KEY = 'key_pressed'
+STAT_ON = 'switch_on'
+STAT_OFF = 'switch_off'
+STAT_PRESSED = 'button_pressed'
+STAT_RELEASED = 'button_released'
+
+INFO_CHANGED = 'user_changed'
+INFO_USER = 'user'
+
+AUTH_DEVID = 'device_id'
+AUTH_AUTHKEY = 'auth_key'
 AUTH_INDEX = 'index'
-AUTH_HOST = 'rtmpHost'
-AUTH_PUSH = 'rtmpPushPort'
-AUTH_STREAM = 'streamName'
+AUTH_HOST = 'rtmp_host'
+AUTH_PUSH = 'rtmp_push_port'
+AUTH_STREAM = 'stream_name'
 AUTH_PORT = 'webport'
 AUTH_LINK = 'filelink'
 
@@ -66,9 +84,10 @@ PIN_JAO1 = 7
 PIN_JAO2 = 0
 PIN_JAO3 = 2
 PIN_JAO4 = 1
-RPI_INPUTS = [PIN_JAO1, PIN_JAO2, PIN_JAO3, PIN_JAO4]
-RPI_OUTPUTS = [PIN_JAI1, PIN_JAI2, PIN_JAI3, PIN_JAI4]
-
+RPI_INPUTS = [PIN_JAO1, PIN_JAO2, PIN_JAO3, PIN_JAO4, PIN_JAI1, PIN_JAI2, PIN_JAI3, PIN_JAI4]
+RPI_OUTPUTS = []
+switches = {1: PIN_JAI1, 2: PIN_JAI2, 3: PIN_JAI3, 4: PIN_JAI4}
+buttons = {1: PIN_JAO1, 2: PIN_JAO2, 3: PIN_JAO3, 4: PIN_JAO4}
 
 # Utility functions
 def jsonfy(arg):
@@ -79,6 +98,4 @@ def get(obj, key):
     if key in obj:
         return obj[key]
     else:
-        print 'The server returns erroneous data. \
-        Please contact the system administrator.'
-        sys.exit()
+        raise Exception
