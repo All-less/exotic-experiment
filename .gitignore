@@ -72,6 +72,3 @@ target/
 
 # swap file
 *.swp
-
-# Binary output
-# bin/
