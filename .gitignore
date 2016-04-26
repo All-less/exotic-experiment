@@ -62,7 +62,8 @@ target/
 .ipynb_checkpoints
 
 # Compilation Output
-# *.out
+*.out
+bin/
 
 # MacOS
 .DS_Store
@@ -71,4 +72,5 @@ target/
 .idea
 
 # swap file
-*.swp
+.swp
+
