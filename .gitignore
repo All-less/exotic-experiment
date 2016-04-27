@@ -69,3 +69,6 @@ target/
 
 # Temporary file
 tmp/
+
+# log file
+*.log

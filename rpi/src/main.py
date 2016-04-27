@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import socket
+import logging
 import tornado.iostream
 import tornado.ioloop
 import exotic as ex
@@ -15,21 +16,28 @@ def on_read(data):
         print data
         en.handle_data(data)
     except Exception as e:
-        print e
-        print 'The server returns erroneous data. \
-        \n%s\n Please contact the system administrator.' % (data.strip(), )
-    print 'Before on_read()'
+        logging.warning('The server returns erroneous data. \
+                        Please check your network status.')
+        logging.warning(str(e))
+        logging.debug('%s' % data.strip())
     en.stream.read_until(ex.delimiter, on_read)
 
 
+def try_authenticate():
+    if not en.status['auth']:
+        en.authenticate()
+        tornado.ioloop.IOLoop().call_later(60, try_authenticate)
+
+
 def on_connect():
-    en.init()
-    print 'In on_connect(), before read_until'
+    logging.info('Successfully connected to ' + ex.host + ':' + str(ex.port) + '.')
+    try_authenticate()
     en.stream.read_until(ex.delimiter, on_read)
 
 
 if __name__ == '__main__':
-    
+
+    logging.basicConfig(filename='exotic.log', level=logging.INFO)
     er.rpi_init()
     er.process = None
     ef.connect_fpga()

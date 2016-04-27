@@ -3,6 +3,7 @@ import exotic_rpi as er
 import json
 import sys
 import os
+import logging
 
 
 # shared variable
@@ -23,10 +24,6 @@ FPGA_NUMBER = 'XC7K160T'
 
 
 # Web-related parameters
-"""
-host = 'exotic.lmin.me'
-port = 9007
-"""
 host = 'es.lmin.me'
 port = 8083
 device_id = 'test'
@@ -115,6 +112,7 @@ def get(obj, key):
 def create_tmpdir():
     if not os.path.isdir(TMP_DIR):
         os.mkdir(TMP_DIR)
+        logging.info('Create temporary directory ' + TMP_DIR + '.')
 
 
 def clear_tmpdir():
@@ -130,6 +128,7 @@ def clear_tmpdir():
         os.rmdir(TMP_DIR)
     except OSError:
         pass
+    logging.info('Temporary files and directory cleared.')
 
 
 def save_tmpfile(path, content):
@@ -142,5 +141,5 @@ def save_tmpfile(path, content):
 
 def exit(ret):
     er.stop_streaming()
-    # clear_tmpdir()
+    clear_tmpdir()
     sys.exit(ret)
