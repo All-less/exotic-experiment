@@ -66,7 +66,7 @@ def handle_operation(message):
         # TODO: Integrate PS/2 simulation.
         pass
     else:
-        raise
+        raise Exception('Unexpected operation %d was found' % operation)
 
 
 def handle_status(message):
@@ -74,26 +74,27 @@ def handle_status(message):
         msg_file = ex.get(message, ex.FIELD_FILE)
         msg_type = ex.get(msg_file, ex.FIELD_TYPE)
         if msg_type == ex.TYPE_BIT:
+            print 'http://' + ex.host + ':' + str(status['port']) + status['link'] + ex.TYPE_BIT
             AsyncHTTPClient().fetch('http://' + ex.host + ':' + str(status['port']) +
-                status['link'], handle_bit_file)
+                status['link'] + ex.TYPE_BIT, handle_bit_file)
         elif msg_type == ex.TYPE_DISK:
+            print 'http://' + ex.host + ':' + str(status['port']) + status['link'] + ex.TYPE_DISK
             AsyncHTTPClient().fetch('http://' + ex.host + ':' + str(status['port']) +
-                status['link'], handle_disk_file)
+                status['link'] + ex.TYPE_DISK, handle_disk_file)
         else:
-            raise
+            raise Exception('Unexpected type "%s" was found.' % msg_type)
 
 
 def handle_info(message):
     msg_info = ex.get(message, ex.FIELD_INFO)
     if msg_info == ex.INFO_CHANGED:
-        if not ex.get(message, ex.INFO_USER):
+        if ex.get(message, ex.INFO_USER):
             er.start_streaming()
         else:
             er.stop_streaming()
 
 
 def handle_data(data):
-    print data
     try:
         message = json.loads(data)
     except ValueError:
@@ -108,7 +109,7 @@ def handle_data(data):
             print "Authorization failed. Please contact the system administrator for for help"
             return
         else:
-            raise
+            raise Exception('Unexpected status "%s" was found.' % msg_status)
 
     msg_type = ex.get(message, ex.FIELD_TYPE)
     if msg_type == ex.TYPE_OPERATION:
@@ -118,7 +119,7 @@ def handle_data(data):
     elif msg_type == ex.TYPE_INFO:
         handle_info(message)
     else:
-        raise
+        raise Exception('Unexpected type "%d" was found.' % msg_type)
 
 
 def init():

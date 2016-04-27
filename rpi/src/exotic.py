@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
+import exotic_rpi as er
 import json
 import sys
 import os
+
+
+# shared variable
+process = None
 
 
 # Temporary file
@@ -22,7 +27,7 @@ FPGA_NUMBER = 'XC7K160T'
 host = 'exotic.lmin.me'
 port = 9007
 """
-host = '10.214.128.116'
+host = 'es.lmin.me'
 port = 8083
 device_id = 'test'
 auth_key = '16230156c26d20618e00304958b69942'
@@ -104,7 +109,7 @@ def get(obj, key):
     if key in obj:
         return obj[key]
     else:
-        raise Exception
+        raise Exception('Expected field "%s" was not found.' % key)
 
 
 def create_tmpdir():
@@ -133,3 +138,9 @@ def save_tmpfile(path, content):
 
     with open(path, 'wb') as f:
         f.write(content)
+
+
+def exit(ret):
+    er.stop_streaming()
+    # clear_tmpdir()
+    sys.exit(ret)
