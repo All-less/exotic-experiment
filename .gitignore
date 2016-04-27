@@ -66,3 +66,6 @@ target/
 
 # Intellij
 .idea
+
+# Temporary file
+tmp/
