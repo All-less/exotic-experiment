@@ -109,99 +109,58 @@ var server = (function(){
 
     function send(data){
         if (socket.readyState == WebSocket.OPEN)
-            socket.send(JSON.stringify(data));
+            socket.send(data);
         else
             console.log('socket not open');
     }
 
+    function send_JSON(obj){
+        send(JSON.stringify(obj));
+    }
+
+    for (var key in Type){
+        tkey = 'send_' + key;
+        this[tkey] = (function(key){
+            return function(){
+                var argv = arguments;
+                return function(){
+                    var obj = {};
+                    obj.type = Type[key];
+                    obj[key] = argv[0];
+                    Array.prototype.map.call(arguments, function(val, index){
+                        obj[argv[index+1]] = val;
+                    })
+                    send_JSON(obj);
+                }
+            }
+        })(key);
+    }
+
     return {
         user : {
-            acquire : function(){
-                send({
-                    'type' : Type.action,
-                    'action' : 'acquire'
-                });
-            },
-            release : function(){
-                send({
-                    'type' : Type.action,
-                    'action' : 'release'
-                });
+            acquire : send_action(Action.acquire),
+            release : send_action(Action.release),
+        },
+        broadcast: send_action(Action.broadcast, 'content'),
+        keyPress : send_operation(Operation.key_press, 'key_code'),
+        switchOn : send_operation(Operation.switch_on, 'id'),
+        switchOff : send_operation(Operation.switch_off, 'id'),
+        buttonPress : send_operation(Operation.button_pressed, 'id'),
+        buttonRelease : send_operation(Operation.button_released, 'id'),
+        remote : (function(){
+            function capitalize(str){
+                return str.charAt(0).toUpperCase() + str.slice(1);
             }
-        },
-        broadcast: function(message){
-            send({
-                'type' : Type.action,
-                'action' : Action.broadcast,
-                'content' : message
-            });
-        },
-        keyPress : function(key){
-            send({
-                'type' : Type.operation,
-                'operation' : Operation.key_press,
-                'key_code' : key
-            });
-        },
-        switchOn : function(id){
-            send({
-                'type' : Type.operation,
-                'operation' : Operation.switch_on,
-                'id' : id
-            });
-        },
-        switchOff : function(id){
-            send({
-                'type' : Type.operation,
-                'operation' : Operation.switch_off,
-                'id' : id
-            });
-        },
-        buttonPress : function(id){
-            send({
-                'type' : Type.operation,
-                'operation' : Operation.button_pressed,
-                'id' : id
-            });
-        },
-        buttonRelease : function(id){
-            send({
-                'type' : Type.operation,
-                'operation' : Operation.button_released,
-                'id' : id
-            });
-        },
-        remote : {
-            setKeyPress : function(func){
-                Remote.keyPress = func;
-            },
-            setSwitchOn : function(func){
-                Remote.switchOn = func;
-            },
-            setSwitchOff : function(func){
-                Remote.switchOff = func;
-            },
-            setButtonPress : function(func){
-                Remote.buttonPress = func;
-            },
-            setButtonRelease : function(func){
-                Remote.buttonRelease = func;
-            },
-            setUserChange : function(func){
-                Remote.userChange = func;
-            },
-            setLeave : function(func){
-                Remote.leave = func;
-            },
-            setFileUpload : function(func){
-                Remote.fileUpload = func;
-            },
-            setFileProgram : function(func){
-                Remote.fileProgram = func;
-            },
-            setBroadcast : function(func){
-                Remote.broadcast = func;
+            funcs = {}
+            for (var key in Remote){
+                rkey = 'set' + capitalize(key);
+                funcs[rkey] = (function(key){
+                    return function(func){
+                        Remote[key] = func;
+                    }
+                })(key);
             }
-        }
+            return funcs;
+        })()
     }
 })();
