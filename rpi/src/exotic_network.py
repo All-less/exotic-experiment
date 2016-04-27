@@ -3,7 +3,6 @@ import json
 import os
 from tornado.httpclient import AsyncHTTPClient
 import exotic as ex
-import exotic_rtmp
 import exotic_fpga as ef
 import exotic_rpi as er
 
@@ -88,9 +87,9 @@ def handle_info(message):
     msg_info = ex.get(message, ex.FIELD_INFO)
     if msg_info == ex.INFO_CHANGED:
         if not ex.get(message, ex.INFO_USER):
-            exotic_rtmp.start()
+            er.start_streaming()
         else:
-            exotic_rtmp.stop()
+            er.stop_streaming()
 
 
 def handle_data(data):

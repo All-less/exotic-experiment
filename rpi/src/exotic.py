@@ -23,9 +23,9 @@ host = 'exotic.lmin.me'
 port = 9007
 """
 host = '10.214.128.116'
-port = 8081
+port = 8083
 device_id = 'test'
-auth_key = '1074394f3c93a8c6ebba353ad200790e'
+auth_key = '16230156c26d20618e00304958b69942'
 delimiter = '\n'
 
 

@@ -11,6 +11,7 @@ import exotic_rpi as er
 
 def on_read(data):
     try:
+        print data
         en.handle_data(data)
     except:
         print 'The server returns erroneous data. \
