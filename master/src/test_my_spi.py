@@ -47,7 +47,6 @@ def spi_transfer(data):
 
 send_data = random.randint(0, 255)
 read_data = spi_transfer(send_data)
-succ = 0
 print "Sent 0x%02X and received 0x%02X." % (send_data, read_data)
 for i in range(rounds):
     delta = random.randint(0, 255)
@@ -57,6 +56,7 @@ for i in range(rounds):
     if read_data != expected_data:
         print "FAILURE! Expected 0x%02X yet received 0x%02X." % (expected_data, read_data) 
     else:
+        pass
         # print "SUCCESS!"# Expected and received 0x%02X." % (expected_data,)
     # print "Send 0x%02X." % (send_data,)
 
