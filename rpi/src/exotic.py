@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 import json
 import sys
+import os
 
 
 # Temporary file
 TMP_DIR = 'tmp'
-TMP_NAME = 'tmp.bit'
+BIT_NAME = 'tmp.bit'
+DISK_NAME = 'tmp.disk'
+BIT_PATH = os.path.join(TMP_DIR, BIT_NAME)
+DISK_PATH = os.path.join(TMP_DIR, DISK_NAME)
 
 
 # Device-related constants
@@ -37,7 +41,6 @@ TYPE_STATUS = 1
 TYPE_OPERATION = 2
 TYPE_INFO = 3
 
-FIELD_TYPE = 'type'
 FIELD_ACTION = 'action'
 FIELD_STATUS = 'status'
 FIELD_INFO = 'info'
@@ -48,6 +51,8 @@ FIELD_FILE = 'file'
 FIELD_SIZE = 'size'
 FIELD_TYPE = 'type'
 FIELD_NAME = 'name'
+TYPE_BIT = 'bit'
+TYPE_DISK = 'disk'
 
 ACT_AUTH = 'authorize'
 
@@ -89,6 +94,7 @@ RPI_OUTPUTS = []
 switches = {1: PIN_JAI1, 2: PIN_JAI2, 3: PIN_JAI3, 4: PIN_JAI4}
 buttons = {1: PIN_JAO1, 2: PIN_JAO2, 3: PIN_JAO3, 4: PIN_JAO4}
 
+
 # Utility functions
 def jsonfy(arg):
     return json.dumps(arg) + delimiter
@@ -99,3 +105,31 @@ def get(obj, key):
         return obj[key]
     else:
         raise Exception
+
+
+def create_tmpdir():
+    if not os.path.isdir(TMP_DIR):
+        os.mkdir(TMP_DIR)
+
+
+def clear_tmpdir():
+    if not os.path.isdir(TMP_DIR):
+        return
+
+    if os.path.isfile(BIT_PATH):
+        os.remove(BIT_PATH)
+    if os.path.isfile(DISK_PATH):
+        os.remove(DISK_PATH)
+
+    try:
+        os.rmdir(TMP_DIR)
+    except OSError:
+        pass
+
+
+def save_tmpfile(path, content):
+    if not os.path.isdir(TMP_DIR):
+        os.mkdir(TMP_DIR)
+
+    with open(path, 'wb') as f:
+        f.write(content)

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import os
 from tornado.httpclient import AsyncHTTPClient
 import exotic as ex
 import exotic_rtmp
@@ -9,6 +10,13 @@ import exotic_rpi as er
 
 status = {'auth': False}
 stream = None
+
+
+def send_status(message, **kwargs):
+    res = {ex.FIELD_TYPE: ex.TYPE_STATUS, ex.FIELD_STATUS: message}
+    for key, value in kwargs.iteritems():
+        res[key] = value
+    stream.write(ex.jsonfy(res))
 
 
 def handle_initialization(message):
@@ -25,20 +33,19 @@ def handle_bit_file(response):
     if response.code != 200:
         print "Failed to download bit file.\n" \
               "Please check your network status or contact the system administrator."
-    # TODO:
-    # 1. determine where to store bit file
-    # 2. add 'with'
-    f = open(ex.TMP_DIR + "/" + ex.TMP_NAME, "wb")
-    f.write(response.body)
-    f.close()
-    ef.program_fpga(ex.TMP_DIR + "/" + ex.TMP_NAME)
+        return
+    ex.save_tmpfile(ex.BIT_PATH, response.body)
+    ef.program_fpga(ex.BIT_PATH)
+    send_status('bit_file_programmed')
 
 
 def handle_disk_file(response):
     if response.code != 200:
         print "Failed to download disk file.\n" \
               "Please check your network status or contact the system administrator."
-    # TODO: Move disk file.
+        return
+    ex.save_tmpfile(ex.DISK_PATH, response.body)
+    send_status('disk_file_downloaded')
 
 
 def handle_operation(message):
@@ -46,12 +53,16 @@ def handle_operation(message):
     identifier = ex.get(message, ex.FIELD_ID)
     if operation == ex.SWITCH_ON:
         er.rpi_write(ex.switches[identifier], 1)
+        send_status('switch_on', id=identifier)
     elif operation == ex.SWITCH_OFF:
         er.rpi_write(ex.switches[identifier], 0)
+        send_status('switch_off', id=identifier)
     elif operation == ex.BUTTON_DOWN:
         er.rpi_write(ex.buttons[identifier], 1)
+        send_status('button_pressed', id=identifier)
     elif operation == ex.BUTTON_UP:
         er.rpi_write(ex.buttons[identifier], 0)
+        send_status('button_release', id=identifier)
     elif operation == ex.KEY_PRESS:
         # TODO: Integrate PS/2 simulation.
         pass
@@ -61,10 +72,16 @@ def handle_operation(message):
 
 def handle_status(message):
     if ex.get(message, ex.FIELD_STATUS) == ex.STAT_UPLOADED:
-        # TODO: Download file.
-        # AsyncHTTPClient().fetch('http://' + ex.host + ':' + str(status['port']) +
-        #                         status['link'], handle_download)
-        pass
+        msg_file = ex.get(message, ex.FIELD_FILE)
+        msg_type = ex.get(msg_file, ex.FIELD_TYPE)
+        if msg_type == ex.TYPE_BIT:
+            AsyncHTTPClient().fetch('http://' + ex.host + ':' + str(status['port']) +
+                status['link'], handle_bit_file)
+        elif msg_type == ex.TYPE_DISK:
+            AsyncHTTPClient().fetch('http://' + ex.host + ':' + str(status['port']) +
+                status['link'], handle_disk_file)
+        else:
+            raise
 
 
 def handle_info(message):
