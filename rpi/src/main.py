@@ -11,13 +11,10 @@ import exotic_rpi as er
 
 
 def on_read(data):
-    print 'on_read() called.'
     try:
-        print data
         en.handle_data(data)
     except Exception as e:
-        logging.warning('The server returns erroneous data. \
-                        Please check your network status.')
+        logging.warning('The server returns erroneous data. Please check your network status.')
         logging.warning(str(e))
         logging.debug('%s' % data.strip())
     en.stream.read_until(ex.delimiter, on_read)
@@ -37,7 +34,7 @@ def on_connect():
 
 if __name__ == '__main__':
 
-    logging.basicConfig(filename='exotic.log', level=logging.INFO)
+    ex.init_logging()
     er.rpi_init()
     er.process = None
     ef.connect_fpga()
@@ -45,4 +42,7 @@ if __name__ == '__main__':
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
     en.stream = tornado.iostream.IOStream(s)
     en.stream.connect((ex.host, ex.port), on_connect)
-    tornado.ioloop.IOLoop.current().start()
+    try:
+        tornado.ioloop.IOLoop.current().start()
+    except:
+        ex.exit(0)

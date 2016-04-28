@@ -15,6 +15,7 @@ def send_status(message, **kwargs):
     res = {ex.FIELD_TYPE: ex.TYPE_STATUS, ex.FIELD_STATUS: message}
     for key, value in kwargs.iteritems():
         res[key] = value
+    logging.debug('Sent status ' + str(res) + '.')
     stream.write(ex.jsonfy(res))
 
 
@@ -30,8 +31,7 @@ def handle_initialization(message):
 
 def handle_bit_file(response):
     if response.code != 200:
-        print "Failed to download bit file.\n" \
-              "Please check your network status or contact the system administrator."
+        logging.warning('Failed to download bit file.')
         return
     ex.save_tmpfile(ex.BIT_PATH, response.body)
     logging.info('Successfully download bit file.')
@@ -41,8 +41,7 @@ def handle_bit_file(response):
 
 def handle_disk_file(response):
     if response.code != 200:
-        print "Failed to download disk file.\n" \
-              "Please check your network status or contact the system administrator."
+        logging.warning('Failed to download disk file.')
         return
     ex.save_tmpfile(ex.DISK_PATH, response.body)
     logging.info('Successfully download disk file.')
@@ -101,6 +100,7 @@ def handle_info(message):
 def handle_data(data):
     try:
         message = json.loads(data)
+        logging.debug('Received data ' + str(message))
     except ValueError:
         raise Exception('Received data cannot be correctly parsed.')
 
@@ -134,11 +134,11 @@ def authenticate():
         ex.AUTH_AUTHKEY: ex.auth_key
     }))
     logging.info('Authentication request sent.')
-    logging.debug(str({
+    logging.debug('Sent action ' + str({
         ex.FIELD_TYPE: ex.TYPE_ACTION,
         ex.FIELD_ACTION: ex.ACT_AUTH,
         ex.AUTH_DEVID: ex.device_id,
         ex.AUTH_AUTHKEY: ex.auth_key
-    }))
+    }) + '.')
 
 

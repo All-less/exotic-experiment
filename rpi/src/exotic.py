@@ -143,3 +143,15 @@ def exit(ret):
     er.stop_streaming()
     clear_tmpdir()
     sys.exit(ret)
+
+
+def init_logging():
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        filename='exotic.log', filemode='w')
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+
