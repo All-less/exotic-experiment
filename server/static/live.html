@@ -1,0 +1,87 @@
+live<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Exotic</title>
+	<link rel="stylesheet" href="./style/basic.css">
+	<script src="/static/javascript/lib/jquery-2.2.0.min.js"></script>
+</head>
+<body>
+	<header>
+		<span id="word_exotic">Exotic</span>
+		<ul id="nav">
+			<li><a href="#">Setting</a></li>
+			<li><a href="#">Apply</a></li>
+			<li><a href="#">Logout</a></li>
+			<li><a href="#">Help</a></li>
+		</ul>
+	</header>
+	<div id="main">
+		<div id="left">
+			<div id="left_contain">
+				<p>Switch</p>
+				<ul id="switch_contain">
+					<li class="switch_border">
+						<div id="switch1" class="switch"></div>
+					</li>
+					<li class="switch_border">
+						<div id="switch2" class="switch"></div>
+					</li>
+					<li class="switch_border">
+						<div id="switch3" class="switch"></div>
+					</li>
+					<li class="switch_border">
+						<div id="switch4" class="switch"></div>
+					</li>
+				</ul>
+				<p>Button</p>
+				<ul id="button_contain">
+					<li class="button_border">
+						<div id="button1" class="button"></div>
+					</li>
+					<li class="button_border">
+						<div id="button2" class="button"></div>
+					</li>
+					<li class="button_border">
+						<div id="button3" class="button"></div>
+					</li>
+					<li class="button_border">
+						<div id="button4" class="button"></div>
+					</li>
+				</ul>
+				<p>Bit file</p>
+				<div id="bitfile_contain">
+					<ul id="about_file">
+						<li id="path_for_file"></li>
+						<li id="file_input" >
+							<input type="file" id="input_file" class="click_button" />···
+						</li>
+					</ul>
+					<ul id="about_button">
+						<li id="upload" class="click_button">UPLOAD</li>
+						<li id="program" class="click_button">PROGRAM</li>
+					</ul>
+				</div>
+				<div id="div_discuss">
+					<p>Discuss</p>
+					<div id="discuss_contain">
+						<li id="text"><input type="text" /></li>
+						<li id="biu" class="click_button">BIU</li>
+					</div>
+				</div>
+				<div id="div_key_stroke">
+					<p>Key-stroke</p>
+					<p style="margin-left:15px; margin-top:0;">You have pressed key <span id="key">ctrl</span></p>
+				</div>
+			</div>
+		</div>
+		<div id="right">
+			<ul id="video_border">
+				<li id="video"></li>
+			</ul>
+		</div>
+	</div>
+	<script src="/static/javascript/server.js"></script>
+	<script src="/static/javascript/basic.js"></script>
+</body>
+</html>

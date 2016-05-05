@@ -66,3 +66,6 @@ target/
 
 # JetBrains IDE
 .idea/
+
+# Javascript Module
+node_modules/
