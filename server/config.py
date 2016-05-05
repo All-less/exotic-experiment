@@ -114,6 +114,7 @@ class Info:
     broadcast = "broadcast"
 
 settings = DefaultDict(
+    debug = True,
     cookie_secret = options.cookie_secret,
     template_path = os.path.join(os.path.dirname(__file__), "template"),
     static_path = os.path.join(os.path.dirname(__file__), "static"),

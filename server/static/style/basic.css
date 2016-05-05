@@ -1,0 +1,233 @@
+html,body{
+	border: none;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	font-family: "Helvetica Neue";
+	width:100%;
+	height:100%;
+	background-color: #000;
+	min-width: 670px;
+}
+li{
+	list-style: none;
+}
+ul,li{
+	padding:0;
+	margin:0;
+}
+input:focus{
+	outline: none;
+}
+
+header{
+	height:50px;
+	width:100%;
+	min-width: 670px;
+	position: fixed;
+	background-color: #000;
+	z-index:1;
+}
+.click_button{
+	cursor: pointer;
+}
+	#word_exotic{
+		color:white;
+		line-height: 50px;
+		padding-left: 100px;
+		letter-spacing:10px;
+		font-family: "Futura";
+		font-size: 25px;
+		font-weight: bold;
+		cursor: default;
+	}
+	#nav{
+		float: right;
+		padding-right: 100px;
+		margin:0;
+	}
+	#nav li{
+		list-style: none;
+		float:left;
+		padding-left: 30px;
+		margin-top: 5px;
+		line-height: 45px;
+	}
+	#nav a{
+		color:#b3b3b3;
+		text-decoration: none;
+	}
+	#nav a:hover{
+		color:white;
+	}
+#main{
+	width:100%;
+	height:100%;
+}
+	#left,#right{
+		height:100%;
+		position: absolute;
+		top:0;
+	}
+	#left{
+		width:45%;
+		left:0;
+	}
+	#right{
+		width:55%;
+		right:0;
+	}
+		#left_contain{
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			margin-left: -131px;
+			margin-top: -219px;
+		}
+		#left_contain p{
+			color:#fff;
+			font-weight: lighter;
+			margin:20px 0 5px;
+			padding-left: 10px;
+		}
+			.switch_border{
+				width:20px;
+				height:40px;
+				border:1px solid #fff;
+				margin: 10px 20px;
+				position: relative;
+				display: inline-block;
+			}
+				.switch{
+					position: relative;
+					width:20px;
+					height: 20px;
+					background-color: #fff;
+				}
+			.button_border{
+				width:26px;
+				height:26px;
+				border:1px solid #fff;
+				margin:17px;
+				position: relative;
+				display: inline-block;
+			}
+				.button{
+					width:18px;
+					height:18px;
+					border-radius:9px;
+					background-color: #fff; 
+					margin:4px;
+				}
+		#bitfile_contain{
+			padding-left: 20px;
+		}
+		#bitfile_contain li,#discuss_contain li{
+			display: inline-block;
+			border: 1px solid #fff;
+			height:20px;
+			text-align: center;
+			margin-top: 5px;
+			margin-bottom: 5px;
+		}
+			#about_file input{
+				height:2000px;
+				width:2000px;
+				filter:alpha(opacity=0); /*IE滤镜，透明度50%*/
+				-moz-opacity:0; /*Firefox私有，透明度50%*/
+				opacity:0;/*其他，透明度50%*/
+				position: absolute;
+				left: 0;
+				top: 0;
+			}
+			#path_for_file{
+				width:170px;
+			}
+			#file_input{
+				width:48px;
+				background-color: #fff;
+				overflow: hidden;
+				position: relative;
+				line-height: 20px;
+				letter-spacing: 5px;
+				font-weight: bold;
+			}
+			#about_button li{
+				background-color: #fff;
+				font-weight: lighter;
+				width:95px;
+				margin-left: 14px;
+				margin-right: 14px;
+			}
+			#about_button li:first-child{
+				margin-left: 0;
+			}
+			#about_button li:last-child{
+				margin-right: 0;
+			}
+		#discuss_contain{
+			padding-left: 20px;
+		}
+		#discuss_contain li{
+			display: block;
+			border: 1px solid #fff;
+			width:224px;
+			height:20px;
+			margin: 10px 0;
+
+		}
+		#discuss_contain input{
+			width:216px;
+			background-color: #000;
+			border:none;
+			color:#fff;
+		}
+		#biu{
+			background-color: #fff;
+			font-weight: lighter;
+		}
+	#right{}
+		#video_border{
+			position: absolute;
+			left:0%;
+			top: 50%;
+			margin-top: -225px;
+			width:550px;
+			height:450px;
+			border: 1px solid #fff;
+		}
+		#video{
+			margin: 25px;
+			width:500px;
+			height:400px;
+			background-color: #bbb;
+		}
+	#div_key_stroke{
+		display:;
+	}
+		#key{
+			height:40px;
+			line-height: 40px;
+			border: 1px solid #fff;
+			border-radius: 3px;
+			padding: 5px 10px;
+			margin-left: 10px;
+			margin-right: 10px;
+			font-size: 20px;
+			font-weight: bolder;
+		}
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+

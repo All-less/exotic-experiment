@@ -1,25 +1,43 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Exotic</title>
+	<link rel="stylesheet" href="/static/style/style.css">
+	<script src="/static/javascript/lib/jquery-2.2.0.min.js"></script>
+</head>
 <body>
-    <h1>Welcome {% if user is not None%}{{user}}{% end %}</h1>
-    {% if user is not None%}
-    <a href='/logout'>Logout</a>
-    {% else %}
-    <a href='/login'>Login</a>
-    <a href='/register'>Register</a>
-    {% end %}
-    {% if len(status) > 0%}
-        <ul>
-        {% for item in status %}
-            <li>
-                <a href='/live/{{item['index']}}/'>index : {{item['index']}}, device_id: {{item['device_id']}}</a>
-                <div>has admin? : {{item['admin']}}</div>
-                <div>users in this room {{item['user_number']}}</div>
-                <div>file status: {{ item['file'] }}</div>
-            </li>
-        {% end %}
-        </ul>
-    {% else %}
-        <p>并没有板子啊！</p>
-    {% end %}
+	<header>
+		<span id="word_exotic">Exotic</span>
+		<ul id="nav">
+			<li><a href="#">Console</a></li>
+			<li><a href="#">Account</a></li>
+			<li><a href="#">Reference</a></li>
+		</ul>
+	</header>
+	<div id="main" class="">
+		<div id="left">
+			<div id="sentence">
+				<p class="not_link">First Computer of mine.</p>
+				<p class="not_link">Inside outside.</p>
+				<p class="link"><a href="#sign">Create your first computer ></a></p>
+			</div>
+		</div>
+		<div id="sign">
+			<div id="form">
+				<input type="text" id="input_email" placeholder="E-mail Address"/>
+				<input type="password" id="input_pwd" placeholder="Password"/>
+				<div id="button_contain">
+					<div class="button white" id="signup">SIGN UP</div>
+					<span id="or">or</span>
+					<div id="signin" class="button black">SIGN IN</div>
+				</div>
+			</div>
+		</div>
+		<div id="right">
+			<img src="/static/img/background.jpg" alt="">
+		</div>
+	</div>
+	<script src="/static/javascript/main.js"></script>
 </body>
 </html>
