@@ -65,7 +65,7 @@ def handle_operation(message):
         send_status('button_pressed', id=identifier)
     elif operation == ex.BUTTON_UP:
         er.rpi_write(ex.buttons[identifier], 0)
-        send_status('button_release', id=identifier)
+        send_status('button_released', id=identifier)
     else:
         raise Exception('Unexpected operation %d was found' % operation)
 
