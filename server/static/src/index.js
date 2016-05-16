@@ -1,10 +1,20 @@
 'use strict'
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
+import { createStore } from 'redux';
+import reducer from './reducer';
 import App from './components/App';
 
+const store = createStore(reducer);
+
+const app = (
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
+
 ReactDOM.render(
-  <App />,
-  document.getElementById('react-root'));
+  app,
+  document.getElementById('react-root')
+);

@@ -1,14 +1,13 @@
 const webpack = require('webpack');
 
 module.exports = {
-  devtool: 'source-map',
   entry: [
     './src/index.js'
   ],
   output: {
     path: `${__dirname}/javascript`,
     publicPath: '/',
-    filename: 'bundle.js'
+    filename: 'live.js'
   },
   module: {
     loaders: [
