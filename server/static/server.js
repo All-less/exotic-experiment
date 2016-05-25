@@ -1,5 +1,6 @@
 var server = (function(){
     var socket = new WebSocket('ws://' + window.location.host + '/socket' + window.location.pathname);
+
     var pass = function(){};
 
     Type = {

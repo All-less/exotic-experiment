@@ -7,6 +7,8 @@ import config
 from BaseHttpHandler import BaseHttpHandler
 import models
 from models import User
+import tornado
+import json
 
 class BaseUserHttpHandler(BaseHttpHandler):
 	def login_as(self, name, password):
@@ -15,7 +17,10 @@ class BaseUserHttpHandler(BaseHttpHandler):
 			self.set_current_name(user.name)
 			self.set_current_user(user.nickname)
 			self.set_secure_cookie(config._identity, models.auth_key(user.name + user.nickname))
-			self.redirect(self.get_argument('next', '/'))
+			self.write(json.dumps({
+				'redirect': '/live/0/'
+			}))
+			self.finish()
 		else:
 			self.redirect(config.settings.login_url)
 
@@ -28,7 +33,7 @@ class LoginHandler(BaseUserHttpHandler):
 		if self.get_current_user() is not None:
 			self.redirect('/')
 			return
-		self.render('login.html', showtype='login', config = config)
+		self.render('login.html', showtype='login', config=config)
 
 	def post(self):
 		if self.get_current_user():
@@ -40,7 +45,7 @@ class LoginHandler(BaseUserHttpHandler):
 
 class RegisterHandler(BaseUserHttpHandler):
 	def get(self):
-		self.render('login.html', showtype='register', config = config)
+		self.render('login.html', showtype='register', config=config)
 
 	def post(self):
 		name = self.get_argument(config._user, None)
@@ -52,4 +57,7 @@ class RegisterHandler(BaseUserHttpHandler):
 class LogoutHandler(BaseUserHttpHandler):
 	def get(self):
 		self.logout()
-		self.redirect('/')
+		self.write(json.dumps({
+			'redirect': '/'
+		}))
+		self.finish()

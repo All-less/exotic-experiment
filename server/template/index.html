@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 	<meta charset="UTF-8">
 	<title>Exotic</title>
@@ -28,9 +27,9 @@
 				<input type="text" id="input_email" placeholder="E-mail Address"/>
 				<input type="password" id="input_pwd" placeholder="Password"/>
 				<div id="button_contain">
-					<div class="button white" id="signup">SIGN UP</div>
+					<div class="button white" id="major">SIGN IN</div>
 					<span id="or">or</span>
-					<div id="signin" class="button black">SIGN IN</div>
+					<div id="minor" class="button black">SIGN UP</div>
 				</div>
 			</div>
 		</div>
@@ -38,6 +37,13 @@
 			<img src="/static/img/background.jpg" alt="">
 		</div>
 	</div>
+	<script>
+	  window.config = {
+	  	user: '{{config._user}}',
+	  	password: '{{config._password}}',
+	  	nickname: '{{config._nickname}}'
+	  };
+	</script>
 	<script src="/static/javascript/main.js"></script>
 </body>
 </html>

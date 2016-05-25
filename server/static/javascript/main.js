@@ -1,8 +1,11 @@
 $(document).ready(function(){
 
 	function email_test(email){
+		/*
 		var patten = new RegExp(/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+(com|cn)$/);
 		return patten.test(email);
+		*/
+		return true;
 	}
 
 	function shack(sth, dis, time){
@@ -37,14 +40,33 @@ $(document).ready(function(){
 		return flag;
 	}
 
-	$("#signin").click(function(){
+	$("#major").click(function(){
 		if(!check()) return;
-		console.log("do_sth_signin");
+		var data = {};
+		data[config.user] = $("#input_email").val();
+		data[config.nickname] = $("#input_email").val();
+		data[config.password] = $("#input_pwd").val();
+		if ($(this).text() == "SIGN IN") 
+			$.post('/login', data, function(res) {
+				var obj = JSON.parse(res);
+				if (obj.redirect) {
+					location.href = obj.redirect;
+				}
+			});
+		else
+			$.post('/register', data, function(res) {
+				var obj = JSON.parse(res);
+				if (obj.redirect) {
+					location.href = obj.redirect
+				}
+			});
 	});
 
-	$("#signup").click(function(){
-		if(!check()) return;
-		console.log("do_sth_signup");
+	$("#minor").click(function(){
+		var major = $("#major").text();
+		var minor = $("#minor").text();
+		$("#major").text(minor);
+		$("#minor").text(major)
 	});
 
 	window.shack = shack;

@@ -22,7 +22,9 @@ import LiveHandler
 class HomePage(BaseHttpHandler):
     def get(self):
         user = self.get_current_user()
-        self.render('index.html', user=user, status = Connection.status())
+        # if user:
+        #     self.redirect('/live/0/')
+        self.render('index.html', user=user, status=Connection.status(), config=config)
 
 class ApiLiveListHandler(BaseHttpHandler):
     def get(self):

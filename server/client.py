@@ -196,6 +196,7 @@ if __name__ == '__main__':
             #incoming message from remote server
             if sock == server.s:
                 data = sock.recv(4096)
+                print data
                 if not data :
                     print '\nDisconnected from chat server'
                     sys.exit()

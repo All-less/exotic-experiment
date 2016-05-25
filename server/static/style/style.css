@@ -76,7 +76,7 @@ header{
 	}
 		#sentence{
 			position: absolute;
-			top:50%;
+			top:40%;
 			left:50%;
 			margin-top: -95px;
 			margin-left: -207px;
@@ -89,10 +89,12 @@ header{
 		}
 		#left .not_link{
 			font-size: 40px;
-			margin:0 20px;
+			margin:30px 20px;
 			cursor: default;
 		}
 		#left .link{
+			position: relative;
+    	top: 40px;
 			font-size: 20px;
 		}
 		#left a{
@@ -105,7 +107,7 @@ header{
 		}
 		#form{
 			position: absolute;
-			top:50%;
+			top:40%;
 			left:50%;
 			margin-top: -80px;
 			margin-left: -121px;
@@ -118,8 +120,8 @@ header{
 			height:40px;
 			line-height: 40px;
 			font-size: 14px;
-			width:220px;
-			margin: 20px 0;
+			width:260px;
+			margin: 40px 0;
 			border: 1px solid #bbb;
 			border-radius: 5px;
 			padding:0 10px;
@@ -136,11 +138,13 @@ header{
 			color:#333;
 			font-size: 14px;
 		}
+		#button_contain {
+			margin-top: 80px;
+		}
 		#button_contain .button{
-			width:60px;
-			height:20px;
-			font-size: 10px;
-			line-height: 20px;
+			width:80px;
+			height:25px;
+			line-height: 25px;
 			border-radius: 3px;
 			cursor: pointer;
 			text-align: center;
@@ -153,21 +157,23 @@ header{
 			background-color: #000;
 			color:#fff;
 		}
-		#signup{
+		#major{
 			float:left;
-			margin-left: 50px;
+			margin-left: 40px;
 			margin-right: 15px;
+			font-size: 17px;
 		}
 		#or{
 			float:left;
-			font-size: 13px;
-			line-height: 20px;
+			line-height: 23px;
 			color:#bbb;
+			font-size: 15px;
 		}
-		#signin{
+		#minor{
 			float:left;
 			background-color: #000 !important;
 			color:#fff !important;
+			font-size: 15px;
 		}
 		#right img{
 			padding-top: 50px;

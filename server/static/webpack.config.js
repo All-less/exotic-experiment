@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 
 module.exports = {
+  devtool: 'source-map',
   entry: [
     './src/index.js'
   ],
@@ -16,7 +17,8 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'babel',
         query: {
-          presets: ['es2015', 'stage-0', 'react']
+          presets: ['es2015', 'stage-0', 'react'],
+          plugins: ['transform-decorators-legacy']
         }
       }, {
         test: /\.css$/,
