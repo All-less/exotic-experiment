@@ -9,6 +9,11 @@
 </head>
 <body>
     <div id="react-root" /div>
+    <script>
+        window.config = {
+            rtmp: 'rtmp://{{rtmpHost}}:{{rtmpPullPort}}/{{rtmpAppName}}/{{streamName}}'
+        };
+    </script>
     <script src="/static/javascript/jwplayer.js"></script>
     <script src="/static/javascript/live.js"></script>
 </body>
