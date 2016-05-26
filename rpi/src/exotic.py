@@ -27,7 +27,7 @@ FPGA_NUMBER = 'XC7K160T'
 host = 'es.lmin.me'
 port = 8083
 device_id = 'test'
-auth_key = '16230156c26d20618e00304958b69942'
+auth_key = '993d46684961939ea10da51e56145580'
 delimiter = '\n'
 
 
@@ -93,8 +93,8 @@ PIN_JAO3 = 2
 PIN_JAO4 = 1
 RPI_INPUTS = []
 RPI_OUTPUTS = [PIN_JAO1, PIN_JAO2, PIN_JAO3, PIN_JAO4, PIN_JAI1, PIN_JAI2, PIN_JAI3, PIN_JAI4]
-switches = {1: PIN_JAI1, 2: PIN_JAI2, 3: PIN_JAI3, 4: PIN_JAI4}
-buttons = {1: PIN_JAO1, 2: PIN_JAO2, 3: PIN_JAO3, 4: PIN_JAO4}
+switches = {0: PIN_JAI1, 1: PIN_JAI2, 2: PIN_JAI3, 3: PIN_JAI4}
+buttons = {0: PIN_JAO1, 1: PIN_JAO2, 2: PIN_JAO3, 3: PIN_JAO4}
 
 
 # Utility functions
