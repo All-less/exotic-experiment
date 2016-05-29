@@ -138,6 +138,10 @@ header{
 			color:#333;
 			font-size: 14px;
 		}
+		#sign #error {
+			text-align: center;
+			color: #fff;
+		}
 		#button_contain {
 			margin-top: 80px;
 		}

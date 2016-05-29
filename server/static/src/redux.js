@@ -13,6 +13,10 @@ const CLOSE_SWITCH_SUCC = 'Exotic/CLOSE_SWITCH_SUCC';
 const CLOSE_SWITCH_FAIL = 'Exotic/CLOSE_SWITCH_FAIL';
 const FPGA_ACQUIRED = 'Exotic/FPGA_ACQUIRED';
 const FPGA_RELEASED = 'Exotic/FPGA_RELEASED';
+const UPLOAD_START = 'Exotic/UPLOAD_START';
+const UPLOAD_PROGRESS = 'Exotic/UPLOAD_PROGRESS';
+const UPLOAD_SUCC = 'Exotic/UPLOAD_SUCC';
+const UPLOAD_FAIL = 'Exotic/UPLOAD_FAIL';
 
 const BTN_DOWN = 0;
 const BTN_UP = 1;
@@ -25,7 +29,17 @@ const init = {
   buttons: [BTN_UP, BTN_UP, BTN_UP, BTN_UP],
   switches: [SW_OFF, SW_OFF, SW_OFF, SW_OFF],
   setting: false,
-  occupied: false
+  occupied: false,
+  uploadStatus: null
+};
+
+const next = {
+  '...' : ' ..',
+  ' ..' : '  .',
+  '  .' : '   ',
+  '   ' : '.  ',
+  '.  ' : '.. ',
+  '.. ' : '...'
 };
 
 export const toggleSetting = () => ({
@@ -100,6 +114,22 @@ export const fpgaReleased = () => ({
   type: FPGA_RELEASED
 });
 
+export const startUpload = () => ({
+  type: UPLOAD_START
+});
+
+export const updateUploadProgress = () => ({
+  type: UPLOAD_PROGRESS
+});
+
+export const uploadSucceed = () => ({
+  type: UPLOAD_SUCC
+});
+
+export const uploadFail = () => ({
+  type: UPLOAD_FAIL
+});
+
 export default (state=init, action) => {
   const switches = Array(...state.switches);
   const buttons = Array(...state.buttons);
@@ -160,6 +190,26 @@ export default (state=init, action) => {
     return {
       ...state,
       occupied: false
+    };
+  case UPLOAD_START:
+    return {
+      ...state,
+      uploadStatus: 'Uploading file ...'
+    };
+  case UPLOAD_PROGRESS:
+    return {
+      ...state,
+      uploadStatus: 'Uploading file ' + next[state.uploadStatus]
+    };
+  case UPLOAD_SUCC:
+    return {
+      ...state,
+      uploadStatus: 'Uploading file succeeded.'
+    };
+  case UPLOAD_FAIL:
+    return {
+      ...state,
+      uploadStatus: 'Uploading file failed.'
     }
   default:
     return state;

@@ -25,8 +25,12 @@ const buttonTimeout = Array(4).fill(undefined);
 
 const socket = new WebSocket(`ws://${location.host}/socket${location.pathname}`);
 
+/* The last sent comment. Store it in order to filter broadcast from the server. */
+let lastComment;
+
 socket.onmessage = (event) => {
   const data = JSON.parse(event.data);
+  console.log(data);
   switch (data.type) {
   case TYPE_STATUS:
     switch (data.status) {
@@ -44,7 +48,7 @@ socket.onmessage = (event) => {
       break;
     case 'button_released':
       store.dispatch(releaseButtonSucc(data.id));
-      clearTimeout(releaseButtonSucc[data.id]);
+      clearTimeout(buttonTimeout[data.id]);
       break;
     }
   case TYPE_INFO:
@@ -57,13 +61,14 @@ socket.onmessage = (event) => {
       }
       break;
     case 'broadcast':
-      $("#danmu").danmu("addDanmu", {
-        text: data.content,
-        color: "white", 
-        size: 1, 
-        position: 0, 
-        time: $('#danmu').data("nowTime")+10
-      });
+      if (data.content !== lastComment)
+        $("#danmu").danmu("addDanmu", {
+          text: data.content,
+          color: "white", 
+          size: 1, 
+          position: 0, 
+          time: $('#danmu').data("nowTime")+10
+        });
     }
   }
 };
@@ -123,9 +128,10 @@ const remote = {
     );
   },
   broadcast: (content) => {
+    lastComment = content;
     send({
       type: TYPE_ACTION,
-      operation: 'broadcast',
+      action: 'broadcast',
       content
     });
   },

@@ -133,6 +133,10 @@ header{
 			margin-top: 5px;
 			margin-bottom: 5px;
 		}
+		  #status {
+		  	color: #777;
+		  	font-size: 15px;
+		  }
 			#about_file input{
 				height:2000px;
 				width:2000px;

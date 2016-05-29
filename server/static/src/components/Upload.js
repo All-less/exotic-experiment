@@ -1,11 +1,24 @@
 'use strict'
 import React from 'react';
 import { connect } from 'react-redux';
+import {
+  startUpload,
+  uploadSucceed,
+  uploadFail,
+  updateUploadProgerss
+} from '../redux';
 
 @connect(
   (state) => ({
-    occupied: state.occupied
-  })
+    occupied: state.occupied,
+    status: state.uploadStatus
+  }),
+  {
+    startUpload,
+    uploadSucceed,
+    uploadFail,
+    updateUploadProgerss
+  }
 )
 class Upload extends React.Component {
 
@@ -22,6 +35,11 @@ class Upload extends React.Component {
     formData.append('file', $('#input_file')[0].files[0]);
     formData.append('filetype', 'bit');
     const req = new XMLHttpRequest();
+    req.addEventListener("abort", this.props.uploadFail);
+    req.addEventListener("error", this.props.uploadFail);
+    req.addEventListener("loadend", this.props.uploadSucceed);
+    req.addEventListener("loadstart", this.props.startUpload);
+    req.addEventListener("progress", this.props.updateUploadProgerss);
     req.open('post', `file`);
     req.send(formData);
   };
@@ -30,7 +48,7 @@ class Upload extends React.Component {
     const color = this.props.occupied ? '#fff' : '#777';
     return (
       <div>
-        <p style={{color: color }}>Bit file</p>
+        <p style={{color: color }}>Bit file <span id="status">{this.props.status}</span></p>
         <div id="bitfile_contain">
           <ul id="about_file">
             <li id="path_for_file" style={{borderColor: color}}>

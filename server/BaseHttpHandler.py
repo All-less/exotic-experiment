@@ -7,6 +7,7 @@ import config
 import tornado.web
 from models import User
 
+
 class BaseHttpHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
         self.set_header('Server', 'ExoticServer/%s' % config.version)

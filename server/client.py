@@ -3,6 +3,7 @@
 import socket, select, string, sys, json, base64, threading, httplib2
 
 from config import Type, Action, Status, Info
+
 OperationReverse = dict()
 OperationReverse['1'] = 'key_pressed'
 OperationReverse['2'] = 'switch_on'
@@ -10,9 +11,11 @@ OperationReverse['3'] = 'switch_off'
 OperationReverse['4'] = 'button_pressed'
 OperationReverse['5'] = 'button_released'
 
+
 def prompt():
     sys.stdout.write('<You> ')
     sys.stdout.flush()
+
 
 def printHelp():
     print '''
@@ -31,6 +34,7 @@ Connected to remote host. Start sending messages
   to exit this program.
     '''
 
+
 class ServerSocket:
     class FileDownload(threading.Thread):
         def __init__(self, host, webport, link, filetype, callback):
@@ -39,17 +43,17 @@ class ServerSocket:
             self.callback = callback
 
         def run(self):
-            h = httplib2.Http(timeout = 10)
+            h = httplib2.Http(timeout=10)
             (resp_headers, content) = h.request(self.link, "GET")
             self.callback(resp_headers, content)
 
     def __init__(self, host, port, device_id, auth_key, separator):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try :
+        try:
             s.connect((host, port))
             s.setblocking(0)
             self.s = s
-        except :
+        except:
             print 'Unable to connect'
             sys.exit()
         self.filelink = None
@@ -62,9 +66,9 @@ class ServerSocket:
         self.buffer = ''
 
     def downloadend(self, resp_headers, content):
-        #with open("./test", "wb") as f:
+        # with open("./test", "wb") as f:
         #    f.write(content)
-        self.send_Status("bit_file_programmed", size = len(content))
+        self.send_Status("bit_file_programmed", size=len(content))
 
     def download(self, filetype):
         filethread = self.FileDownload(self.host, self.webport, self.filelink, filetype, self.downloadend)
@@ -89,26 +93,26 @@ class ServerSocket:
             device_id = self.device_id
         if auth_key == None:
             auth_key = self.auth_key
-        self.send_Action(Action.authorize, device_id = device_id, auth_key = auth_key)
+        self.send_Action(Action.authorize, device_id=device_id, auth_key=auth_key)
 
     def send_Status(self, message, **kw):
         kw['status'] = message
         self.send_Type(Type.status, **kw)
 
     def send_keyPress(self, key_code):
-        self.send_Status('key_pressed', key_code = key_code)
+        self.send_Status('key_pressed', key_code=key_code)
 
     def send_switchOn(self, id):
-        self.send_Status('switch_on', id = id)
+        self.send_Status('switch_on', id=id)
 
     def send_switchOff(self, id):
-        self.send_Status('switch_off', id = id)
+        self.send_Status('switch_off', id=id)
 
     def send_buttonPress(self, id):
-        self.send_Status('button_pressed', id = id)
+        self.send_Status('button_pressed', id=id)
 
     def send_buttonRelease(self, id):
-        self.send_Status('button_released', id = id)
+        self.send_Status('button_released', id=id)
 
     def handleOperation(self, data):
         operation = data.get("operation", None)
@@ -161,9 +165,10 @@ class ServerSocket:
         elif messageType == Type.info:
             self.handleInfo(data)
 
+
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print 'Usage : python ', __file__,' hostname port'
+        print 'Usage : python ', __file__, ' hostname port'
         sys.exit()
 
     host = sys.argv[1]
@@ -190,32 +195,32 @@ if __name__ == '__main__':
         rlist = [sys.stdin, server.s]
 
         # Get the list sockets which are readable
-        read_list, write_list, error_list = select.select(rlist , [], [])
+        read_list, write_list, error_list = select.select(rlist, [], [])
 
         for sock in read_list:
-            #incoming message from remote server
+            # incoming message from remote server
             if sock == server.s:
                 data = sock.recv(4096)
                 print data
-                if not data :
+                if not data:
                     print '\nDisconnected from chat server'
                     sys.exit()
-                else :
+                else:
                     server.dataRecv(data)
                     prompt()
 
-            #user entered a message
+            # user entered a message
             else:
                 msg = sys.stdin.readline()
                 msg = msg[:-1]
                 try:
                     funcEqual = {
-                        'auth' : server.send_authorize,
-                        'exit' : sys.exit,
+                        'auth': server.send_authorize,
+                        'exit': sys.exit,
                     }
                     funcOneParam = {
-                        'keypress' : server.send_keyPress,
-                        'switchon' : server.send_switchOn,
+                        'keypress': server.send_keyPress,
+                        'switchon': server.send_switchOn,
                         'switchoff': server.send_switchOff,
                         'buttonpress': server.send_buttonPress,
                         'buttonrelease': server.send_buttonRelease,

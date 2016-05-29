@@ -21078,6 +21078,10 @@
 	var CLOSE_SWITCH_FAIL = 'Exotic/CLOSE_SWITCH_FAIL';
 	var FPGA_ACQUIRED = 'Exotic/FPGA_ACQUIRED';
 	var FPGA_RELEASED = 'Exotic/FPGA_RELEASED';
+	var UPLOAD_START = 'Exotic/UPLOAD_START';
+	var UPLOAD_PROGRESS = 'Exotic/UPLOAD_PROGRESS';
+	var UPLOAD_SUCC = 'Exotic/UPLOAD_SUCC';
+	var UPLOAD_FAIL = 'Exotic/UPLOAD_FAIL';
 	
 	var BTN_DOWN = 0;
 	var BTN_UP = 1;
@@ -21090,7 +21094,17 @@
 	  buttons: [BTN_UP, BTN_UP, BTN_UP, BTN_UP],
 	  switches: [SW_OFF, SW_OFF, SW_OFF, SW_OFF],
 	  setting: false,
-	  occupied: false
+	  occupied: false,
+	  uploadStatus: null
+	};
+	
+	var next = {
+	  '...': ' ..',
+	  ' ..': '  .',
+	  '  .': '   ',
+	  '   ': '.  ',
+	  '.  ': '.. ',
+	  '.. ': '...'
 	};
 	
 	var toggleSetting = exports.toggleSetting = function toggleSetting() {
@@ -21195,6 +21209,30 @@
 	  };
 	};
 	
+	var startUpload = exports.startUpload = function startUpload() {
+	  return {
+	    type: UPLOAD_START
+	  };
+	};
+	
+	var updateUploadProgress = exports.updateUploadProgress = function updateUploadProgress() {
+	  return {
+	    type: UPLOAD_PROGRESS
+	  };
+	};
+	
+	var uploadSucceed = exports.uploadSucceed = function uploadSucceed() {
+	  return {
+	    type: UPLOAD_SUCC
+	  };
+	};
+	
+	var uploadFail = exports.uploadFail = function uploadFail() {
+	  return {
+	    type: UPLOAD_FAIL
+	  };
+	};
+	
 	exports.default = function () {
 	  var state = arguments.length <= 0 || arguments[0] === undefined ? init : arguments[0];
 	  var action = arguments[1];
@@ -21249,6 +21287,22 @@
 	    case FPGA_RELEASED:
 	      return _extends({}, state, {
 	        occupied: false
+	      });
+	    case UPLOAD_START:
+	      return _extends({}, state, {
+	        uploadStatus: 'Uploading file ...'
+	      });
+	    case UPLOAD_PROGRESS:
+	      return _extends({}, state, {
+	        uploadStatus: 'Uploading file ' + next[state.uploadStatus]
+	      });
+	    case UPLOAD_SUCC:
+	      return _extends({}, state, {
+	        uploadStatus: 'Uploading file succeeded.'
+	      });
+	    case UPLOAD_FAIL:
+	      return _extends({}, state, {
+	        uploadStatus: 'Uploading file failed.'
 	      });
 	    default:
 	      return state;
@@ -21466,8 +21520,12 @@
 	
 	var socket = new WebSocket('ws://' + location.host + '/socket' + location.pathname);
 	
+	/* The last sent comment. Store it in order to filter broadcast from the server. */
+	var lastComment = void 0;
+	
 	socket.onmessage = function (event) {
 	  var data = JSON.parse(event.data);
+	  console.log(data);
 	  switch (data.type) {
 	    case TYPE_STATUS:
 	      switch (data.status) {
@@ -21485,7 +21543,7 @@
 	          break;
 	        case 'button_released':
 	          _store2.default.dispatch((0, _redux.releaseButtonSucc)(data.id));
-	          clearTimeout(_redux.releaseButtonSucc[data.id]);
+	          clearTimeout(buttonTimeout[data.id]);
 	          break;
 	      }
 	    case TYPE_INFO:
@@ -21498,7 +21556,7 @@
 	          }
 	          break;
 	        case 'broadcast':
-	          $("#danmu").danmu("addDanmu", {
+	          if (data.content !== lastComment) $("#danmu").danmu("addDanmu", {
 	            text: data.content,
 	            color: "white",
 	            size: 1,
@@ -21564,9 +21622,10 @@
 	    }, 30000);
 	  },
 	  broadcast: function broadcast(content) {
+	    lastComment = content;
 	    send({
 	      type: TYPE_ACTION,
-	      operation: 'broadcast',
+	      action: 'broadcast',
 	      content: content
 	    });
 	  },
@@ -21885,6 +21944,8 @@
 	
 	var _reactRedux = __webpack_require__(160);
 	
+	var _redux = __webpack_require__(180);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -21895,8 +21956,14 @@
 	
 	var Upload = (_dec = (0, _reactRedux.connect)(function (state) {
 	  return {
-	    occupied: state.occupied
+	    occupied: state.occupied,
+	    status: state.uploadStatus
 	  };
+	}, {
+	  startUpload: _redux.startUpload,
+	  uploadSucceed: _redux.uploadSucceed,
+	  uploadFail: _redux.uploadFail,
+	  updateUploadProgerss: _redux.updateUploadProgerss
 	}), _dec(_class = function (_React$Component) {
 	  _inherits(Upload, _React$Component);
 	
@@ -21920,6 +21987,11 @@
 	      formData.append('file', $('#input_file')[0].files[0]);
 	      formData.append('filetype', 'bit');
 	      var req = new XMLHttpRequest();
+	      req.addEventListener("abort", _this.props.uploadFail);
+	      req.addEventListener("error", _this.props.uploadFail);
+	      req.addEventListener("loadend", _this.props.uploadSucceed);
+	      req.addEventListener("loadstart", _this.props.startUpload);
+	      req.addEventListener("progress", _this.props.updateUploadProgerss);
 	      req.open('post', 'file');
 	      req.send(formData);
 	    }, _temp), _possibleConstructorReturn(_this, _ret);
@@ -21935,7 +22007,12 @@
 	        _react2.default.createElement(
 	          'p',
 	          { style: { color: color } },
-	          'Bit file'
+	          'Bit file ',
+	          _react2.default.createElement(
+	            'span',
+	            { id: 'status' },
+	            this.props.status
+	          )
 	        ),
 	        _react2.default.createElement(
 	          'div',
@@ -22358,10 +22435,12 @@
 	
 	      $('#danmu').danmu('danmuStart');
 	
+	      console.log(config.rtmp);
+	
 	      jwplayer('mediaspace').setup({
 	        'flashplayer': '/static/javascript/player.swf',
 	        'file': '0',
-	        'streamer': 'rtmp://10.214.128.116:1935/live/',
+	        'streamer': config.rtmp,
 	        'controlbar': 'bottom',
 	        'width': '640',
 	        'height': '360'

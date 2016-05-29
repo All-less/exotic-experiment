@@ -52,6 +52,9 @@ $(document).ready(function(){
 				if (obj.redirect) {
 					location.href = obj.redirect;
 				}
+				if (obj.error) {
+					$("#error").text(obj.error);
+				}
 			});
 		else
 			$.post('/register', data, function(res) {
