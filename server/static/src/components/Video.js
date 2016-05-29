@@ -3,6 +3,14 @@ import React from 'react';
 
 class Video extends React.Component {
   componentDidMount() {
+    jwplayer('mediaspace').setup({
+      'flashplayer': '/static/javascript/player.swf',
+      'file': config.streamName,
+      'streamer': config.streamUrl,
+      'controlbar': 'bottom',
+      'width': '640',
+      'height': '360'
+    });
     
     $("danmu").danmu({
       height: 450,  //弹幕区高度
@@ -25,16 +33,6 @@ class Video extends React.Component {
     
     $('#danmu').danmu('danmuStart');
     
-    console.log(config.rtmp);
-    
-    jwplayer('mediaspace').setup({
-      'flashplayer': '/static/javascript/player.swf',
-      'file': '0',
-      'streamer': config.rtmp,
-      'controlbar': 'bottom',
-      'width': '640',
-      'height': '360'
-    });
   }
 
   render() {

@@ -5,7 +5,7 @@ import {
   startUpload,
   uploadSucceed,
   uploadFail,
-  updateUploadProgerss
+  updateUploadProgress
 } from '../redux';
 
 @connect(
@@ -17,7 +17,7 @@ import {
     startUpload,
     uploadSucceed,
     uploadFail,
-    updateUploadProgerss
+    updateUploadProgress
   }
 )
 class Upload extends React.Component {
@@ -39,7 +39,10 @@ class Upload extends React.Component {
     req.addEventListener("error", this.props.uploadFail);
     req.addEventListener("loadend", this.props.uploadSucceed);
     req.addEventListener("loadstart", this.props.startUpload);
-    req.addEventListener("progress", this.props.updateUploadProgerss);
+    req.addEventListener("progress", () => {
+      console.log('in progress');
+      this.props.updateUploadProgress();
+    });
     req.open('post', `file`);
     req.send(formData);
   };
@@ -51,7 +54,7 @@ class Upload extends React.Component {
         <p style={{color: color }}>Bit file <span id="status">{this.props.status}</span></p>
         <div id="bitfile_contain">
           <ul id="about_file">
-            <li id="path_for_file" style={{borderColor: color}}>
+            <li id="path_for_file" style={{color: color, borderColor: color}}>
               {(this.state.file && this.state.file.name) || null}
             </li>
             <li id="file_input" style={{backgroundColor: color, borderColor: color}}>

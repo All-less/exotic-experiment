@@ -15,6 +15,11 @@ const handleClick = () => {
   $("#input_biu").val('');
 };
 
+const handleKey = (event) => {
+  if (event.keyCode === 13)
+    handleClick();
+};
+
 class Comment extends React.Component {
 
   render() {
@@ -22,7 +27,7 @@ class Comment extends React.Component {
       <div id="div_discuss">
         <p>Discuss</p>
         <div id="discuss_contain">
-          <li id="text"><input type="text" id="input_biu"/></li>
+          <li id="text"><input type="text" id="input_biu" onKeyDown={handleKey}/></li>
           <li id="biu" className="click_button" onClick={handleClick}>BIU</li>
         </div>
       </div>
