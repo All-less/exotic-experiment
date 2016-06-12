@@ -15,7 +15,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -68,17 +67,26 @@ bin/
 # MacOS
 .DS_Store
 
-# Intellij
-.idea
+# JetBrains IDE
+.idea/
 
 # swap file
 .swp
 
+# Javascript Module
+node_modules/
+
 # Temporary file
 tmp/
+
+# Database
+*.db
 
 # log file
 *.log
 
 # merge backup file
 *.orig
+
+# cofiguration
+config_override.py
