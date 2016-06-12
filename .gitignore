@@ -68,9 +68,17 @@ bin/
 # MacOS
 .DS_Store
 
-# IDE
+# Intellij
 .idea
 
 # swap file
 .swp
 
+# Temporary file
+tmp/
+
+# log file
+*.log
+
+# merge backup file
+*.orig
