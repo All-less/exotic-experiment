@@ -11,8 +11,11 @@
     <div id="react-root" /div>
     <script>
         window.config = {
-            rtmp: 'rtmp://{{rtmpHost}}:{{rtmpPullPort}}/{{rtmpAppName}}/{{streamName}}'
+            streamUrl: 'rtmp://{{rtmpHost}}:{{rtmpPullPort}}/{{rtmpAppName}}',
+            streamName: '{{streamName}}',
+            nickname: '{{nickname}}'
         };
+        console.log(config.nickname);
     </script>
     <script src="/static/javascript/jwplayer.js"></script>
     <script src="/static/javascript/live.js"></script>
