@@ -174,7 +174,7 @@ if __name__ == '__main__':
     host = sys.argv[1]
     port = int(sys.argv[2])
     device_id = 'test'
-    auth_key = '8f5aff8cb424d2cf39b206619f8d1461'
+    auth_key = '7aeb64ae34a82383f46472ae46644bb4'
     separator = '\n'
 
     if len(sys.argv) > 4:

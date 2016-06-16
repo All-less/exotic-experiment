@@ -21235,7 +21235,8 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = (0, _redux.createStore)(_redux3.default, undefined, window.devToolsExtension && window.devToolsExtension());
+	exports.default = (0, _redux.createStore)(_redux3.default /*, undefined, 
+	                                                          window.devToolsExtension && window.devToolsExtension()*/);
 
 /***/ },
 /* 184 */
@@ -21277,6 +21278,15 @@
 	var SW_OFF = 0;
 	var SW_ON = 1;
 	var SW_WAIT = 2;
+	
+	var state = exports.state = {
+	  BTN_DOWN: 0,
+	  BTN_UP: 1,
+	  BTN_WAIT: 2,
+	  SW_OFF: 0,
+	  SW_ON: 1,
+	  SW_WAIT: 2
+	};
 	
 	var init = {
 	  buttons: [BTN_UP, BTN_UP, BTN_UP, BTN_UP],
@@ -21482,7 +21492,7 @@
 	      });
 	    case UPLOAD_PROGRESS:
 	      return _extends({}, state, {
-	        uploadStatus: 'Uploading file ' + next[state.uploadStatus]
+	        uploadStatus: 'Uploading file ' + next[state.uploadStatus.slice(-3)]
 	      });
 	    case UPLOAD_SUCC:
 	      return _extends({}, state, {
@@ -21713,7 +21723,6 @@
 	
 	socket.onmessage = function (event) {
 	  var data = JSON.parse(event.data);
-	  console.log(data);
 	  switch (data.type) {
 	    case TYPE_STATUS:
 	      switch (data.status) {
@@ -21737,7 +21746,7 @@
 	    case TYPE_INFO:
 	      switch (data.info) {
 	        case 'user_changed':
-	          if (data.user === 'Exotic') {
+	          if (data.user === config.nickname) {
 	            _store2.default.dispatch((0, _redux.fpgaAcquired)());
 	          } else if (data.user === null) {
 	            _store2.default.dispatch((0, _redux.fpgaReleased)());
@@ -21818,7 +21827,6 @@
 	    });
 	  },
 	  acquire: function acquire() {
-	    console.log('in acquire');
 	    send({
 	      type: TYPE_ACTION,
 	      action: 'acquire'
@@ -21949,6 +21957,8 @@
 	
 	var _socket2 = _interopRequireDefault(_socket);
 	
+	var _redux = __webpack_require__(184);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -21963,15 +21973,33 @@
 	var Buttons = (_dec = (0, _reactRedux.connect)(function (state) {
 	  return {
 	    status: state.buttons,
-	    occupied: state.occupied
+	    occupied: state.occupied,
+	    buttons: state.buttons
 	  };
 	}), _dec(_class = function (_React$Component) {
 	  _inherits(Buttons, _React$Component);
 	
 	  function Buttons() {
+	    var _Object$getPrototypeO;
+	
+	    var _temp, _this, _ret;
+	
 	    _classCallCheck(this, Buttons);
 	
-	    return _possibleConstructorReturn(this, Object.getPrototypeOf(Buttons).apply(this, arguments));
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+	
+	    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Buttons)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.getClickCallback = function (i) {
+	      if (!_this.props.occupied) return null;
+	      if (_this.props.buttons[i] === _redux.state.BTN_UP) {
+	        return _socket2.default.pressButton.bind(undefined, i);
+	      } else if (_this.props.buttons[i] === _redux.state.BTN_DOWN) {
+	        return _socket2.default.releaseButton.bind(undefined, i);
+	      } else {
+	        return null;
+	      }
+	    }, _temp), _possibleConstructorReturn(_this, _ret);
 	  }
 	
 	  _createClass(Buttons, [{
@@ -22001,8 +22029,7 @@
 	                style: { borderColor: occupied ? '#fff' : '#777' } },
 	              _react2.default.createElement('div', { id: 'button' + (i + 1),
 	                className: 'button',
-	                onMouseDown: _this2.props.occupied ? _socket2.default.pressButton.bind(undefined, i) : null,
-	                onMouseUp: _this2.props.occupied ? _socket2.default.releaseButton.bind(undefined, i) : null,
+	                onClick: _this2.getClickCallback(i),
 	                style: {
 	                  height: size[status[i]] * 2,
 	                  width: size[status[i]] * 2,
@@ -22151,7 +22178,7 @@
 	  startUpload: _redux.startUpload,
 	  uploadSucceed: _redux.uploadSucceed,
 	  uploadFail: _redux.uploadFail,
-	  updateUploadProgerss: _redux.updateUploadProgerss
+	  updateUploadProgress: _redux.updateUploadProgress
 	}), _dec(_class = function (_React$Component) {
 	  _inherits(Upload, _React$Component);
 	
@@ -22179,7 +22206,10 @@
 	      req.addEventListener("error", _this.props.uploadFail);
 	      req.addEventListener("loadend", _this.props.uploadSucceed);
 	      req.addEventListener("loadstart", _this.props.startUpload);
-	      req.addEventListener("progress", _this.props.updateUploadProgerss);
+	      req.addEventListener("progress", function () {
+	        console.log('in progress');
+	        _this.props.updateUploadProgress();
+	      });
 	      req.open('post', 'file');
 	      req.send(formData);
 	    }, _this.handleProgram = function () {
@@ -22212,7 +22242,7 @@
 	            { id: 'about_file' },
 	            _react2.default.createElement(
 	              'li',
-	              { id: 'path_for_file', style: { borderColor: color } },
+	              { id: 'path_for_file', style: { color: color, borderColor: color } },
 	              this.state.file && this.state.file.name || null
 	            ),
 	            _react2.default.createElement(
@@ -22351,6 +22381,10 @@
 	  $("#input_biu").val('');
 	};
 	
+	var handleKey = function handleKey(event) {
+	  if (event.keyCode === 13) handleClick();
+	};
+	
 	var Comment = function (_React$Component) {
 	  _inherits(Comment, _React$Component);
 	
@@ -22377,7 +22411,7 @@
 	          _react2.default.createElement(
 	            'li',
 	            { id: 'text' },
-	            _react2.default.createElement('input', { type: 'text', id: 'input_biu' })
+	            _react2.default.createElement('input', { type: 'text', id: 'input_biu', onKeyDown: handleKey })
 	          ),
 	          _react2.default.createElement(
 	            'li',
@@ -22595,6 +22629,14 @@
 	  _createClass(Video, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
+	      jwplayer('mediaspace').setup({
+	        'flashplayer': '/static/javascript/player.swf',
+	        'file': config.streamName,
+	        'streamer': config.streamUrl,
+	        'controlbar': 'bottom',
+	        'width': '640',
+	        'height': '360'
+	      });
 	
 	      $("danmu").danmu({
 	        height: 450, //弹幕区高度
@@ -22616,18 +22658,6 @@
 	      });
 	
 	      $('#danmu').danmu('danmuStart');
-	
-	      console.log(config.streamUrl);
-	      console.log(config.streamName);
-	
-	      jwplayer('mediaspace').setup({
-	        'flashplayer': '/static/javascript/player.swf',
-	        'file': config.streamName,
-	        'streamer': config.streamUrl,
-	        'controlbar': 'bottom',
-	        'width': '640',
-	        'height': '360'
-	      });
 	    }
 	  }, {
 	    key: 'render',

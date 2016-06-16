@@ -25,6 +25,15 @@ const SW_OFF = 0;
 const SW_ON = 1;
 const SW_WAIT = 2;
 
+export const state = {
+  BTN_DOWN: 0,
+  BTN_UP: 1,
+  BTN_WAIT: 2,
+  SW_OFF: 0,
+  SW_ON: 1,
+  SW_WAIT: 2
+};
+
 const init = {
   buttons: [BTN_UP, BTN_UP, BTN_UP, BTN_UP],
   switches: [SW_OFF, SW_OFF, SW_OFF, SW_OFF],
@@ -199,7 +208,7 @@ export default (state=init, action) => {
   case UPLOAD_PROGRESS:
     return {
       ...state,
-      uploadStatus: 'Uploading file ' + next[state.uploadStatus]
+      uploadStatus: 'Uploading file ' + next[state.uploadStatus.slice(-3)]
     };
   case UPLOAD_SUCC:
     return {

@@ -30,7 +30,6 @@ let lastComment;
 
 socket.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  console.log(data);
   switch (data.type) {
   case TYPE_STATUS:
     switch (data.status) {
@@ -54,7 +53,7 @@ socket.onmessage = (event) => {
   case TYPE_INFO:
     switch (data.info) {
     case 'user_changed':
-      if (data.user === 'Exotic') {
+      if (data.user === config.nickname) {
         store.dispatch(fpgaAcquired());
       } else if (data.user === null) {
         store.dispatch(fpgaReleased())
@@ -136,7 +135,6 @@ const remote = {
     });
   },
   acquire: () => {
-    console.log('in acquire');
     send({
       type: TYPE_ACTION,
       action: 'acquire'
