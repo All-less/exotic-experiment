@@ -44,6 +44,10 @@ class Upload extends React.Component {
     req.send(formData);
   };
 
+  handleProgram = () => {
+    // TODO
+  }
+
   render() {
     const color = this.props.occupied ? '#fff' : '#777';
     return (
@@ -64,13 +68,16 @@ class Upload extends React.Component {
             <li id="upload" className="click_button" onClick={this.handleUpload}
                 style={{
                   backgroundColor: color,
-                  borderColor: color
+                  borderColor: color,
+                  width: 218
                 }}>UPLOAD</li>
-            <li id="program" className="click_button"
+            {/*
+            <li id="program" className="click_button" onClick={this.handleProgram}
                 style={{
                   backgroundColor: color,
                   borderColor: color
                 }}>PROGRAM</li>
+            */}
           </ul>
         </div>
       </div>

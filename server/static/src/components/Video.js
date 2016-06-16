@@ -25,12 +25,13 @@ class Video extends React.Component {
     
     $('#danmu').danmu('danmuStart');
     
-    console.log(config.rtmp);
+    console.log(config.streamUrl);
+    console.log(config.streamName);
     
     jwplayer('mediaspace').setup({
       'flashplayer': '/static/javascript/player.swf',
-      'file': '0',
-      'streamer': config.rtmp,
+      'file': config.streamName,
+      'streamer': config.streamUrl,
       'controlbar': 'bottom',
       'width': '640',
       'height': '360'

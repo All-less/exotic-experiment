@@ -63,11 +63,11 @@
 	
 	var _reactRedux = __webpack_require__(160);
 	
-	var _store = __webpack_require__(179);
+	var _store = __webpack_require__(183);
 	
 	var _store2 = _interopRequireDefault(_store);
 	
-	var _App = __webpack_require__(181);
+	var _App = __webpack_require__(185);
 	
 	var _App2 = _interopRequireDefault(_App);
 	
@@ -240,12 +240,40 @@
 	// shim for using process in browser
 	
 	var process = module.exports = {};
+	
+	// cached from whatever global is present so that test runners that stub it
+	// don't break things.  But we need to wrap it in a try catch in case it is
+	// wrapped in strict mode code which doesn't define any globals.  It's inside a
+	// function because try/catches deoptimize in certain engines.
+	
+	var cachedSetTimeout;
+	var cachedClearTimeout;
+	
+	(function () {
+	  try {
+	    cachedSetTimeout = setTimeout;
+	  } catch (e) {
+	    cachedSetTimeout = function () {
+	      throw new Error('setTimeout is not defined');
+	    }
+	  }
+	  try {
+	    cachedClearTimeout = clearTimeout;
+	  } catch (e) {
+	    cachedClearTimeout = function () {
+	      throw new Error('clearTimeout is not defined');
+	    }
+	  }
+	} ())
 	var queue = [];
 	var draining = false;
 	var currentQueue;
 	var queueIndex = -1;
 	
 	function cleanUpNextTick() {
+	    if (!draining || !currentQueue) {
+	        return;
+	    }
 	    draining = false;
 	    if (currentQueue.length) {
 	        queue = currentQueue.concat(queue);
@@ -261,7 +289,7 @@
 	    if (draining) {
 	        return;
 	    }
-	    var timeout = setTimeout(cleanUpNextTick);
+	    var timeout = cachedSetTimeout(cleanUpNextTick);
 	    draining = true;
 	
 	    var len = queue.length;
@@ -278,7 +306,7 @@
 	    }
 	    currentQueue = null;
 	    draining = false;
-	    clearTimeout(timeout);
+	    cachedClearTimeout(timeout);
 	}
 	
 	process.nextTick = function (fun) {
@@ -290,7 +318,7 @@
 	    }
 	    queue.push(new Item(fun, args));
 	    if (queue.length === 1 && !draining) {
-	        setTimeout(drainQueue, 0);
+	        cachedSetTimeout(drainQueue, 0);
 	    }
 	};
 	
@@ -19829,15 +19857,15 @@
 	
 	var _wrapActionCreators2 = _interopRequireDefault(_wrapActionCreators);
 	
-	var _isPlainObject = __webpack_require__(168);
+	var _isPlainObject = __webpack_require__(177);
 	
 	var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 	
-	var _hoistNonReactStatics = __webpack_require__(177);
+	var _hoistNonReactStatics = __webpack_require__(181);
 	
 	var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
 	
-	var _invariant = __webpack_require__(178);
+	var _invariant = __webpack_require__(182);
 	
 	var _invariant2 = _interopRequireDefault(_invariant);
 	
@@ -20927,6 +20955,164 @@
 
 /***/ },
 /* 177 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var getPrototype = __webpack_require__(178),
+	    isHostObject = __webpack_require__(179),
+	    isObjectLike = __webpack_require__(180);
+	
+	/** `Object#toString` result references. */
+	var objectTag = '[object Object]';
+	
+	/** Used for built-in method references. */
+	var objectProto = Object.prototype;
+	
+	/** Used to resolve the decompiled source of functions. */
+	var funcToString = Function.prototype.toString;
+	
+	/** Used to check objects for own properties. */
+	var hasOwnProperty = objectProto.hasOwnProperty;
+	
+	/** Used to infer the `Object` constructor. */
+	var objectCtorString = funcToString.call(Object);
+	
+	/**
+	 * Used to resolve the
+	 * [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+	 * of values.
+	 */
+	var objectToString = objectProto.toString;
+	
+	/**
+	 * Checks if `value` is a plain object, that is, an object created by the
+	 * `Object` constructor or one with a `[[Prototype]]` of `null`.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 0.8.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a plain object,
+	 *  else `false`.
+	 * @example
+	 *
+	 * function Foo() {
+	 *   this.a = 1;
+	 * }
+	 *
+	 * _.isPlainObject(new Foo);
+	 * // => false
+	 *
+	 * _.isPlainObject([1, 2, 3]);
+	 * // => false
+	 *
+	 * _.isPlainObject({ 'x': 0, 'y': 0 });
+	 * // => true
+	 *
+	 * _.isPlainObject(Object.create(null));
+	 * // => true
+	 */
+	function isPlainObject(value) {
+	  if (!isObjectLike(value) ||
+	      objectToString.call(value) != objectTag || isHostObject(value)) {
+	    return false;
+	  }
+	  var proto = getPrototype(value);
+	  if (proto === null) {
+	    return true;
+	  }
+	  var Ctor = hasOwnProperty.call(proto, 'constructor') && proto.constructor;
+	  return (typeof Ctor == 'function' &&
+	    Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString);
+	}
+	
+	module.exports = isPlainObject;
+
+
+/***/ },
+/* 178 */
+/***/ function(module, exports) {
+
+	/* Built-in method references for those with the same name as other `lodash` methods. */
+	var nativeGetPrototype = Object.getPrototypeOf;
+	
+	/**
+	 * Gets the `[[Prototype]]` of `value`.
+	 *
+	 * @private
+	 * @param {*} value The value to query.
+	 * @returns {null|Object} Returns the `[[Prototype]]`.
+	 */
+	function getPrototype(value) {
+	  return nativeGetPrototype(Object(value));
+	}
+	
+	module.exports = getPrototype;
+
+
+/***/ },
+/* 179 */
+/***/ function(module, exports) {
+
+	/**
+	 * Checks if `value` is a host object in IE < 9.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
+	 */
+	function isHostObject(value) {
+	  // Many host objects are `Object` objects that can coerce to strings
+	  // despite having improperly defined `toString` methods.
+	  var result = false;
+	  if (value != null && typeof value.toString != 'function') {
+	    try {
+	      result = !!(value + '');
+	    } catch (e) {}
+	  }
+	  return result;
+	}
+	
+	module.exports = isHostObject;
+
+
+/***/ },
+/* 180 */
+/***/ function(module, exports) {
+
+	/**
+	 * Checks if `value` is object-like. A value is object-like if it's not `null`
+	 * and has a `typeof` result of "object".
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 4.0.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+	 * @example
+	 *
+	 * _.isObjectLike({});
+	 * // => true
+	 *
+	 * _.isObjectLike([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isObjectLike(_.noop);
+	 * // => false
+	 *
+	 * _.isObjectLike(null);
+	 * // => false
+	 */
+	function isObjectLike(value) {
+	  return !!value && typeof value == 'object';
+	}
+	
+	module.exports = isObjectLike;
+
+
+/***/ },
+/* 181 */
 /***/ function(module, exports) {
 
 	/**
@@ -20955,14 +21141,16 @@
 	    arity: true
 	};
 	
-	module.exports = function hoistNonReactStatics(targetComponent, sourceComponent) {
-	    var keys = Object.getOwnPropertyNames(sourceComponent);
-	    for (var i=0; i<keys.length; ++i) {
-	        if (!REACT_STATICS[keys[i]] && !KNOWN_STATICS[keys[i]]) {
-	            try {
-	                targetComponent[keys[i]] = sourceComponent[keys[i]];
-	            } catch (error) {
+	module.exports = function hoistNonReactStatics(targetComponent, sourceComponent, customStatics) {
+	    if (typeof sourceComponent !== 'string') { // don't hoist over string (html) components
+	        var keys = Object.getOwnPropertyNames(sourceComponent);
+	        for (var i = 0; i < keys.length; ++i) {
+	            if (!REACT_STATICS[keys[i]] && !KNOWN_STATICS[keys[i]] && (!customStatics || !customStatics[keys[i]])) {
+	                try {
+	                    targetComponent[keys[i]] = sourceComponent[keys[i]];
+	                } catch (error) {
 	
+	                }
 	            }
 	        }
 	    }
@@ -20972,7 +21160,7 @@
 
 
 /***/ },
-/* 178 */
+/* 182 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -21030,7 +21218,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5)))
 
 /***/ },
-/* 179 */
+/* 183 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21041,17 +21229,16 @@
 	
 	var _redux = __webpack_require__(166);
 	
-	var _redux2 = __webpack_require__(180);
+	var _redux2 = __webpack_require__(184);
 	
 	var _redux3 = _interopRequireDefault(_redux2);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = (0, _redux.createStore)(_redux3.default /*, undefined, 
-	                                                          window.devToolsExtension && window.devToolsExtension()*/);
+	exports.default = (0, _redux.createStore)(_redux3.default, undefined, window.devToolsExtension && window.devToolsExtension());
 
 /***/ },
-/* 180 */
+/* 184 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -21090,15 +21277,6 @@
 	var SW_OFF = 0;
 	var SW_ON = 1;
 	var SW_WAIT = 2;
-	
-	var state = exports.state = {
-	  BTN_DOWN: 0,
-	  BTN_UP: 1,
-	  BTN_WAIT: 2,
-	  SW_OFF: 0,
-	  SW_ON: 1,
-	  SW_WAIT: 2
-	};
 	
 	var init = {
 	  buttons: [BTN_UP, BTN_UP, BTN_UP, BTN_UP],
@@ -21304,7 +21482,7 @@
 	      });
 	    case UPLOAD_PROGRESS:
 	      return _extends({}, state, {
-	        uploadStatus: 'Uploading file ' + next[state.uploadStatus.slice(-3)]
+	        uploadStatus: 'Uploading file ' + next[state.uploadStatus]
 	      });
 	    case UPLOAD_SUCC:
 	      return _extends({}, state, {
@@ -21320,7 +21498,7 @@
 	};
 
 /***/ },
-/* 181 */
+/* 185 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21335,15 +21513,15 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _Header = __webpack_require__(182);
+	var _Header = __webpack_require__(186);
 	
 	var _Header2 = _interopRequireDefault(_Header);
 	
-	var _Panel = __webpack_require__(184);
+	var _Panel = __webpack_require__(188);
 	
 	var _Panel2 = _interopRequireDefault(_Panel);
 	
-	var _Video = __webpack_require__(191);
+	var _Video = __webpack_require__(195);
 	
 	var _Video2 = _interopRequireDefault(_Video);
 	
@@ -21387,7 +21565,7 @@
 	exports.default = App;
 
 /***/ },
-/* 182 */
+/* 186 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21406,9 +21584,9 @@
 	
 	var _reactRedux = __webpack_require__(160);
 	
-	var _redux = __webpack_require__(180);
+	var _redux = __webpack_require__(184);
 	
-	var _socket = __webpack_require__(183);
+	var _socket = __webpack_require__(187);
 	
 	var _socket2 = _interopRequireDefault(_socket);
 	
@@ -21504,7 +21682,7 @@
 	exports.default = Header;
 
 /***/ },
-/* 183 */
+/* 187 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21513,11 +21691,11 @@
 	  value: true
 	});
 	
-	var _store = __webpack_require__(179);
+	var _store = __webpack_require__(183);
 	
 	var _store2 = _interopRequireDefault(_store);
 	
-	var _redux = __webpack_require__(180);
+	var _redux = __webpack_require__(184);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -21535,6 +21713,7 @@
 	
 	socket.onmessage = function (event) {
 	  var data = JSON.parse(event.data);
+	  console.log(data);
 	  switch (data.type) {
 	    case TYPE_STATUS:
 	      switch (data.status) {
@@ -21558,7 +21737,7 @@
 	    case TYPE_INFO:
 	      switch (data.info) {
 	        case 'user_changed':
-	          if (data.user === config.nickname) {
+	          if (data.user === 'Exotic') {
 	            _store2.default.dispatch((0, _redux.fpgaAcquired)());
 	          } else if (data.user === null) {
 	            _store2.default.dispatch((0, _redux.fpgaReleased)());
@@ -21639,6 +21818,7 @@
 	    });
 	  },
 	  acquire: function acquire() {
+	    console.log('in acquire');
 	    send({
 	      type: TYPE_ACTION,
 	      action: 'acquire'
@@ -21655,7 +21835,7 @@
 	exports.default = remote;
 
 /***/ },
-/* 184 */
+/* 188 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21674,27 +21854,27 @@
 	
 	var _reactRedux = __webpack_require__(160);
 	
-	var _Buttons = __webpack_require__(185);
+	var _Buttons = __webpack_require__(189);
 	
 	var _Buttons2 = _interopRequireDefault(_Buttons);
 	
-	var _Switches = __webpack_require__(186);
+	var _Switches = __webpack_require__(190);
 	
 	var _Switches2 = _interopRequireDefault(_Switches);
 	
-	var _Upload = __webpack_require__(187);
+	var _Upload = __webpack_require__(191);
 	
 	var _Upload2 = _interopRequireDefault(_Upload);
 	
-	var _KeyStroke = __webpack_require__(188);
+	var _KeyStroke = __webpack_require__(192);
 	
 	var _KeyStroke2 = _interopRequireDefault(_KeyStroke);
 	
-	var _Comment = __webpack_require__(189);
+	var _Comment = __webpack_require__(193);
 	
 	var _Comment2 = _interopRequireDefault(_Comment);
 	
-	var _Setting = __webpack_require__(190);
+	var _Setting = __webpack_require__(194);
 	
 	var _Setting2 = _interopRequireDefault(_Setting);
 	
@@ -21746,7 +21926,7 @@
 	exports.default = Panel;
 
 /***/ },
-/* 185 */
+/* 189 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21765,11 +21945,9 @@
 	
 	var _reactRedux = __webpack_require__(160);
 	
-	var _socket = __webpack_require__(183);
+	var _socket = __webpack_require__(187);
 	
 	var _socket2 = _interopRequireDefault(_socket);
-	
-	var _redux = __webpack_require__(180);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -21785,33 +21963,15 @@
 	var Buttons = (_dec = (0, _reactRedux.connect)(function (state) {
 	  return {
 	    status: state.buttons,
-	    occupied: state.occupied,
-	    buttons: state.buttons
+	    occupied: state.occupied
 	  };
 	}), _dec(_class = function (_React$Component) {
 	  _inherits(Buttons, _React$Component);
 	
 	  function Buttons() {
-	    var _Object$getPrototypeO;
-	
-	    var _temp, _this, _ret;
-	
 	    _classCallCheck(this, Buttons);
 	
-	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	      args[_key] = arguments[_key];
-	    }
-	
-	    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Buttons)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.getClickCallback = function (i) {
-	      if (!_this.props.occupied) return null;
-	      if (_this.props.buttons[i] === _redux.state.BTN_UP) {
-	        return _socket2.default.pressButton.bind(undefined, i);
-	      } else if (_this.props.buttons[i] === _redux.state.BTN_DOWN) {
-	        return _socket2.default.releaseButton.bind(undefined, i);
-	      } else {
-	        return null;
-	      }
-	    }, _temp), _possibleConstructorReturn(_this, _ret);
+	    return _possibleConstructorReturn(this, Object.getPrototypeOf(Buttons).apply(this, arguments));
 	  }
 	
 	  _createClass(Buttons, [{
@@ -21841,7 +22001,8 @@
 	                style: { borderColor: occupied ? '#fff' : '#777' } },
 	              _react2.default.createElement('div', { id: 'button' + (i + 1),
 	                className: 'button',
-	                onClick: _this2.getClickCallback(i),
+	                onMouseDown: _this2.props.occupied ? _socket2.default.pressButton.bind(undefined, i) : null,
+	                onMouseUp: _this2.props.occupied ? _socket2.default.releaseButton.bind(undefined, i) : null,
 	                style: {
 	                  height: size[status[i]] * 2,
 	                  width: size[status[i]] * 2,
@@ -21861,7 +22022,7 @@
 	exports.default = Buttons;
 
 /***/ },
-/* 186 */
+/* 190 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21880,7 +22041,7 @@
 	
 	var _reactRedux = __webpack_require__(160);
 	
-	var _socket = __webpack_require__(183);
+	var _socket = __webpack_require__(187);
 	
 	var _socket2 = _interopRequireDefault(_socket);
 	
@@ -21952,7 +22113,7 @@
 	exports.default = Switches;
 
 /***/ },
-/* 187 */
+/* 191 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21971,7 +22132,7 @@
 	
 	var _reactRedux = __webpack_require__(160);
 	
-	var _redux = __webpack_require__(180);
+	var _redux = __webpack_require__(184);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -21990,7 +22151,7 @@
 	  startUpload: _redux.startUpload,
 	  uploadSucceed: _redux.uploadSucceed,
 	  uploadFail: _redux.uploadFail,
-	  updateUploadProgress: _redux.updateUploadProgress
+	  updateUploadProgerss: _redux.updateUploadProgerss
 	}), _dec(_class = function (_React$Component) {
 	  _inherits(Upload, _React$Component);
 	
@@ -22018,12 +22179,11 @@
 	      req.addEventListener("error", _this.props.uploadFail);
 	      req.addEventListener("loadend", _this.props.uploadSucceed);
 	      req.addEventListener("loadstart", _this.props.startUpload);
-	      req.addEventListener("progress", function () {
-	        console.log('in progress');
-	        _this.props.updateUploadProgress();
-	      });
+	      req.addEventListener("progress", _this.props.updateUploadProgerss);
 	      req.open('post', 'file');
 	      req.send(formData);
+	    }, _this.handleProgram = function () {
+	      // TODO
 	    }, _temp), _possibleConstructorReturn(_this, _ret);
 	  }
 	
@@ -22052,7 +22212,7 @@
 	            { id: 'about_file' },
 	            _react2.default.createElement(
 	              'li',
-	              { id: 'path_for_file', style: { color: color, borderColor: color } },
+	              { id: 'path_for_file', style: { borderColor: color } },
 	              this.state.file && this.state.file.name || null
 	            ),
 	            _react2.default.createElement(
@@ -22072,18 +22232,10 @@
 	              { id: 'upload', className: 'click_button', onClick: this.handleUpload,
 	                style: {
 	                  backgroundColor: color,
-	                  borderColor: color
+	                  borderColor: color,
+	                  width: 218
 	                } },
 	              'UPLOAD'
-	            ),
-	            _react2.default.createElement(
-	              'li',
-	              { id: 'program', className: 'click_button',
-	                style: {
-	                  backgroundColor: color,
-	                  borderColor: color
-	                } },
-	              'PROGRAM'
 	            )
 	          )
 	        )
@@ -22096,7 +22248,7 @@
 	exports.default = Upload;
 
 /***/ },
-/* 188 */
+/* 192 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22159,7 +22311,7 @@
 	exports.default = KeyStroke;
 
 /***/ },
-/* 189 */
+/* 193 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22174,7 +22326,7 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _socket = __webpack_require__(183);
+	var _socket = __webpack_require__(187);
 	
 	var _socket2 = _interopRequireDefault(_socket);
 	
@@ -22197,10 +22349,6 @@
 	    time: $('#danmu').data("nowTime") + 5
 	  });
 	  $("#input_biu").val('');
-	};
-	
-	var handleKey = function handleKey(event) {
-	  if (event.keyCode === 13) handleClick();
 	};
 	
 	var Comment = function (_React$Component) {
@@ -22229,7 +22377,7 @@
 	          _react2.default.createElement(
 	            'li',
 	            { id: 'text' },
-	            _react2.default.createElement('input', { type: 'text', id: 'input_biu', onKeyDown: handleKey })
+	            _react2.default.createElement('input', { type: 'text', id: 'input_biu' })
 	          ),
 	          _react2.default.createElement(
 	            'li',
@@ -22247,7 +22395,7 @@
 	exports.default = Comment;
 
 /***/ },
-/* 190 */
+/* 194 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22412,7 +22560,7 @@
 	exports.default = Setting;
 
 /***/ },
-/* 191 */
+/* 195 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22447,14 +22595,6 @@
 	  _createClass(Video, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      jwplayer('mediaspace').setup({
-	        'flashplayer': '/static/javascript/player.swf',
-	        'file': config.streamName,
-	        'streamer': config.streamUrl,
-	        'controlbar': 'bottom',
-	        'width': '640',
-	        'height': '360'
-	      });
 	
 	      $("danmu").danmu({
 	        height: 450, //弹幕区高度
@@ -22476,6 +22616,18 @@
 	      });
 	
 	      $('#danmu').danmu('danmuStart');
+	
+	      console.log(config.streamUrl);
+	      console.log(config.streamName);
+	
+	      jwplayer('mediaspace').setup({
+	        'flashplayer': '/static/javascript/player.swf',
+	        'file': config.streamName,
+	        'streamer': config.streamUrl,
+	        'controlbar': 'bottom',
+	        'width': '640',
+	        'height': '360'
+	      });
 	    }
 	  }, {
 	    key: 'render',
