@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-__author__ = 'lmzqwer2'
-
 import config
 import tornado.web
-from models import User
 
 
 class BaseHttpHandler(tornado.web.RequestHandler):
