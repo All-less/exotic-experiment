@@ -11,9 +11,9 @@ import logconfig
 path = lambda root,*a: os.path.join(root, *a)
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
-define("port", default=8888, help="run on the given port", type=int)
+define("port", default=6060, help="run on the given port", type=int)
 define("config", default=None, help="tornado config file")
-define("debug", default=False, help="debug mode")
+define("debug", default=True, help="debug mode")
 tornado.options.parse_command_line()
 
 MEDIA_ROOT = path(ROOT, 'media')
@@ -45,7 +45,7 @@ settings['cookie_secret'] = "your-cookie-secret"
 settings['xsrf_cookies'] = True
 settings['template_loader'] = tornado.template.Loader(TEMPLATE_ROOT)
 
-SYSLOG_TAG = "boilerplate"
+SYSLOG_TAG = "exotic_experiment"
 SYSLOG_FACILITY = logging.handlers.SysLogHandler.LOG_LOCAL2
 
 # See PEP 391 and logconfig for formatting help.  Each section of LOGGERS
@@ -55,7 +55,7 @@ SYSLOG_FACILITY = logging.handlers.SysLogHandler.LOG_LOCAL2
 # unless propagate: True is set.
 LOGGERS = {
    'loggers': {
-        'boilerplate': {},
+        'exotic_experiment': {},
     },
 }
 

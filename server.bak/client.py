@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import socket, select, string, sys, json, base64, threading, httplib2
+import socket
+import select
+import string
+import sys
+import json
+import base64
+import threading
+import httplib2
 
 from config import Type, Action, Status, Info
 
@@ -36,7 +43,9 @@ Connected to remote host. Start sending messages
 
 
 class ServerSocket:
+
     class FileDownload(threading.Thread):
+
         def __init__(self, host, webport, link, filetype, callback):
             threading.Thread.__init__(self)
             self.link = 'http://%s:%d%s%s' % (host, webport, link, filetype)
@@ -71,7 +80,8 @@ class ServerSocket:
         self.send_Status("bit_file_programmed", size=len(content))
 
     def download(self, filetype):
-        filethread = self.FileDownload(self.host, self.webport, self.filelink, filetype, self.downloadend)
+        filethread = self.FileDownload(
+            self.host, self.webport, self.filelink, filetype, self.downloadend)
         filethread.start()
 
     def send(self, message):
@@ -93,7 +103,8 @@ class ServerSocket:
             device_id = self.device_id
         if auth_key == None:
             auth_key = self.auth_key
-        self.send_Action(Action.authorize, device_id=device_id, auth_key=auth_key)
+        self.send_Action(
+            Action.authorize, device_id=device_id, auth_key=auth_key)
 
     def send_Status(self, message, **kw):
         kw['status'] = message

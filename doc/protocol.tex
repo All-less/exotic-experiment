@@ -1,0 +1,484 @@
+%!TEX program=xelatex
+\documentclass{article}
+
+\input{protocol.sty}
+
+\title{接口文档1.1}
+\author{\today}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+接口指服务器端、树莓派端与浏览器端之间进行通信的协议。三者间通过WebSocket技术进行双向通信，其中的数据通过json对象进行传递，具体规定如下。
+
+\section{数据分类}
+
+传输的数据分为四类：
+\begin{enumerate}
+\item 对服务器发起的动作信息，例如申请可用FPGA、树莓派申请认证等。该类信息中主要字段为\texttt{action}。
+\item 对树莓派发起的操作信息，例如打开开关、按下按钮等。该类信息中主要字段为\texttt{operation}。
+\item 对于发起的动作返回的信息，例如确认上传成功、文件烧录失败等。该类信息中主要字段为\texttt{status}。
+\item 由于状态变化而给出的信息，例如树莓派连接断开等。该类信息中主要字段为\texttt{info}。
+\end{enumerate}
+
+因此所有数据包中有\texttt{type}字段，用于区分当前数据包的类型。其中对应关系如下：
+\begin{lstlisting}[style=json]
+{
+  0: "action",
+  1: "status",
+  2: "operation",
+  3: "info"
+}
+\end{lstlisting}
+
+\section{\texttt{action}}
+
+\subsection{\texttt{acquire}}
+\label{act:acquire}
+
+\noindent\textbf{功能}：用于申请可用的FPGA设备。
+
+\noindent\textbf{说明}：由浏览器向服务器发出。
+
+\noindent\textbf{返回}：服务器会返回\texttt{\nameref{info:user_changed}}作为反馈，同时会将该信息广播给所有连接的服务器。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 0,
+  action: "acquire"
+}
+\end{lstlisting}
+
+\subsection{\texttt{release}}
+\label{act:release}
+
+\noindent\textbf{功能}：用于释放当前控制的FPGA设备。
+
+\noindent\textbf{说明}：由浏览器向服务器发出。
+
+\noindent\textbf{返回}：服务器会返回\texttt{\nameref{info:user_changed}}作为反馈，同时会将该信息广播给所有连接的服务器。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 0,
+  action: "release"
+}
+\end{lstlisting}
+
+\subsection{\texttt{authorize}}
+\label{act:authorize}
+
+\noindent\textbf{功能}：树莓派申请进行身份验证。
+
+\noindent\textbf{说明}：由树莓派向服务器发出。其中\texttt{auth\_key}字段可通过API进行查询。
+
+\noindent\textbf{返回}：
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 0,
+  action: "authorize",
+  device_id: "fpga",
+  auth_key: "xxxxxxxxx"
+}
+\end{lstlisting}
+
+\subsection{\texttt{broadcast}}
+\label{act:broadcast}
+
+\noindent\textbf{功能}：用于请求服务器将消息进行转发。
+
+\noindent\textbf{说明}：由浏览器向服务器发出。
+
+\noindent\textbf{返回}：无
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 0,
+  action: "broadcast",
+  content: "xxxxxxxx"
+}
+\end{lstlisting}
+
+\section{\texttt{status}}
+
+\subsection{\texttt{authorized}}
+\label{status:authorized}
+
+\noindent\textbf{功能}：用于表明树莓派验证通过。
+
+\noindent\textbf{说明}：由服务器向树莓派发出。同时返回的数据中还会有以下字段：
+\begin{itemize}
+\item \texttt{index}：当前树莓派分配的索引号
+\item \texttt{filelink}：树莓派下载文件时所用的连接
+\item \texttt{webport}：服务器提供下载文件所使用的web端口号 
+\item \texttt{rtmp\_host}：rtmp服务器地址
+\item \texttt{rtmp\_push\_port}：rtmp视频流推送端口
+\item \texttt{stream\_name}：视频流的名称
+\end{itemize}
+
+\noindent\textbf{返回}：无。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 1,
+  status: "authorized",
+  index: 0,
+  filelink: "/live/0/file",
+  webport: 9000,
+  rtmp_host: "127.0.0.1",
+  rtmp_push_port: 1935,
+  stream_name: "0"
+}
+\end{lstlisting}
+
+\subsection{\texttt{auth\_failed}}
+\label{status:auth_failed}
+
+\noindent\textbf{功能}：用于表明树莓派验证失败。
+
+\noindent\textbf{说明}：由服务器向树莓派发出。
+
+\noindent\textbf{返回}：无。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 1,
+  status: "auth_failed"
+}
+\end{lstlisting}
+
+\subsection{\texttt{key\_pressed}}
+\label{status:key_pressed}
+
+\noindent\textbf{功能}：用于表明树莓派成功输入按键信号。
+
+\noindent\textbf{说明}：由树莓派向浏览器发出。该信息会被转发给所有观看该设备的浏览器页面。数据包还含有\texttt{key\_code}字段用于标示所按下的按键。
+
+\noindent\textbf{返回}：无。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 1,
+  status: "key_pressed",
+  key_code: 20
+}
+\end{lstlisting}
+
+\subsection{\texttt{switch\_on}}
+\label{status:switch_on}
+
+\noindent\textbf{功能}：用于表明树莓派成功输入打开开关的信号。
+
+\noindent\textbf{说明}：由树莓派向浏览器发出。该信息会被转发给所有观看该设备的浏览器页面。数据包还含有\texttt{id}字段用于标示开关的编号。
+
+\noindent\textbf{返回}：无。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 1,
+  status: "switch_on",
+  id: 1
+}
+\end{lstlisting}
+
+\subsection{\texttt{switch\_off}}
+\label{status:switch_off}
+
+\noindent\textbf{功能}：用于表明树莓派成功输入关闭开关的信号。
+
+\noindent\textbf{说明}：由树莓派向浏览器发出。该信息会被转发给所有观看该设备的浏览器页面。数据包还含有\texttt{id}字段用于标示开关的编号。
+
+\noindent\textbf{返回}：无。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 1,
+  status: "switch_off",
+  id: 1
+}
+\end{lstlisting}
+
+\subsection{\texttt{button\_pressed}}
+\label{status:button_pressed}
+
+\noindent\textbf{功能}：用于表明树莓派成功输入按下按钮的信号。
+
+\noindent\textbf{说明}：由树莓派向浏览器发出。该信息会被转发给所有观看该设备的浏览器页面。数据包还含有\texttt{id}字段用于标示按钮的编号。
+
+\noindent\textbf{返回}：无。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 1,
+  status: "button_pressed",
+  id: 1
+}
+\end{lstlisting}
+
+\subsection{\texttt{button\_released}}
+\label{status:button_released}
+
+\noindent\textbf{功能}：用于表明树莓派成功输入松开按钮的信号。
+
+\noindent\textbf{说明}：由树莓派向浏览器发出。该信息会被转发给所有观看该设备的浏览器页面。数据包还含有\texttt{id}字段用于标示按钮的编号。
+
+\noindent\textbf{返回}：无。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 1,
+  status: "button_released",
+  id: 1
+}
+\end{lstlisting}
+
+\subsection{\texttt{file\_uploaded}}
+\label{status:file_uploaded}
+
+\noindent\textbf{功能}：用于表示bit文件上传成功。
+
+\noindent\textbf{说明}：由服务器向浏览器和服务器发出。数据包还含有名为\texttt{file}的json对象，其中有以下字段：
+\begin{itemize}
+\item \texttt{type}：表明当前文件的类型，可能的取值为bit和disk
+\item \texttt{name}：代表上传的文件名
+\item \texttt{size}：代表上传文件的大小
+\end{itemize}
+
+\noindent\textbf{返回}：无。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 1,
+  status: "bit_file_uploaded",
+  file: 
+  {
+    type: "bit",
+    name: "file.bit",
+    size: 1000
+  }
+}
+\end{lstlisting}
+
+\subsection{\texttt{bit\_file\_programmed}}
+\label{status:bit_file_programmed}
+
+\noindent\textbf{功能}：用于表示bit文件下载成功。
+
+\noindent\textbf{说明}：由树莓派向浏览器发出。
+
+\noindent\textbf{返回}：无。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 1,
+  status: "bit_file_programmed"
+}
+\end{lstlisting}
+
+\subsection{\texttt{disk\_file\_downloaded}}
+\label{status:disk_file_downloaded}
+
+\noindent\textbf{功能}：用于表示树莓派下载disk文件成功。
+
+\noindent\textbf{说明}：由树莓派向浏览器发出。
+
+\noindent\textbf{返回}：无。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 1,
+  status: "disk_file_downloaded"
+}
+\end{lstlisting}
+
+\section{\texttt{operation}}
+
+\subsection{\texttt{1}（键盘按键）}
+\label{op:key}
+
+\noindent\textbf{功能}：用于模拟键盘被按下。
+
+\noindent\textbf{说明}：由浏览器向树莓派发出。数据包还含有\texttt{key\_code}字段用于标示所按下的按键。
+
+\noindent\textbf{返回}：树莓派会返回\texttt{\nameref{status:key_pressed}}作为确认。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 2,
+  operation: 1,
+  key_code: 20
+}
+\end{lstlisting}
+
+\subsection{\texttt{2}（打开开关）}
+\label{op:switch_on}
+
+\noindent\textbf{功能}：用于模拟开关被打开。
+
+\noindent\textbf{说明}：由浏览器向树莓派发出。数据包还含有\texttt{id}字段用于标示开关的编号。
+
+\noindent\textbf{返回}：树莓派会返回\texttt{\nameref{status:switch_on}}作为确认。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 2,
+  operation: 2,
+  id: 1
+}
+\end{lstlisting}
+
+\subsection{\texttt{3}（关闭开关）}
+\label{op:switch_off}
+
+\noindent\textbf{功能}：用于模拟开关被关闭。
+
+\noindent\textbf{说明}：由浏览器向树莓派发出。数据包还含有\texttt{id}字段用于标示开关的编号。
+
+\noindent\textbf{返回}：树莓派会返回\texttt{\nameref{status:switch_off}}作为确认。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 2,
+  operation: 3,
+  id: 1
+}
+\end{lstlisting}
+
+\subsection{\texttt{4}（按下按钮）}
+\label{op:press_button}
+
+\noindent\textbf{功能}：用于模拟按钮被按下。
+
+\noindent\textbf{说明}：由浏览器向树莓派发出。数据包还含有\texttt{id}字段用于标示开关的编号。
+
+\noindent\textbf{返回}：树莓派会返回\texttt{\nameref{status:button_pressed}}作为确认。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 2,
+  operation: 4,
+  id: 1
+}
+\end{lstlisting}
+
+\subsection{\texttt{5}（松开按钮）}
+\label{op:release_button}
+
+\noindent\textbf{功能}：用于模拟按钮被松开
+
+\noindent\textbf{说明}：由浏览器向树莓派发出。数据包还含有\texttt{id}字段用于标示开关的编号。
+
+\noindent\textbf{返回}：树莓派会返回\texttt{\nameref{status:button_released}}作为确认。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 2,
+  operation: 5,
+  id: 1
+}
+\end{lstlisting}
+
+\section{\texttt{info}}
+
+\subsection{\texttt{user\_changed}}
+\label{info:user_changed}
+
+\noindent\textbf{功能}：用于表示树莓派的操作者发生了变更。
+
+\noindent\textbf{说明}：由服务器向浏览器发出，同时也会发送给树莓派。数据包还含有\texttt{user}字段用于标示当前的使用者，该字段可为空（\texttt{null}），表示当前无人进行操作。
+
+\noindent\textbf{返回}：
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 3,
+  user: null
+}
+\end{lstlisting}
+
+\subsection{\texttt{fpga\_disconnected}}
+\label{info:fpga_disconnected}
+
+\noindent\textbf{功能}：用于表示树莓派的连接断开。
+
+\noindent\textbf{说明}：由服务器向浏览器发出。
+
+\noindent\textbf{返回}：无。
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 3,
+  info: "fpga_disconnected"
+}
+\end{lstlisting}
+
+\subsection{\texttt{broadcast}}
+\label{info:broadcast}
+
+\noindent\textbf{功能}：用于广播服务器接收到的消息。
+
+\noindent\textbf{说明}：由服务器向浏览器发出。
+
+\noindent\textbf{返回}：无
+
+\noindent\textbf{示例}：
+
+\begin{lstlisting}[style=json]
+{
+  type: 3,
+  info: "broadcast",
+  timestamp: "1461564393",
+  nickname: "name",
+  content: "xxxxxxxx"
+}
+\end{lstlisting}
+
+\end{document}

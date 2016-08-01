@@ -1,0 +1,75 @@
+\usepackage{ctex}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage[colorlinks=true,linkcolor=blue]{hyperref}
+\usepackage{xcolor}
+\usepackage{framed}
+
+\definecolor{shadecolor}{rgb}{0.92,0.92,0.92}
+
+\lstset{
+	basicstyle=\small\ttfamily,
+	xleftmargin=2em,
+	framexleftmargin=1.5em,
+	% columns=flexible,
+	breaklines=true
+}
+
+\lstdefinestyle{mycstyle}{
+	language=C++,
+	basicstyle=\ttfamily,
+	tabsize=4,
+	keywordstyle=\color[rgb]{0,0,1}\ttfamily,
+	stringstyle=\color[rgb]{0.627,0.126,0.941}\ttfamily,
+	commentstyle=\color[rgb]{0.026,0.112,0.095}\ttfamily,
+	morecomment=[l][\color{magenta}]{//},
+	morecomment=[s][\color{magenta}]{/*}{*/},
+	showstringspaces=false,
+	breaklines = true
+}
+
+\geometry{margin=2.5cm}
+
+\newcommand\JSONnumbervaluestyle{\color{blue}}
+\newcommand\JSONstringvaluestyle{\color{red}}
+
+% switch used as state variable
+\newif\ifcolonfoundonthisline
+
+\makeatletter
+
+\lstdefinestyle{json}
+{
+  showstringspaces    = false,
+  keywords            = {false,true},
+  alsoletter          = 0123456789.,
+  morestring          = [s]{"}{"},
+  stringstyle         = \ifcolonfoundonthisline\JSONstringvaluestyle\fi,
+  MoreSelectCharTable =%
+    \lst@DefSaveDef{`:}\colon@json{\processColon@json},
+  basicstyle          = \ttfamily,
+  keywordstyle        = \ttfamily\bfseries,
+}
+
+% flip the switch if a colon is found in Pmode
+\newcommand\processColon@json{%
+  \colon@json%
+  \ifnum\lst@mode=\lst@Pmode%
+    \global\colonfoundonthislinetrue%
+  \fi
+}
+
+\lst@AddToHook{Output}{%
+  \ifcolonfoundonthisline%
+    \ifnum\lst@mode=\lst@Pmode%
+      \def\lst@thestyle{\JSONnumbervaluestyle}%
+    \fi
+  \fi
+  %override by keyword style if a keyword is detected!
+  \lsthk@DetectKeywords% 
+}
+
+% reset the switch at the end of line
+\lst@AddToHook{EOL}%
+  {\global\colonfoundonthislinefalse}
+

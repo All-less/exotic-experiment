@@ -38,8 +38,8 @@ def connect_fpga():
 def program_fpga(file_path):
     index = connect_fpga()
     try:
-        res = sp.check_output('file ' + file_path, shell=True)
-
+        res = sp.check_output('file ' + file_path, shell=True)  # TODO: check file type
+        
         res = sp.check_output('djtgcfg prog -d ' + ex.CABLE_NAME + ' --index ' + str(index) +
                               ' --file ' + file_path + '| grep "Programming succeeded."', shell=True)
         if len(res) < 1:

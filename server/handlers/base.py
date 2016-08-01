@@ -3,10 +3,11 @@ import tornado.web
 import uuid
 import logging
 
-logger = logging.getLogger('boilerplate.' + __name__)
+logger = logging.getLogger('server.' + __name__)
 
 
 class BaseHandler(tornado.web.RequestHandler):
+
     """A class to collect common handler methods - all other handlers should
     subclass this one.
     """
@@ -21,7 +22,7 @@ class BaseHandler(tornado.web.RequestHandler):
         try:
             self.request.arguments = json.loads(self.request.body)
         except ValueError:
-            msg = "Could not decode JSON: %s" % self.request.body
+            msg = "Could not decode JSON: {}".format(self.request.body)
             logger.debug(msg)
             raise tornado.web.HTTPError(400, msg)
 
@@ -39,7 +40,7 @@ class BaseHandler(tornado.web.RequestHandler):
                 logger.debug(msg)
                 raise tornado.web.HTTPError(400, msg)
             logger.debug("Returning default argument %s, as we couldn't find "
-                    "'%s' in %s" % (default, name, self.request.arguments))
+                         "'%s' in %s" % (default, name, self.request.arguments))
             return default
         arg = self.request.arguments[name]
         logger.debug("Found '%s': %s in JSON arguments" % (name, arg))
@@ -50,13 +51,6 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header('X-XSS-Protection', '1; mode=block')
         self.set_header('x-content-type-options', 'nosniff')
 
-    def prepare(self):
-        session_id = self.get_secure_cookie('session_id')
-        if session_id:
-            self.session = redis_server.get(session_id)
-        else:
-            self.set_secure_cookie('session_id', uuid.uuid4())
-            self.session = {}
-
-    def on_finish(self):
-        redis_server.set(session_id, self.session)
+    def get_current_user(self):
+        # TODO
+        pass
