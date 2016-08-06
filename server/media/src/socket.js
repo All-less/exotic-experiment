@@ -1,4 +1,4 @@
-import store from './store';
+import store from './redux/store';
 import {
   openSwitch,
   openSwitchSucc,
@@ -14,7 +14,7 @@ import {
   releaseButtonFail,
   fpgaAcquired,
   fpgaReleased
-} from './redux';
+} from './redux/device';
 
 const TYPE_ACTION = 0;
 const TYPE_STATUS = 1;

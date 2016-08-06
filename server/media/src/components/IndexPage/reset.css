@@ -1,0 +1,44 @@
+html, body{
+  border: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  font-family: "Helvetica Neue";
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+}
+
+.btn {
+  color: white;
+  background-color: black;
+}
+
+.dropdown {
+  margin: 0 auto;
+}
+
+.caret {
+  color: white;
+}
+
+.dropdown-toggle {
+  background-color: black; 
+}
+
+.dropdown-menu {
+  background-color: black;
+  border-color: white;
+}
+
+.dropdown-menu > li > a {
+  color: white;
+}
+
+.dropdown-menu > li > a :hover{
+  background-color: #555555;
+}
+
+.form-control {
+  background-color: black;
+}

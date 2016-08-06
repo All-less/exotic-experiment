@@ -1,0 +1,54 @@
+.wrapper {
+  height: 600px;
+  width: 400px;
+  margin: 0 auto;
+
+  .svg {
+    width: 286px;
+    height: 57px;
+    margin-top: 150px;
+    margin-bottom: 50px;
+    margin-left: 57px;
+    margin-right: 57px;
+  }
+
+  .path {
+    fill: #FFF;
+    stroke: #FFF;
+    stroke-width: 1px;
+    stroke-miterlimit: 10;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 0;
+    animation: dash 5s linear;
+  }
+
+  @keyframes dash {
+    0% {
+      stroke-dashoffset: 1000;
+      fill: #000;
+    }
+    10% {
+      stroke-dashoffset: 1000;
+    }
+    70% {
+      stroke-dashoffset: 800;
+    }
+    90% {
+      stroke-dashoffset: 0;
+      fill: #000;
+    }
+    100% {
+      fill: #FFF;
+    }
+  }
+
+  .footer {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    color: white;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+}

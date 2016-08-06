@@ -2,7 +2,7 @@
 import React from 'react';
 import { connect } from 'react-redux'
 import remote from '../socket'; 
-import { state } from '../redux';
+import { state } from '../redux/device';
 
 /* BTN_UP, BTN_DOWN和BTN_WAIT对应的尺寸*/
 const size = [5, 9, 7];

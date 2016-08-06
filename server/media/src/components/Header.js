@@ -1,7 +1,7 @@
 'use strict'
 import React from 'react';
 import { connect } from 'react-redux';
-import { toggleSetting } from '../redux';
+import { toggleSetting } from '../redux/device';
 
 import remote from '../socket';
 

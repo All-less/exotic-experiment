@@ -6,7 +6,7 @@ import {
   uploadSucceed,
   uploadFail,
   updateUploadProgress
-} from '../redux';
+} from '../redux/device';
 
 @connect(
   (state) => ({

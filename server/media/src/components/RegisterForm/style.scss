@@ -1,0 +1,17 @@
+.container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-content: center;
+  margin-top: 60px;
+
+  .button {
+    background-color: black;
+    color: white;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.15);
+      color: white;
+    }
+  }
+}

@@ -5,7 +5,6 @@ module.exports = {
   devtool: 'source-map',
   entry: {
     main: [
-      'webpack-hot-middleware/client',
       './src/index.js'
     ]
   },
@@ -18,8 +17,6 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"development"'
     }),
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin()
   ],
   module: {
     loaders: [
@@ -28,8 +25,8 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'babel',
         query: {
-          presets: ['es2015', 'stage-0', 'react', 'react-hmre'],
-          plugins: ['transform-decorators-legacy', 'antd']
+          presets: ['es2015', 'stage-0', 'react'],
+          plugins: ['transform-decorators-legacy']
         }
       }, {
         test: /\.scss$/,
@@ -53,7 +50,7 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['', '.js', '.jsx', '.json', '.scss']
+    extensions: ['', '.js', '.jsx', '.json', '.scss', '.css']
   },
   postcss: [
     require('autoprefixer')({ browsers: ['last 3 versions'] })

@@ -5,7 +5,8 @@ import { routerMiddleware } from 'react-router-redux';
 import { combineReducers } from 'redux';
 import { routerReducer as routing } from 'react-router-redux';
 
-import reducer from './redux';
+import device from './device';
+import account from './account';
 
 import qwest from 'qwest';
 
@@ -70,7 +71,7 @@ function ajaxMiddleware(client) {
 const _ajaxMiddleware = ajaxMiddleware(ajax);
 const _routerMiddleware = routerMiddleware(browserHistory);
 
-export default createStore(combineReducers({reducer, routing}), compose(
+export default createStore(combineReducers({account, device, routing}), compose(
     applyMiddleware(_ajaxMiddleware, _routerMiddleware),
     window.devToolsExtension && window.devToolsExtension()
   )
