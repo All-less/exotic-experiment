@@ -1,28 +1,8 @@
-from peewee import (SqliteDatabase, TextField, Model)
+import motor.motor_tornado
 
-db = SqliteDatabase('exotic.db')
+client = motor.motor_tornado.MotorClient()
+db = client.exotic_database
 
-
-class BaseModel(Model):
-
-    class Meta:
-        database = db
-
-
-class User(BaseModel):
-    email = TextField(unique=True)
-    password = TextField()
-
-
-class Rpi(BaseModel):
-    name = TextField(unique=True)
-    auth_key = TextField()
-
-
-class Admin(BaseModel):
-    name = TextField(unique=True)
-    password = TextField()
-
-
-db.connect()
-db.create_tables([User, Rpi, Admin], safe=True)
+User = db.user
+Rpi = db.rpi
+Admin = db.admin

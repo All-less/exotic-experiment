@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*- 
 """Add current directory to Python's site-packages path.
 """
 import os
@@ -9,6 +10,7 @@ path = lambda *a: os.path.join(ROOT, *a)
 
 prev_sys_path = list(sys.path)
 
+site.addsitedir(path('lib'))
 site.addsitedir(path('handlers'))
 if os.path.exists(path('vendor')):
     for directory in os.listdir(path('vendor')):

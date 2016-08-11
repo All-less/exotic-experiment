@@ -81,6 +81,7 @@ tmp/
 
 # Database
 *.db
+db/
 
 # log file
 *.log
@@ -90,6 +91,8 @@ tmp/
 
 # cofiguration
 config_override.py
+config*
 
 # Hot Module Replacement
 *hot-update*
+

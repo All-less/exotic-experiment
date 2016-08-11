@@ -8,7 +8,7 @@ import logging, logging.handlers
 import os.path
 import types
 
-from logconfig import dictconfig
+import logging.config
 
 # Pulled from commonware.log we don't have to import that, which drags with
 # it Django dependencies.
@@ -85,7 +85,7 @@ def initialize_logging(syslog_tag, syslog_facility, loggers,
                 'formatter': 'prod',
             },
         },
-        'loggers': {
+        'loggers': {  
         }
     }
 
@@ -101,4 +101,4 @@ def initialize_logging(syslog_tag, syslog_facility, loggers,
         if 'propagate' not in logger:
             logger['propagate'] = False
 
-    dictconfig.dictConfig(cfg)
+    logging.config.dictConfig(cfg)

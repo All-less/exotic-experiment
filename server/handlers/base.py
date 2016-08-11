@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*- 
 import json
 import tornado.web
 import uuid
@@ -20,7 +21,7 @@ class BaseHandler(tornado.web.RequestHandler):
         If JSON cannot be decoded, raises an HTTPError with status 400.
         """
         try:
-            self.request.arguments = json.loads(self.request.body)
+            self.request.arguments = json.loads(self.request.body.decode('utf-8'))
         except ValueError:
             msg = "Could not decode JSON: {}".format(self.request.body)
             logger.debug(msg)
@@ -54,3 +55,14 @@ class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
         # TODO
         pass
+
+    def prepare(self):
+        logger.debug("{method} {uri} {body}".format(method=self.request.method, uri=self.request.uri, body=self.request.body))
+
+    def succ(self, data):
+        self.write({'code': 0, 'data': data})
+        self.flush()
+
+    def fail(self, error):
+        self.write({'code': 1, 'error': error})
+        self.flush()

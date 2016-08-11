@@ -1,10 +1,14 @@
+# -*- coding: utf-8 -*- 
 from handlers.home import HomeHandler
 from handlers.file import UploadHandler
 from handlers.file import DownloadHandler
 from handlers.user import LoginHandler
 from handlers.user import LogoutHandler
 from handlers.user import RegisterHandler
-
+from handlers.base import BaseHandler
+from handlers.user import EmailHandler
+from handlers.user import FindPasswordHandler
+from handlers.user import ChangePasswordHandler
 
 url_patterns = [
     (r'/', HomeHandler),
@@ -12,8 +16,11 @@ url_patterns = [
     (r'/api/logout', LogoutHandler),
     (r'/api/register', RegisterHandler),
     (r'/api/upload', UploadHandler),
-    (r'/api/download', DownloadHandler) # ,
-    #(r'/*', ErrorHandler)
+    (r'/api/download', DownloadHandler),
+    (r'/api/verify', EmailHandler),
+    (r'/api/find', FindPasswordHandler),
+    (r'/api/change', ChangePasswordHandler),
+    (r'/*', BaseHandler)
 ]
 
 """

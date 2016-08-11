@@ -32,6 +32,7 @@
     "babel-runtime": "^6.9.0",
     "classnames": "2.2.3",
     "css-loader": "0.23.1",
+    "is_js": "^0.8.0",
     "node-sass": "^3.6.0",
     "normalize.css": "github:necolas/normalize.css#ab3abb6d36cf3cd66e22faeec65dcef1196ba1c1",
     "postcss-loader": "^0.9.1",

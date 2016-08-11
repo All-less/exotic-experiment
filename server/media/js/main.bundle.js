@@ -77,7 +77,7 @@
 	
 	var _IndexPage2 = _interopRequireDefault(_IndexPage);
 	
-	var _DevicePage = __webpack_require__(810);
+	var _DevicePage = __webpack_require__(809);
 	
 	var _DevicePage2 = _interopRequireDefault(_DevicePage);
 	
@@ -37184,17 +37184,44 @@
 
 /***/ },
 /* 565 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var CHANGE_FORM = 'Exotic/account/changeForm';
+	exports.changePassword = exports.findPassword = exports.login = exports.register = exports.vcodeCountdown = exports.verifyEmail = exports.changeForm = undefined;
+	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	var _store = __webpack_require__(563);
+	
+	var _store2 = _interopRequireDefault(_store);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var CHANGE_FORM = 'Exotic/account/CHANGE_FORM';
+	var VERIFY_EMAIL = 'Exotic/account/VERIFY_EMAIL';
+	var VERIFY_EMAIL_SUCC = 'Exotic/account/VERIFY_EMAIL_SUCC';
+	var VERIFY_EMAIL_FAIL = 'Exotic/account/VERIFY_EMAIL_FAIL';
+	var VCODE_COUNTDOWN = 'Exotic/account/VCODE_COUNTDOWN';
+	var REGISTER = 'Exotic/account/REGISTER';
+	var REGISTER_SUCC = 'Exotic/account/REGISTER_SUCC';
+	var REGISTER_FAIL = 'Exotic/account/REGISTER_FAIL';
+	var LOGIN = 'Exotic/account/LOGIN';
+	var LOGIN_SUCC = 'Exotic/account/LOGIN_SUCC';
+	var LOGIN_FAIL = 'Exotic/account/LOGIN_FAIL';
+	var FIND = 'Exotic/account/FIND';
+	var FIND_SUCC = 'Exotic/account/FIND_SUCC';
+	var FIND_FAIL = 'Exotic/account/FIND_FAIL';
+	var CHANGE = 'Exotic/account/CHANGE';
+	var CHANGE_SUCC = 'Exotic/account/CHANGE_SUCC';
+	var CHANGE_FAIL = 'Exotic/account/CHANGE_FAIL';
 	
 	var init = {
-	  formState: 'login'
+	  formState: 'login',
+	  vcode_count: 0
 	};
 	
 	var changeForm = exports.changeForm = function changeForm(formState) {
@@ -37204,15 +37231,164 @@
 	  };
 	};
 	
+	var verifyEmail = exports.verifyEmail = function verifyEmail(email) {
+	  return {
+	    types: [VERIFY_EMAIL, VERIFY_EMAIL_SUCC, VERIFY_EMAIL_FAIL],
+	    promise: function promise(client) {
+	      return client.post('/api/verify', { email: email });
+	    }
+	  };
+	};
+	
+	var vcodeCountdown = exports.vcodeCountdown = function vcodeCountdown() {
+	  return {
+	    type: VCODE_COUNTDOWN
+	  };
+	};
+	
+	var register = exports.register = function register(email, password) {
+	  return {
+	    types: [REGISTER, REGISTER_SUCC, REGISTER_FAIL],
+	    promise: function promise(client) {
+	      return client.post('/api/register', { email: email, password: password });
+	    }
+	  };
+	};
+	
+	var login = exports.login = function login(email, password) {
+	  return {
+	    types: [LOGIN, LOGIN_SUCC, LOGIN_FAIL],
+	    promise: function promise(client) {
+	      return client.post('/api/login', { email: email, password: password });
+	    }
+	  };
+	};
+	
+	var findPassword = exports.findPassword = function findPassword(email) {
+	  return {
+	    types: [FIND, FIND_SUCC, FIND_FAIL],
+	    promise: function promise(client) {
+	      return client.post('/api/find', { email: email });
+	    }
+	  };
+	};
+	
+	var changePassword = exports.changePassword = function changePassword(email, oldpass, newpass) {
+	  return {
+	    types: [CHANGE, CHANGE_SUCC, CHANGE_FAIL],
+	    promise: function promise(client) {
+	      return client.post('/api/change', { email: email, oldpass: oldpass, newpass: newpass });
+	    }
+	  };
+	};
+	
 	exports.default = function () {
 	  var state = arguments.length <= 0 || arguments[0] === undefined ? init : arguments[0];
 	  var action = arguments[1];
 	
 	  switch (action.type) {
 	    case CHANGE_FORM:
-	      return {
-	        formState: action.formState
-	      };
+	      return _extends({}, state, {
+	        formState: action.formState,
+	        vcode_msg: null,
+	        reg_msg: null,
+	        change_msg: null,
+	        find_msg: null,
+	        login_msg: null
+	      });
+	    case VERIFY_EMAIL:
+	      return _extends({}, state, {
+	        vcode_sending: true,
+	        vcode_msg: null
+	      });
+	    case VERIFY_EMAIL_SUCC:
+	      setTimeout(function () {
+	        _store2.default.dispatch(vcodeCountdown());
+	      }, 1000);
+	      return _extends({}, state, {
+	        vcode_sending: false,
+	        vcode: action.result.code,
+	        vcode_sent: true,
+	        vcode_count: 60,
+	        vcode_msg: null
+	      });
+	    case VERIFY_EMAIL_FAIL:
+	      return _extends({}, state, {
+	        vcode_sending: false,
+	        vcode_msg: '获取验证码失败，请重试。'
+	      });
+	    case VCODE_COUNTDOWN:
+	      if (state.vcode_count !== 0) {
+	        setTimeout(function () {
+	          _store2.default.dispatch(vcodeCountdown());
+	        }, 1000);
+	        return _extends({}, state, {
+	          vcode_count: state.vcode_count - 1
+	        });
+	      } else {
+	        return _extends({}, state, {
+	          vcode_sent: false,
+	          vcode_msg: null
+	        });
+	      }
+	    case REGISTER:
+	      return _extends({}, state, {
+	        registering: true,
+	        reg_msg: ''
+	      });
+	    case REGISTER_SUCC:
+	      return _extends({}, state, {
+	        registering: false
+	      });
+	    case REGISTER_FAIL:
+	      return _extends({}, state, {
+	        registering: false,
+	        reg_msg: action.error.err === 'DUPLICATE_EMAIL' ? '该邮箱已被注册。' : '出现未知错误。'
+	      });
+	    case LOGIN:
+	      return _extends({}, state, {
+	        loggingIn: true,
+	        login_msg: null
+	      });
+	    case LOGIN_SUCC:
+	      return _extends({}, state, {
+	        loggingIn: false
+	      });
+	    case LOGIN_FAIL:
+	      return _extends({}, state, {
+	        loggingIn: false,
+	        login_msg: action.error.err === 'NO_USER' ? '该邮箱未注册。' : action.error.err === 'WRONG_PASSWORD' ? '登录密码错误。' : '出现未知错误。'
+	      });
+	    case CHANGE:
+	      return _extends({}, state, {
+	        changing: true,
+	        change_msg: null
+	      });
+	    case CHANGE_SUCC:
+	      return _extends({}, state, {
+	        changing: false,
+	        change_msg: '密码修改成功。'
+	      });
+	    case CHANGE_FAIL:
+	      return _extends({}, state, {
+	        changing: false,
+	        change_msg: action.error.err === 'NO_USER' ? '该邮箱未注册。' : action.error.err === 'WRONG_PASSWORD' ? '登录密码错误。' : '出现未知错误。'
+	      });
+	    case FIND:
+	      return _extends({}, state, {
+	        finding: true,
+	        find_msg: null
+	      });
+	    case FIND_SUCC:
+	      return _extends({}, state, {
+	        finding: false,
+	        find_msg: '重置后密码已发送至邮箱。'
+	      });
+	    case FIND_FAIL:
+	      return _extends({}, state, {
+	        finding: false,
+	        find_msg: action.error.err === 'NO_USER' ? '该邮箱未注册。' : action.error.err === 'SMTP_ERR' ? '密码重置邮件发送失败。' : '出现未知错误。'
+	      });
 	    default:
 	      return state;
 	  }
@@ -38150,23 +38326,23 @@
 	
 	var _LoginForm2 = _interopRequireDefault(_LoginForm);
 	
-	var _RegisterForm = __webpack_require__(797);
+	var _RegisterForm = __webpack_require__(798);
 	
 	var _RegisterForm2 = _interopRequireDefault(_RegisterForm);
 	
-	var _ResetPasswordForm = __webpack_require__(800);
+	var _ChangePasswordForm = __webpack_require__(822);
 	
-	var _ResetPasswordForm2 = _interopRequireDefault(_ResetPasswordForm);
+	var _ChangePasswordForm2 = _interopRequireDefault(_ChangePasswordForm);
 	
-	var _FindPasswordForm = __webpack_require__(803);
+	var _FindPasswordForm = __webpack_require__(802);
 	
 	var _FindPasswordForm2 = _interopRequireDefault(_FindPasswordForm);
 	
-	var _style = __webpack_require__(806);
+	var _style = __webpack_require__(805);
 	
 	var _style2 = _interopRequireDefault(_style);
 	
-	var _reset = __webpack_require__(808);
+	var _reset = __webpack_require__(807);
 	
 	var _reset2 = _interopRequireDefault(_reset);
 	
@@ -38202,7 +38378,7 @@
 	          { className: _style2.default.svg },
 	          _react2.default.createElement('path', { className: _style2.default.path, d: 'M5.26 42.78L5.26 1.79L33.49 1.79L33.49 6.16L10.58 6.16L10.58 19.43L32.65 19.43L32.65 24.25L10.58 24.25L10.58 37.91L34.38 37.91L34.38 42.78L5.26 42.78L5.26 42.78ZM54.26 42.78L68.77 22.06L55.55 1.79L62.16 1.79L72.30 17.64L82.49 1.79L89.10 1.79L75.43 22.06L89.94 42.78L82.88 42.78L72.30 26.49L61.32 42.78L54.26 42.78L54.26 42.78ZM108.02 20.72Q108.02 19.77 108.14 18.79Q108.25 17.81 108.47 16.80Q109.76 11.03 114.72 6.19Q119.67 1.34 127.90 1.34Q128.91 1.34 129.92 1.43Q130.93 1.51 131.94 1.74Q137.70 2.80 142.58 7.59Q147.45 12.38 147.73 22.51Q147.73 31.14 142.44 37.60Q137.14 44.07 126.56 44.07Q117.32 44.07 112.67 37.52Q108.02 30.97 108.02 20.72L108.02 20.72M113.34 23.41Q113.46 24.75 113.74 26.38Q114.02 28 114.63 29.68Q115.81 33.04 118.55 35.92Q121.30 38.81 126.56 39.26Q126.95 39.31 127.32 39.34Q127.68 39.37 128.07 39.37Q133.62 39.37 137.98 34.64Q142.35 29.90 142.02 20.27Q141.68 14.67 137.93 10.42Q134.18 6.16 127.90 6.16Q127.18 6.16 126.45 6.24Q125.72 6.33 124.99 6.50Q120.62 7.39 116.98 11.42Q113.34 15.46 113.34 23.41L113.34 23.41ZM179.54 42.78L179.54 6.16L165.87 6.16L165.87 1.79L198.07 1.79L198.07 6.16L185.25 6.16L185.25 42.78L179.54 42.78L179.54 42.78ZM219.18 42.78L219.18 1.79L224.50 1.79L224.50 42.78L219.18 42.78L219.18 42.78ZM247.02 22.96Q247.07 21.78 247.21 20.58Q247.35 19.38 247.58 18.14Q248.70 12.15 252.73 7.03Q256.76 1.90 265.55 1.34Q266.95 1.34 268.74 1.65Q270.54 1.96 272.44 2.74Q275.35 4.03 277.98 6.89Q280.62 9.74 281.85 15.01L276.14 15.01Q274.90 10.53 271.96 8.34Q269.02 6.16 265.66 6.16Q265.44 6.16 265.24 6.16Q265.05 6.16 264.88 6.22Q260.46 6.55 256.73 10.56Q253.01 14.56 252.78 22.06Q252.78 31.08 256.54 35.08Q260.29 39.09 264.77 39.14Q264.82 39.14 264.85 39.14Q264.88 39.14 264.94 39.14Q269.30 39.14 273 36.04Q276.70 32.93 277.03 27.78L282.74 27.78Q282.63 28.50 282.49 29.26Q282.35 30.02 282.13 30.80Q280.67 35.78 276.50 39.93Q272.33 44.07 266 44.07Q256.42 44.35 251.72 37.94Q247.02 31.53 247.02 22.96L247.02 22.96Z' })
 	        ),
-	        { 'login': _react2.default.createElement(_LoginForm2.default, null), 'register': _react2.default.createElement(_RegisterForm2.default, null), 'reset': _react2.default.createElement(_ResetPasswordForm2.default, null), 'find': _react2.default.createElement(_FindPasswordForm2.default, null) }[this.props.formState],
+	        { 'login': _react2.default.createElement(_LoginForm2.default, null), 'register': _react2.default.createElement(_RegisterForm2.default, null), 'reset': _react2.default.createElement(_ChangePasswordForm2.default, null), 'find': _react2.default.createElement(_FindPasswordForm2.default, null) }[this.props.formState],
 	        _react2.default.createElement(
 	          'div',
 	          { className: _style2.default.footer },
@@ -38244,7 +38420,11 @@
 	
 	var _rcQueueAnim2 = _interopRequireDefault(_rcQueueAnim);
 	
-	var _style = __webpack_require__(793);
+	var _is_js = __webpack_require__(793);
+	
+	var _is_js2 = _interopRequireDefault(_is_js);
+	
+	var _style = __webpack_require__(794);
 	
 	var _style2 = _interopRequireDefault(_style);
 	
@@ -38260,20 +38440,70 @@
 	
 	var LoginForm = (_dec = (0, _reactRedux.connect)(function (state) {
 	  return {
-	    formState: state.account.formState
+	    formState: state.account.formState,
+	    loggingIn: state.account.loggingIn,
+	    login_msg: state.account.login_msg
 	  };
-	}, { changeForm: _account.changeForm }), _dec(_class = function (_React$Component) {
+	}, { changeForm: _account.changeForm, login: _account.login }), _dec(_class = function (_React$Component) {
 	  _inherits(LoginForm, _React$Component);
 	
-	  function LoginForm() {
+	  function LoginForm(props) {
 	    _classCallCheck(this, LoginForm);
 	
-	    return _possibleConstructorReturn(this, Object.getPrototypeOf(LoginForm).apply(this, arguments));
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LoginForm).call(this, props));
+	
+	    _this.state = {
+	      fields: {
+	        email: { touched: false, value: '', error: '此项为必填项。' },
+	        password: { touched: false, value: '', error: '此项为必填项。' }
+	      }
+	    };
+	    return _this;
 	  }
 	
 	  _createClass(LoginForm, [{
+	    key: 'handleLoginClick',
+	    value: function handleLoginClick() {
+	      var _state$fields = this.state.fields;
+	      var email = _state$fields.email;
+	      var password = _state$fields.password;
+	
+	      if (email.error || password.error || this.props.loggingIn) return;
+	      this.props.login(email.value, password.value);
+	    }
+	  }, {
+	    key: 'validate',
+	    value: function validate(key, val) {
+	      switch (key) {
+	        case 'email':
+	          return !val ? '此项为必填项。' : !_is_js2.default.email(val) ? '邮箱地址不合法。' : '';
+	        case 'password':
+	          return !val ? '此项为必填项。' : '';
+	      }
+	    }
+	  }, {
+	    key: 'handleChange',
+	    value: function handleChange(key, event) {
+	      var fields = this.state.fields;
+	      var val = event.target.value;
+	      fields[key].value = val;
+	      fields[key].error = this.validate(key, val);
+	      this.setState({ fields: fields });
+	    }
+	  }, {
+	    key: 'handleBlur',
+	    value: function handleBlur(field) {
+	      var fields = this.state.fields;
+	      fields[field].touched = true;
+	      this.setState({ fields: fields });
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
+	      var _state$fields2 = this.state.fields;
+	      var email = _state$fields2.email;
+	      var password = _state$fields2.password;
+	
 	      return _react2.default.createElement(
 	        'form',
 	        null,
@@ -38291,12 +38521,13 @@
 	                null,
 	                _react2.default.createElement('i', { className: 'fa fa-envelope-o fa-fw', 'aria-hidden': 'true' })
 	              ),
-	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入邮箱地址' })
+	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入邮箱地址',
+	                onChange: this.handleChange.bind(this, 'email'), onBlur: this.handleBlur.bind(this, 'email') })
 	            ),
 	            _react2.default.createElement(
 	              _reactBootstrap.HelpBlock,
 	              null,
-	              '　'
+	              email.touched && email.error || '　'
 	            )
 	          ), _react2.default.createElement(
 	            _reactBootstrap.FormGroup,
@@ -38309,19 +38540,32 @@
 	                null,
 	                _react2.default.createElement('i', { className: 'fa fa-lock fa-fw', 'aria-hidden': 'true' })
 	              ),
-	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入登录密码' })
+	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'password', placeholder: '请输入登录密码',
+	                onChange: this.handleChange.bind(this, 'password'), onBlur: this.handleBlur.bind(this, 'password') })
 	            ),
 	            _react2.default.createElement(
 	              _reactBootstrap.HelpBlock,
 	              null,
-	              '　'
+	              password.touched && password.error || '　'
 	            )
 	          ), _react2.default.createElement(
 	            'div',
 	            { className: _style2.default.container, key: 'input-btn' },
 	            _react2.default.createElement(
+	              'div',
+	              { className: _style2.default.error, key: 'input-error' },
+	              this.props.login_msg || '　'
+	            ),
+	            _react2.default.createElement(
 	              _reactBootstrap.SplitButton,
-	              { className: _style2.default.button, bsStyle: 'default', title: '登录', id: 'btn', onSelect: this.props.changeForm },
+	              { className: _style2.default.button, bsStyle: 'default', id: 'btn', onSelect: this.props.changeForm,
+	                title: _react2.default.createElement(
+	                  'span',
+	                  null,
+	                  '登录',
+	                  this.props.loggingIn && _react2.default.createElement('i', { className: 'fa fa-spinner fa-spin fa-fw' })
+	                ),
+	                onClick: this.handleLoginClick.bind(this) },
 	              _react2.default.createElement(
 	                _reactBootstrap.MenuItem,
 	                { eventKey: 'register' },
@@ -59918,13 +60162,852 @@
 /* 793 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {// is.js 0.8.0
+	// Author: Aras Atasaygin
+	
+	// AMD with global, Node, or global
+	;(function(root, factory) {
+	    if(true) {
+	        // AMD. Register as an anonymous module.
+	        !(__WEBPACK_AMD_DEFINE_RESULT__ = function() {
+	            // Also create a global in case some scripts
+	            // that are loaded still are looking for
+	            // a global even when an AMD loader is in use.
+	            return (root.is = factory());
+	        }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if(typeof exports === 'object') {
+	        // Node. Does not work with strict CommonJS, but
+	        // only CommonJS-like enviroments that support module.exports,
+	        // like Node.
+	        module.exports = factory();
+	    } else {
+	        // Browser globals (root is window)
+	        root.is = factory();
+	    }
+	} (this, function() {
+	
+	    // Baseline
+	    /* -------------------------------------------------------------------------- */
+	
+	    var root = this || global;
+	    var previousIs = root.is;
+	
+	    // define 'is' object and current version
+	    var is = {};
+	    is.VERSION = '0.8.0';
+	
+	    // define interfaces
+	    is.not = {};
+	    is.all = {};
+	    is.any = {};
+	
+	    // cache some methods to call later on
+	    var toString = Object.prototype.toString;
+	    var arraySlice = Array.prototype.slice;
+	    var hasOwnProperty = Object.prototype.hasOwnProperty;
+	
+	    // helper function which reverses the sense of predicate result
+	    function not(func) {
+	        return function() {
+	            return !func.apply(null, arraySlice.call(arguments));
+	        };
+	    }
+	
+	    // helper function which call predicate function per parameter and return true if all pass
+	    function all(func) {
+	        return function() {
+	            var parameters = arraySlice.call(arguments);
+	            var length = parameters.length;
+	            if(length === 1 && is.array(parameters[0])) {    // support array
+	                parameters = parameters[0];
+	                length = parameters.length;
+	            }
+	            for (var i = 0; i < length; i++) {
+	                if (!func.call(null, parameters[i])) {
+	                    return false;
+	                }
+	            }
+	            return true;
+	        };
+	    }
+	
+	    // helper function which call predicate function per parameter and return true if any pass
+	    function any(func) {
+	        return function() {
+	            var parameters = arraySlice.call(arguments);
+	            var length = parameters.length;
+	            if(length === 1 && is.array(parameters[0])) {    // support array
+	                parameters = parameters[0];
+	                length = parameters.length;
+	            }
+	            for (var i = 0; i < length; i++) {
+	                if (func.call(null, parameters[i])) {
+	                    return true;
+	                }
+	            }
+	            return false;
+	        };
+	    }
+	
+	    // Type checks
+	    /* -------------------------------------------------------------------------- */
+	
+	    // is a given value Arguments?
+	    is.arguments = function(value) {    // fallback check is for IE
+	        return is.not.null(value) && (toString.call(value) === '[object Arguments]' || (typeof value === 'object' && 'callee' in value));
+	    };
+	
+	    // is a given value Array?
+	    is.array = Array.isArray || function(value) {    // check native isArray first
+	        return toString.call(value) === '[object Array]';
+	    };
+	
+	    // is a given value Boolean?
+	    is.boolean = function(value) {
+	        return value === true || value === false || toString.call(value) === '[object Boolean]';
+	    };
+	
+	    // is a given value Date Object?
+	    is.date = function(value) {
+	        return toString.call(value) === '[object Date]';
+	    };
+	
+	    // is a given value Error object?
+	    is.error = function(value) {
+	        return toString.call(value) === '[object Error]';
+	    };
+	
+	    // is a given value function?
+	    is.function = function(value) {    // fallback check is for IE
+	        return toString.call(value) === '[object Function]' || typeof value === 'function';
+	    };
+	
+	    // is a given value NaN?
+	    is.nan = function(value) {    // NaN is number :) Also it is the only value which does not equal itself
+	        return value !== value;
+	    };
+	
+	    // is a given value null?
+	    is.null = function(value) {
+	        return value === null;
+	    };
+	
+	    // is a given value number?
+	    is.number = function(value) {
+	        return is.not.nan(value) && toString.call(value) === '[object Number]';
+	    };
+	
+	    // is a given value object?
+	    is.object = function(value) {
+	        var type = typeof value;
+	        return type === 'function' || type === 'object' && !!value;
+	    };
+	
+	    // is given value a pure JSON object?
+	    is.json = function(value) {
+	        return toString.call(value) === '[object Object]';
+	    };
+	
+	    // is a given value RegExp?
+	    is.regexp = function(value) {
+	        return toString.call(value) === '[object RegExp]';
+	    };
+	
+	    // are given values same type?
+	    // prevent NaN, Number same type check
+	    is.sameType = function(value1, value2) {
+	        if(is.nan(value1) || is.nan(value2)) {
+	            return is.nan(value1) === is.nan(value2);
+	        }
+	        return toString.call(value1) === toString.call(value2);
+	    };
+	    // sameType method does not support 'all' and 'any' interfaces
+	    is.sameType.api = ['not'];
+	
+	    // is a given value String?
+	    is.string = function(value) {
+	        return toString.call(value) === '[object String]';
+	    };
+	
+	    // is a given value Char?
+	    is.char = function(value) {
+	        return is.string(value) && value.length === 1;
+	    };
+	
+	    // is a given value undefined?
+	    is.undefined = function(value) {
+	        return value === void 0;
+	    };
+	
+	    // Presence checks
+	    /* -------------------------------------------------------------------------- */
+	
+	    //is a given value empty? Objects, arrays, strings
+	    is.empty = function(value) {
+	        if(is.object(value)){
+	            var num = Object.getOwnPropertyNames(value).length;
+	            if(num === 0 || (num === 1 && is.array(value)) || (num === 2 && is.arguments(value))){
+	                return true;
+	            }
+	            return false;
+	        } else {
+	            return value === '';
+	        }
+	    };
+	
+	    // is a given value existy?
+	    is.existy = function(value) {
+	        return value !== null && value !== undefined;
+	    };
+	
+	    // is a given value truthy?
+	    is.truthy = function(value) {
+	        return is.existy(value) && value !== false && is.not.nan(value) && value !== "" && value !== 0;
+	    };
+	
+	    // is a given value falsy?
+	    is.falsy = not(is.truthy);
+	
+	    // is a given value space?
+	    // horizantal tab: 9, line feed: 10, vertical tab: 11, form feed: 12, carriage return: 13, space: 32
+	    is.space =  function(value) {
+	        if(is.char(value)) {
+	            var characterCode = value.charCodeAt(0);
+	            return (characterCode >  8 && characterCode < 14) || characterCode === 32;
+	        } else {
+	            return false;
+	        }
+	    };
+	
+	    // Arithmetic checks
+	    /* -------------------------------------------------------------------------- */
+	
+	    // are given values equal? supports numbers, strings, regexps, booleans
+	    // TODO: Add object and array support
+	    is.equal = function(value1, value2) {
+	        // check 0 and -0 equity with Infinity and -Infinity
+	        if(is.all.number(value1, value2)) {
+	            return value1 === value2 && 1 / value1 === 1 / value2;
+	        }
+	        // check regexps as strings too
+	        if(is.all.string(value1, value2) || is.all.regexp(value1, value2)) {
+	            return '' + value1 === '' + value2;
+	        }
+	        if(is.all.boolean(value1, value2)) {
+	            return value1 === value2;
+	        }
+	        return false;
+	    };
+	    // equal method does not support 'all' and 'any' interfaces
+	    is.equal.api = ['not'];
+	
+	    // is a given number even?
+	    is.even = function(numb) {
+	        return is.number(numb) && numb % 2 === 0;
+	    };
+	
+	    // is a given number odd?
+	    is.odd = function(numb) {
+	        return is.number(numb) && numb % 2 === 1;
+	    };
+	
+	    // is a given number positive?
+	    is.positive = function(numb) {
+	        return is.number(numb) && numb > 0;
+	    };
+	
+	    // is a given number negative?
+	    is.negative = function(numb) {
+	        return is.number(numb) && numb < 0;
+	    };
+	
+	    // is a given number above minimum parameter?
+	    is.above = function(numb, min) {
+	        return is.all.number(numb, min) && numb > min;
+	    };
+	    // above method does not support 'all' and 'any' interfaces
+	    is.above.api = ['not'];
+	
+	    // is a given number above maximum parameter?
+	    is.under = function(numb, max) {
+	        return is.all.number(numb, max) && numb < max;
+	    };
+	    // least method does not support 'all' and 'any' interfaces
+	    is.under.api = ['not'];
+	
+	    // is a given number within minimum and maximum parameters?
+	    is.within = function(numb, min, max) {
+	        return is.all.number(numb, min, max) && numb > min && numb < max;
+	    };
+	    // within method does not support 'all' and 'any' interfaces
+	    is.within.api = ['not'];
+	
+	    // is a given number decimal?
+	    is.decimal = function(numb) {
+	        return is.number(numb) && numb % 1 !== 0;
+	    };
+	
+	    // is a given number integer?
+	    is.integer = function(numb) {
+	        return is.number(numb) && numb % 1 === 0;
+	    };
+	
+	    // is a given number finite?
+	    is.finite = isFinite || function(numb) {
+	        return numb !== Infinity && numb !== -Infinity && is.not.nan(numb);
+	    };
+	
+	    // is a given number infinite?
+	    is.infinite = not(is.finite);
+	
+	    // Regexp checks
+	    /* -------------------------------------------------------------------------- */
+	    // Steven Levithan, Jan Goyvaerts: Regular Expressions Cookbook
+	    // Scott Gonzalez: Email address validation
+	
+	    // eppPhone match extensible provisioning protocol format
+	    // nanpPhone match north american number plan format
+	    // dateString match m/d/yy and mm/dd/yyyy, allowing any combination of one or two digits for the day and month, and two or four digits for the year
+	    // time match hours, minutes, and seconds, 24-hour clock
+	    var regexps = {
+	        url: /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/i,
+	        email: /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i,
+	        creditCard: /^(?:(4[0-9]{12}(?:[0-9]{3})?)|(5[1-5][0-9]{14})|(6(?:011|5[0-9]{2})[0-9]{12})|(3[47][0-9]{13})|(3(?:0[0-5]|[68][0-9])[0-9]{11})|((?:2131|1800|35[0-9]{3})[0-9]{11}))$/,
+	        alphaNumeric: /^[A-Za-z0-9]+$/,
+	        timeString: /^(2[0-3]|[01]?[0-9]):([0-5]?[0-9]):([0-5]?[0-9])$/,
+	        dateString: /^(1[0-2]|0?[1-9])\/(3[01]|[12][0-9]|0?[1-9])\/(?:[0-9]{2})?[0-9]{2}$/,
+	        usZipCode: /^[0-9]{5}(?:-[0-9]{4})?$/,
+	        caPostalCode: /^(?!.*[DFIOQU])[A-VXY][0-9][A-Z]\s?[0-9][A-Z][0-9]$/,
+	        ukPostCode: /^[A-Z]{1,2}[0-9RCHNQ][0-9A-Z]?\s?[0-9][ABD-HJLNP-UW-Z]{2}$|^[A-Z]{2}-?[0-9]{4}$/,
+	        nanpPhone: /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/,
+	        eppPhone: /^\+[0-9]{1,3}\.[0-9]{4,14}(?:x.+)?$/,
+	        socialSecurityNumber: /^(?!000|666)[0-8][0-9]{2}-(?!00)[0-9]{2}-(?!0000)[0-9]{4}$/,
+	        affirmative: /^(?:1|t(?:rue)?|y(?:es)?|ok(?:ay)?)$/,
+	        hexadecimal: /^[0-9a-fA-F]+$/,
+	        hexColor: /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/,
+	        ipv4: /^(?:(?:\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}(?:\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])$/,
+	        ipv6: /^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$|^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/,
+	        ip: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$|^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/
+	    };
+	
+	    // create regexp checks methods from 'regexp' object
+	    for(var regexp in regexps) {
+	        if(regexps.hasOwnProperty(regexp)) {
+	            regexpCheck(regexp, regexps);
+	        }
+	    }
+	
+	    function regexpCheck(regexp, regexps) {
+	        is[regexp] = function(value) {
+	            return regexps[regexp].test(value);
+	        };
+	    }
+	
+	    // String checks
+	    /* -------------------------------------------------------------------------- */
+	
+	    // is a given string include parameter substring?
+	    is.include = function(str, substr) {
+	        return str.indexOf(substr) > -1;
+	    };
+	    // include method does not support 'all' and 'any' interfaces
+	    is.include.api = ['not'];
+	
+	    // is a given string all uppercase?
+	    is.upperCase = function(str) {
+	        return is.string(str) && str === str.toUpperCase();
+	    };
+	
+	    // is a given string all lowercase?
+	    is.lowerCase = function(str) {
+	        return is.string(str) && str === str.toLowerCase();
+	    };
+	
+	    // is string start with a given startWith parameter?
+	    is.startWith = function(str, startWith) {
+	        return is.string(str) && str.indexOf(startWith) === 0;
+	    };
+	    // startWith method does not support 'all' and 'any' interfaces
+	    is.startWith.api = ['not'];
+	
+	    // is string end with a given endWith parameter?
+	    is.endWith = function(str, endWith) {
+	        return is.string(str) && str.indexOf(endWith) > -1 && str.indexOf(endWith) === str.length -  endWith.length;
+	    };
+	    // endWith method does not support 'all' and 'any' interfaces
+	    is.endWith.api = ['not'];
+	
+	    // is a given string or sentence capitalized?
+	    is.capitalized = function(str) {
+	        if(is.not.string(str)) {
+	            return false;
+	        }
+	        var words = str.split(' ');
+	        var capitalized = [];
+	        for(var i = 0; i < words.length; i++) {
+	            capitalized.push(words[i][0] === words[i][0].toUpperCase());
+	        }
+	        return is.all.truthy.apply(null, capitalized);
+	    };
+	
+	    // is a given string palindrome?
+	    is.palindrome = function(str) {
+	        return is.string(str) && str == str.split('').reverse().join('');
+	    };
+	
+	    // Time checks
+	    /* -------------------------------------------------------------------------- */
+	
+	    var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+	    var months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+	
+	    // is a given date indicate today?
+	    is.today = function(obj) {
+	        var now = new Date();
+	        var todayString = now.toDateString();
+	        return is.date(obj) && obj.toDateString() === todayString;
+	    };
+	
+	    // is a given date indicate yesterday?
+	    is.yesterday = function(obj) {
+	        var now = new Date();
+	        var yesterdayString = new Date(now.setDate(now.getDate() - 1)).toDateString();
+	        return is.date(obj) && obj.toDateString() === yesterdayString;
+	    };
+	
+	    // is a given date indicate tomorrow?
+	    is.tomorrow = function(obj) {
+	        var now = new Date();
+	        var tomorrowString = new Date(now.setDate(now.getDate() + 1)).toDateString();
+	        return is.date(obj) && obj.toDateString() === tomorrowString;
+	    };
+	
+	    // is a given date past?
+	    is.past = function(obj) {
+	        var now = new Date();
+	        return is.date(obj) && obj.getTime() < now.getTime();
+	    };
+	
+	    // is a given date future?
+	    is.future = not(is.past);
+	
+	    // is a given dates day equal given dayString parameter?
+	    is.day = function(obj, dayString) {
+	        return is.date(obj) && dayString.toLowerCase() === days[obj.getDay()];
+	    };
+	    // day method does not support 'all' and 'any' interfaces
+	    is.day.api = ['not'];
+	
+	    // is a given dates month equal given monthString parameter?
+	    is.month = function(obj, monthString) {
+	        return is.date(obj) && monthString.toLowerCase() === months[obj.getMonth()];
+	    };
+	    // month method does not support 'all' and 'any' interfaces
+	    is.month.api = ['not'];
+	
+	    // is a given dates year equal given year parameter?
+	    is.year = function(obj, year) {
+	        return is.date(obj) && is.number(year) && year === obj.getFullYear();
+	    };
+	    // year method does not support 'all' and 'any' interfaces
+	    is.year.api = ['not'];
+	
+	    // is the given year a leap year?
+	    is.leapYear = function(year) {
+	        return is.number(year) && ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0);
+	    };
+	
+	    // is a given date weekend?
+	    // 6: Saturday, 0: Sunday
+	    is.weekend = function(obj) {
+	        return is.date(obj) && (obj.getDay() === 6 || obj.getDay() === 0);
+	    };
+	
+	    // is a given date weekday?
+	    is.weekday = not(is.weekend);
+	
+	    // is date within given range?
+	    is.inDateRange = function(obj, startObj, endObj) {
+	        if(is.not.date(obj) || is.not.date(startObj) || is.not.date(endObj)) {
+	            return false;
+	        }
+	        var givenDate = obj.getTime();
+	        var start = startObj.getTime();
+	        var end = endObj.getTime();
+	        return givenDate > start && givenDate < end;
+	    };
+	    // inDateRange method does not support 'all' and 'any' interfaces
+	    is.inDateRange.api = ['not'];
+	
+	    // is a given date in last week range?
+	    is.inLastWeek = function(obj) {
+	        return is.inDateRange(obj, new Date(new Date().setDate(new Date().getDate() - 7)), new Date());
+	    };
+	
+	    // is a given date in last month range?
+	    is.inLastMonth = function(obj) {
+	        return is.inDateRange(obj, new Date(new Date().setMonth(new Date().getMonth() - 1)), new Date());
+	    };
+	
+	    // is a given date in last year range?
+	    is.inLastYear = function(obj) {
+	        return is.inDateRange(obj, new Date(new Date().setFullYear(new Date().getFullYear() - 1)), new Date());
+	    };
+	
+	    // is a given date in next week range?
+	    is.inNextWeek = function(obj) {
+	        return is.inDateRange(obj, new Date(), new Date(new Date().setDate(new Date().getDate() + 7)));
+	    };
+	
+	    // is a given date in next month range?
+	    is.inNextMonth = function(obj) {
+	        return is.inDateRange(obj, new Date(), new Date(new Date().setMonth(new Date().getMonth() + 1)));
+	    };
+	
+	    // is a given date in next year range?
+	    is.inNextYear = function(obj) {
+	        return is.inDateRange(obj, new Date(), new Date(new Date().setFullYear(new Date().getFullYear() + 1)));
+	    };
+	
+	    // is a given date in the parameter quarter?
+	    is.quarterOfYear = function(obj, quarterNumber) {
+	        return is.date(obj) && is.number(quarterNumber) && quarterNumber === Math.floor((obj.getMonth() + 3) / 3);
+	    };
+	    // quarterOfYear method does not support 'all' and 'any' interfaces
+	    is.quarterOfYear.api = ['not'];
+	
+	    // is a given date in daylight saving time?
+	    is.dayLightSavingTime = function(obj) {
+	        var january = new Date(obj.getFullYear(), 0, 1);
+	        var july = new Date(obj.getFullYear(), 6, 1);
+	        var stdTimezoneOffset = Math.max(january.getTimezoneOffset(), july.getTimezoneOffset());
+	        return obj.getTimezoneOffset() < stdTimezoneOffset;
+	    };
+	
+	    // Environment checks
+	    /* -------------------------------------------------------------------------- */
+	
+	    // check if library is used as a Node.js module
+	    if(typeof window !== 'undefined') {
+	
+	        // store navigator properties to use later
+	        var userAgent = 'navigator' in window && 'userAgent' in navigator && navigator.userAgent.toLowerCase() || '';
+	        var vendor = 'navigator' in window && 'vendor' in navigator && navigator.vendor.toLowerCase() || '';
+	        var appVersion = 'navigator' in window && 'appVersion' in navigator && navigator.appVersion.toLowerCase() || '';
+	
+	        // is current browser chrome?
+	        is.chrome = function() {
+	            return /chrome|chromium/i.test(userAgent) && /google inc/.test(vendor);
+	        };
+	        // chrome method does not support 'all' and 'any' interfaces
+	        is.chrome.api = ['not'];
+	
+	        // is current browser firefox?
+	        is.firefox = function() {
+	            return /firefox/i.test(userAgent);
+	        };
+	        // firefox method does not support 'all' and 'any' interfaces
+	        is.firefox.api = ['not'];
+	
+	        // is current browser edge?
+	        is.edge = function() {
+	            return /edge/i.test(userAgent);
+	        };
+	        // edge method does not support 'all' and 'any' interfaces
+	        is.edge.api = ['not'];
+	
+	        // is current browser internet explorer?
+	        // parameter is optional
+	        is.ie = function(version) {
+	            if(!version) {
+	                return /msie/i.test(userAgent) || "ActiveXObject" in window;
+	            }
+	            if(version >= 11) {
+	                return "ActiveXObject" in window;
+	            }
+	            return new RegExp('msie ' + version).test(userAgent);
+	        };
+	        // ie method does not support 'all' and 'any' interfaces
+	        is.ie.api = ['not'];
+	
+	        // is current browser opera?
+	        is.opera = function() {
+	            return /^Opera\//.test(userAgent) || // Opera 12 and older versions
+	                /\x20OPR\//.test(userAgent); // Opera 15+
+	        };
+	        // opera method does not support 'all' and 'any' interfaces
+	        is.opera.api = ['not'];
+	
+	        // is current browser safari?
+	        is.safari = function() {
+	            return /safari/i.test(userAgent) && /apple computer/i.test(vendor);
+	        };
+	        // safari method does not support 'all' and 'any' interfaces
+	        is.safari.api = ['not'];
+	
+	        // is current device ios?
+	        is.ios = function() {
+	            return is.iphone() || is.ipad() || is.ipod();
+	        };
+	        // ios method does not support 'all' and 'any' interfaces
+	        is.ios.api = ['not'];
+	
+	        // is current device iphone?
+	        is.iphone = function() {
+	            return /iphone/i.test(userAgent);
+	        };
+	        // iphone method does not support 'all' and 'any' interfaces
+	        is.iphone.api = ['not'];
+	
+	        // is current device ipad?
+	        is.ipad = function() {
+	            return /ipad/i.test(userAgent);
+	        };
+	        // ipad method does not support 'all' and 'any' interfaces
+	        is.ipad.api = ['not'];
+	
+	        // is current device ipod?
+	        is.ipod = function() {
+	            return /ipod/i.test(userAgent);
+	        };
+	        // ipod method does not support 'all' and 'any' interfaces
+	        is.ipod.api = ['not'];
+	
+	        // is current device android?
+	        is.android = function() {
+	            return /android/i.test(userAgent);
+	        };
+	        // android method does not support 'all' and 'any' interfaces
+	        is.android.api = ['not'];
+	
+	        // is current device android phone?
+	        is.androidPhone = function() {
+	            return /android/i.test(userAgent) && /mobile/i.test(userAgent);
+	        };
+	        // androidPhone method does not support 'all' and 'any' interfaces
+	        is.androidPhone.api = ['not'];
+	
+	        // is current device android tablet?
+	        is.androidTablet = function() {
+	            return /android/i.test(userAgent) && !/mobile/i.test(userAgent);
+	        };
+	        // androidTablet method does not support 'all' and 'any' interfaces
+	        is.androidTablet.api = ['not'];
+	
+	        // is current device blackberry?
+	        is.blackberry = function() {
+	            return /blackberry/i.test(userAgent) || /BB10/i.test(userAgent);
+	        };
+	        // blackberry method does not support 'all' and 'any' interfaces
+	        is.blackberry.api = ['not'];
+	
+	        // is current device desktop?
+	        is.desktop = function() {
+	            return is.not.mobile() && is.not.tablet();
+	        };
+	        // desktop method does not support 'all' and 'any' interfaces
+	        is.desktop.api = ['not'];
+	
+	        // is current operating system linux?
+	        is.linux = function() {
+	            return /linux/i.test(appVersion);
+	        };
+	        // linux method does not support 'all' and 'any' interfaces
+	        is.linux.api = ['not'];
+	
+	        // is current operating system mac?
+	        is.mac = function() {
+	            return /mac/i.test(appVersion);
+	        };
+	        // mac method does not support 'all' and 'any' interfaces
+	        is.mac.api = ['not'];
+	
+	        // is current operating system windows?
+	        is.windows = function() {
+	            return /win/i.test(appVersion);
+	        };
+	        // windows method does not support 'all' and 'any' interfaces
+	        is.windows.api = ['not'];
+	
+	        // is current device windows phone?
+	        is.windowsPhone = function() {
+	            return is.windows() && /phone/i.test(userAgent);
+	        };
+	        // windowsPhone method does not support 'all' and 'any' interfaces
+	        is.windowsPhone.api = ['not'];
+	
+	        // is current device windows tablet?
+	        is.windowsTablet = function() {
+	            return is.windows() && is.not.windowsPhone() && /touch/i.test(userAgent);
+	        };
+	        // windowsTablet method does not support 'all' and 'any' interfaces
+	        is.windowsTablet.api = ['not'];
+	
+	        // is current device mobile?
+	        is.mobile = function() {
+	            return is.iphone() || is.ipod() || is.androidPhone() || is.blackberry() || is.windowsPhone();
+	        };
+	        // mobile method does not support 'all' and 'any' interfaces
+	        is.mobile.api = ['not'];
+	
+	        // is current device tablet?
+	        is.tablet = function() {
+	            return is.ipad() || is.androidTablet() || is.windowsTablet();
+	        };
+	        // tablet method does not support 'all' and 'any' interfaces
+	        is.tablet.api = ['not'];
+	
+	        // is current state online?
+	        is.online = function() {
+	            return navigator.onLine;
+	        };
+	        // online method does not support 'all' and 'any' interfaces
+	        is.online.api = ['not'];
+	
+	        // is current state offline?
+	        is.offline = not(is.online);
+	        // offline method does not support 'all' and 'any' interfaces
+	        is.offline.api = ['not'];
+	
+	        // is current device supports touch?
+	        is.touchDevice = function() {
+	            return 'ontouchstart' in window ||'DocumentTouch' in window && document instanceof DocumentTouch;
+	        };
+	        // touchDevice method does not support 'all' and 'any' interfaces
+	        is.touchDevice.api = ['not'];
+	    }
+	
+	    // Object checks
+	    /* -------------------------------------------------------------------------- */
+	
+	    // has a given object got parameterized count property?
+	    is.propertyCount = function(obj, count) {
+	        if(!is.object(obj) || !is.number(count)) {
+	            return false;
+	        }
+	        if(Object.keys) {
+	            return Object.keys(obj).length === count;
+	        }
+	        var properties = [],
+	            property;
+	        for(property in obj) {
+	            if (hasOwnProperty.call(obj, property)) {
+	                properties.push(property);
+	            }
+	        }
+	        return properties.length === count;
+	    };
+	    // propertyCount method does not support 'all' and 'any' interfaces
+	    is.propertyCount.api = ['not'];
+	
+	    // is given object has parameterized property?
+	    is.propertyDefined = function(obj, property) {
+	        return is.object(obj) && is.string(property) && property in obj;
+	    };
+	    // propertyDefined method does not support 'all' and 'any' interfaces
+	    is.propertyDefined.api = ['not'];
+	
+	    // is a given object window?
+	    // setInterval method is only available for window object
+	    is.windowObject = function(obj) {
+	        return typeof obj === 'object' && 'setInterval' in obj;
+	    };
+	
+	    // is a given object a DOM node?
+	    is.domNode = function(obj) {
+	        return is.object(obj) && obj.nodeType > 0;
+	    };
+	
+	    // Array checks
+	    /* -------------------------------------------------------------------------- */
+	
+	    // is a given item in an array?
+	    is.inArray = function(val, arr){
+	        if(is.not.array(arr)) {
+	            return false;
+	        }
+	        for(var i = 0; i < arr.length; i++) {
+	            if (arr[i] === val) return true;
+	        }
+	        return false;
+	    };
+	    // inArray method does not support 'all' and 'any' interfaces
+	    is.inArray.api = ['not'];
+	
+	    // is a given array sorted?
+	    is.sorted = function(arr) {
+	        if(is.not.array(arr)) {
+	            return false;
+	        }
+	        for(var i = 0; i < arr.length; i++) {
+	            if(arr[i] > arr[i + 1]) return false;
+	        }
+	        return true;
+	    };
+	
+	    // API
+	    // Set 'not', 'all' and 'any' interfaces to methods based on their api property
+	    /* -------------------------------------------------------------------------- */
+	
+	    function setInterfaces() {
+	        var options = is;
+	        for(var option in options) {
+	            if(hasOwnProperty.call(options, option) && is.function(options[option])) {
+	                var interfaces = options[option].api || ['not', 'all', 'any'];
+	                for (var i = 0; i < interfaces.length; i++) {
+	                    if(interfaces[i] === 'not') {
+	                        is.not[option] = not(is[option]);
+	                    }
+	                    if(interfaces[i] === 'all') {
+	                        is.all[option] = all(is[option]);
+	                    }
+	                    if(interfaces[i] === 'any') {
+	                        is.any[option] = any(is[option]);
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    setInterfaces();
+	
+	    // Configuration methods
+	    // Intentionally added after setInterfaces function
+	    /* -------------------------------------------------------------------------- */
+	
+	    // set optional regexps to methods if you think they suck
+	    is.setRegexp = function(regexp, regexpName) {
+	        for(var r in regexps) {
+	            if(hasOwnProperty.call(regexps, r) && (regexpName === r)) {
+	                regexps[r] = regexp;
+	            }
+	        }
+	    };
+	
+	    // change namespace of library to prevent name collisions
+	    // var preferredName = is.setNamespace();
+	    // preferredName.odd(3);
+	    // => true
+	    is.setNamespace = function() {
+	        root.is = previousIs;
+	        return this;
+	    };
+	
+	    return is;
+	}));
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 794 */
+/***/ function(module, exports, __webpack_require__) {
+
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(794);
+	var content = __webpack_require__(795);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(796)(content, {});
+	var update = __webpack_require__(797)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -59941,24 +61024,25 @@
 	}
 
 /***/ },
-/* 794 */
+/* 795 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(795)();
+	exports = module.exports = __webpack_require__(796)();
 	// imports
 	
 	
 	// module
-	exports.push([module.id, ".style_container_2NEEX {\n  position: relative;\n  width: 100%;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-align-content: center;\n      -ms-flex-line-pack: center;\n          align-content: center;\n  margin-top: 60px; }\n  .style_container_2NEEX .style_button_3o42L {\n    background-color: black;\n    color: white; }\n    .style_container_2NEEX .style_button_3o42L:hover {\n      background-color: rgba(0, 0, 0, 0.15);\n      color: white; }\n", ""]);
+	exports.push([module.id, ".style_container_2NEEX {\n  position: relative;\n  width: 100%;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-align-content: center;\n      -ms-flex-line-pack: center;\n          align-content: center;\n  margin-top: 20px; }\n  .style_container_2NEEX .style_error_45Nkk {\n    color: white;\n    text-align: center;\n    margin-bottom: 20px; }\n  .style_container_2NEEX .style_button_3o42L {\n    background-color: black;\n    color: white; }\n    .style_container_2NEEX .style_button_3o42L:hover {\n      background-color: rgba(0, 0, 0, 0.15);\n      color: white; }\n", ""]);
 	
 	// exports
 	exports.locals = {
 		"container": "style_container_2NEEX",
+		"error": "style_error_45Nkk",
 		"button": "style_button_3o42L"
 	};
 
 /***/ },
-/* 795 */
+/* 796 */
 /***/ function(module, exports) {
 
 	/*
@@ -60014,7 +61098,7 @@
 
 
 /***/ },
-/* 796 */
+/* 797 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -60268,7 +61352,7 @@
 
 
 /***/ },
-/* 797 */
+/* 798 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -60287,13 +61371,17 @@
 	
 	var _reactRedux = __webpack_require__(472);
 	
+	var _is_js = __webpack_require__(793);
+	
+	var _is_js2 = _interopRequireDefault(_is_js);
+	
 	var _reactBootstrap = __webpack_require__(574);
 	
 	var _rcQueueAnim = __webpack_require__(788);
 	
 	var _rcQueueAnim2 = _interopRequireDefault(_rcQueueAnim);
 	
-	var _style = __webpack_require__(798);
+	var _style = __webpack_require__(820);
 	
 	var _style2 = _interopRequireDefault(_style);
 	
@@ -60307,22 +61395,91 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
+	var regex = /(?=.*\d)(?=.*[a-zA-Z])[\da-zA-Z]{8,20}/;
+	
 	var RegisterForm = (_dec = (0, _reactRedux.connect)(function (state) {
 	  return {
-	    formState: state.account.formState
+	    formState: state.account.formState,
+	    vcode_sending: state.account.vcode_sending,
+	    vcode_sent: state.account.vcode_sent,
+	    vcode: state.account.vcode,
+	    vcode_msg: state.account.vcode_msg,
+	    vcode_count: state.account.vcode_count,
+	    registering: state.account.registering,
+	    reg_msg: state.account.reg_msg
 	  };
-	}, { changeForm: _account.changeForm }), _dec(_class = function (_React$Component) {
+	}, {
+	  changeForm: _account.changeForm, verifyEmail: _account.verifyEmail, register: _account.register
+	}), _dec(_class = function (_React$Component) {
 	  _inherits(RegisterForm, _React$Component);
 	
-	  function RegisterForm() {
+	  function RegisterForm(props) {
 	    _classCallCheck(this, RegisterForm);
 	
-	    return _possibleConstructorReturn(this, Object.getPrototypeOf(RegisterForm).apply(this, arguments));
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RegisterForm).call(this, props));
+	
+	    _this.state = {
+	      fields: {
+	        email: { touched: false, value: '', error: '此项为必填项。' },
+	        password: { touched: false, value: '', error: '此项为必填项。' },
+	        vcode: { touched: false, value: '', error: '此项为必填项。' }
+	      }
+	    };
+	    return _this;
 	  }
 	
 	  _createClass(RegisterForm, [{
+	    key: 'handleRegisterClick',
+	    value: function handleRegisterClick() {
+	      var _state$fields = this.state.fields;
+	      var email = _state$fields.email;
+	      var password = _state$fields.password;
+	      var vcode = _state$fields.vcode;
+	
+	      if (email.error || password.error || vcode.error || this.props.vcode_msg || this.props.registering) return;
+	      this.props.register(email.value, password.value);
+	    }
+	  }, {
+	    key: 'handleVcodeClick',
+	    value: function handleVcodeClick() {
+	      this.props.verifyEmail(this.state.fields.email.value);
+	    }
+	  }, {
+	    key: 'validate',
+	    value: function validate(key, val) {
+	      switch (key) {
+	        case 'email':
+	          return !val ? '此项为必填项。' : !_is_js2.default.email(val) ? '邮箱地址不合法。' : '';
+	        case 'password':
+	          return !val ? '此项为必填项。' : !regex.test(val) ? '密码长度可为8至20位，其中必须包含数字和字母组合。' : '';
+	        case 'vcode':
+	          return val !== this.props.vcode ? '验证码输入有误。' : !val ? '此项为必填项。' : '';
+	      }
+	    }
+	  }, {
+	    key: 'handleChange',
+	    value: function handleChange(key, event) {
+	      var fields = this.state.fields;
+	      var val = event.target.value;
+	      fields[key].value = val;
+	      fields[key].error = this.validate(key, val);
+	      this.setState({ fields: fields });
+	    }
+	  }, {
+	    key: 'handleBlur',
+	    value: function handleBlur(field) {
+	      var fields = this.state.fields;
+	      fields[field].touched = true;
+	      this.setState({ fields: fields });
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
+	      var _state$fields2 = this.state.fields;
+	      var email = _state$fields2.email;
+	      var password = _state$fields2.password;
+	      var vcode = _state$fields2.vcode;
+	
 	      return _react2.default.createElement(
 	        'form',
 	        null,
@@ -60340,12 +61497,13 @@
 	                null,
 	                _react2.default.createElement('i', { className: 'fa fa-envelope-o fa-fw', 'aria-hidden': 'true' })
 	              ),
-	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入邮箱地址' })
+	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入邮箱地址',
+	                onChange: this.handleChange.bind(this, 'email'), onBlur: this.handleBlur.bind(this, 'email') })
 	            ),
 	            _react2.default.createElement(
 	              _reactBootstrap.HelpBlock,
 	              null,
-	              '　'
+	              email.touched && email.error || '　'
 	            )
 	          ), _react2.default.createElement(
 	            _reactBootstrap.FormGroup,
@@ -60358,16 +61516,17 @@
 	                null,
 	                _react2.default.createElement('i', { className: 'fa fa-lock fa-fw', 'aria-hidden': 'true' })
 	              ),
-	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入登录密码' })
+	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'password', placeholder: '请输入登录密码',
+	                onChange: this.handleChange.bind(this, 'password'), onBlur: this.handleBlur.bind(this, 'password') })
 	            ),
 	            _react2.default.createElement(
 	              _reactBootstrap.HelpBlock,
 	              null,
-	              '　'
+	              password.touched && password.error || '　'
 	            )
 	          ), _react2.default.createElement(
 	            _reactBootstrap.FormGroup,
-	            { controlId: 'formBasicText', key: 'input-code' },
+	            { controlId: 'formBasicText', key: 'input-vcode' },
 	            _react2.default.createElement(
 	              _reactBootstrap.InputGroup,
 	              null,
@@ -60376,19 +61535,42 @@
 	                null,
 	                _react2.default.createElement('i', { className: 'fa fa-key fa-fw', 'aria-hidden': 'true' })
 	              ),
-	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入验证码' })
+	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入验证码',
+	                onChange: this.handleChange.bind(this, 'vcode'), onBlur: this.handleBlur.bind(this, 'vcode') }),
+	              _react2.default.createElement(
+	                _reactBootstrap.InputGroup.Button,
+	                null,
+	                _react2.default.createElement(
+	                  _reactBootstrap.Button,
+	                  { onClick: this.handleVcodeClick.bind(this), disabled: this.props.vcode_sent || !!email.error },
+	                  this.props.vcode_sent ? this.props.vcode_count + '秒后重新获取' : '获取验证码',
+	                  this.props.vcode_sending && _react2.default.createElement('i', { className: 'fa fa-spinner fa-pulse fa-fw' })
+	                )
+	              )
 	            ),
 	            _react2.default.createElement(
 	              _reactBootstrap.HelpBlock,
 	              null,
-	              '　'
+	              this.props.vcode_msg || vcode.touched && vcode.error || '　'
 	            )
 	          ), _react2.default.createElement(
 	            'div',
 	            { className: _style2.default.container, key: 'input-btn' },
 	            _react2.default.createElement(
+	              'div',
+	              { className: _style2.default.error, key: 'input-error' },
+	              this.props.reg_msg || '　'
+	            ),
+	            _react2.default.createElement(
 	              _reactBootstrap.SplitButton,
-	              { className: _style2.default.button, bsStyle: 'default', title: '注册', id: 'btn', onSelect: this.props.changeForm },
+	              { className: _style2.default.button, bsStyle: 'default', id: 'btn', onSelect: this.props.changeForm,
+	                title: _react2.default.createElement(
+	                  'span',
+	                  null,
+	                  '注册',
+	                  this.props.registering && _react2.default.createElement('i', { className: 'fa fa-spinner fa-spin fa-fw' })
+	                ),
+	                onClick: this.handleRegisterClick.bind(this) },
 	              _react2.default.createElement(
 	                _reactBootstrap.MenuItem,
 	                { eventKey: 'login' },
@@ -60417,244 +61599,12 @@
 	exports.default = RegisterForm;
 
 /***/ },
-/* 798 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// style-loader: Adds some css to the DOM by adding a <style> tag
-	
-	// load the styles
-	var content = __webpack_require__(799);
-	if(typeof content === 'string') content = [[module.id, content, '']];
-	// add the styles to the DOM
-	var update = __webpack_require__(796)(content, {});
-	if(content.locals) module.exports = content.locals;
-	// Hot Module Replacement
-	if(false) {
-		// When the styles change, update the <style> tags
-		if(!content.locals) {
-			module.hot.accept("!!./../../../node_modules/css-loader/index.js?modules&importLoaders=1&localIdentName=[name]_[local]_[hash:base64:5]!./../../../node_modules/postcss-loader/index.js?sourceMap!./../../../node_modules/sass-loader/index.js?sourceMap!./style.scss", function() {
-				var newContent = require("!!./../../../node_modules/css-loader/index.js?modules&importLoaders=1&localIdentName=[name]_[local]_[hash:base64:5]!./../../../node_modules/postcss-loader/index.js?sourceMap!./../../../node_modules/sass-loader/index.js?sourceMap!./style.scss");
-				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-				update(newContent);
-			});
-		}
-		// When the module is disposed, remove the <style> tags
-		module.hot.dispose(function() { update(); });
-	}
-
-/***/ },
-/* 799 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports = module.exports = __webpack_require__(795)();
-	// imports
-	
-	
-	// module
-	exports.push([module.id, ".style_container_sxamD {\n  position: relative;\n  width: 100%;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-align-content: center;\n      -ms-flex-line-pack: center;\n          align-content: center;\n  margin-top: 60px; }\n  .style_container_sxamD .style_button_1TCss {\n    background-color: black;\n    color: white; }\n    .style_container_sxamD .style_button_1TCss:hover {\n      background-color: rgba(0, 0, 0, 0.15);\n      color: white; }\n", ""]);
-	
-	// exports
-	exports.locals = {
-		"container": "style_container_sxamD",
-		"button": "style_button_1TCss"
-	};
-
-/***/ },
-/* 800 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _dec, _class;
-	
-	var _react = __webpack_require__(299);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _reactRedux = __webpack_require__(472);
-	
-	var _reactBootstrap = __webpack_require__(574);
-	
-	var _rcQueueAnim = __webpack_require__(788);
-	
-	var _rcQueueAnim2 = _interopRequireDefault(_rcQueueAnim);
-	
-	var _style = __webpack_require__(801);
-	
-	var _style2 = _interopRequireDefault(_style);
-	
-	var _account = __webpack_require__(565);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var ResetPasswordForm = (_dec = (0, _reactRedux.connect)(function (state) {
-	  return {
-	    formState: state.account.formState
-	  };
-	}, { changeForm: _account.changeForm }), _dec(_class = function (_React$Component) {
-	  _inherits(ResetPasswordForm, _React$Component);
-	
-	  function ResetPasswordForm() {
-	    _classCallCheck(this, ResetPasswordForm);
-	
-	    return _possibleConstructorReturn(this, Object.getPrototypeOf(ResetPasswordForm).apply(this, arguments));
-	  }
-	
-	  _createClass(ResetPasswordForm, [{
-	    key: 'render',
-	    value: function render() {
-	      return _react2.default.createElement(
-	        'form',
-	        null,
-	        _react2.default.createElement(
-	          _rcQueueAnim2.default,
-	          { duration: 1000 },
-	          [_react2.default.createElement(
-	            _reactBootstrap.FormGroup,
-	            { controlId: 'formBasicText', key: 'input-mail' },
-	            _react2.default.createElement(
-	              _reactBootstrap.InputGroup,
-	              null,
-	              _react2.default.createElement(
-	                _reactBootstrap.InputGroup.Addon,
-	                null,
-	                _react2.default.createElement('i', { className: 'fa fa-envelope-o fa-fw', 'aria-hidden': 'true' })
-	              ),
-	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入邮箱地址' })
-	            ),
-	            _react2.default.createElement(
-	              _reactBootstrap.HelpBlock,
-	              null,
-	              '　'
-	            )
-	          ), _react2.default.createElement(
-	            _reactBootstrap.FormGroup,
-	            { controlId: 'formBasicText', key: 'input-old' },
-	            _react2.default.createElement(
-	              _reactBootstrap.InputGroup,
-	              null,
-	              _react2.default.createElement(
-	                _reactBootstrap.InputGroup.Addon,
-	                null,
-	                _react2.default.createElement('i', { className: 'fa fa-unlock fa-fw', 'aria-hidden': 'true' })
-	              ),
-	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入旧登录密码' })
-	            ),
-	            _react2.default.createElement(
-	              _reactBootstrap.HelpBlock,
-	              null,
-	              '　'
-	            )
-	          ), _react2.default.createElement(
-	            _reactBootstrap.FormGroup,
-	            { controlId: 'formBasicText', key: 'input-new' },
-	            _react2.default.createElement(
-	              _reactBootstrap.InputGroup,
-	              null,
-	              _react2.default.createElement(
-	                _reactBootstrap.InputGroup.Addon,
-	                null,
-	                _react2.default.createElement('i', { className: 'fa fa-lock fa-fw', 'aria-hidden': 'true' })
-	              ),
-	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入新登录密码' })
-	            ),
-	            _react2.default.createElement(
-	              _reactBootstrap.HelpBlock,
-	              null,
-	              '　'
-	            )
-	          ), _react2.default.createElement(
-	            'div',
-	            { className: _style2.default.container, key: 'input-btn' },
-	            _react2.default.createElement(
-	              _reactBootstrap.SplitButton,
-	              { className: _style2.default.button, bsStyle: 'default', title: '修改密码', id: 'btn', onSelect: this.props.changeForm },
-	              _react2.default.createElement(
-	                _reactBootstrap.MenuItem,
-	                { eventKey: 'login' },
-	                '登录'
-	              ),
-	              _react2.default.createElement(
-	                _reactBootstrap.MenuItem,
-	                { eventKey: 'register' },
-	                '注册'
-	              ),
-	              _react2.default.createElement(_reactBootstrap.MenuItem, { divider: true }),
-	              _react2.default.createElement(
-	                _reactBootstrap.MenuItem,
-	                { eventKey: 'find' },
-	                '找回密码'
-	              )
-	            )
-	          )]
-	        )
-	      );
-	    }
-	  }]);
-	
-	  return ResetPasswordForm;
-	}(_react2.default.Component)) || _class);
-	exports.default = ResetPasswordForm;
-
-/***/ },
-/* 801 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// style-loader: Adds some css to the DOM by adding a <style> tag
-	
-	// load the styles
-	var content = __webpack_require__(802);
-	if(typeof content === 'string') content = [[module.id, content, '']];
-	// add the styles to the DOM
-	var update = __webpack_require__(796)(content, {});
-	if(content.locals) module.exports = content.locals;
-	// Hot Module Replacement
-	if(false) {
-		// When the styles change, update the <style> tags
-		if(!content.locals) {
-			module.hot.accept("!!./../../../node_modules/css-loader/index.js?modules&importLoaders=1&localIdentName=[name]_[local]_[hash:base64:5]!./../../../node_modules/postcss-loader/index.js?sourceMap!./../../../node_modules/sass-loader/index.js?sourceMap!./style.scss", function() {
-				var newContent = require("!!./../../../node_modules/css-loader/index.js?modules&importLoaders=1&localIdentName=[name]_[local]_[hash:base64:5]!./../../../node_modules/postcss-loader/index.js?sourceMap!./../../../node_modules/sass-loader/index.js?sourceMap!./style.scss");
-				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-				update(newContent);
-			});
-		}
-		// When the module is disposed, remove the <style> tags
-		module.hot.dispose(function() { update(); });
-	}
-
-/***/ },
+/* 799 */,
+/* 800 */,
+/* 801 */,
 /* 802 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(795)();
-	// imports
-	
-	
-	// module
-	exports.push([module.id, ".style_container_2GSWC {\n  position: relative;\n  width: 100%;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-align-content: center;\n      -ms-flex-line-pack: center;\n          align-content: center;\n  margin-top: 60px; }\n  .style_container_2GSWC .style_button_24E5n {\n    background-color: black;\n    color: white; }\n    .style_container_2GSWC .style_button_24E5n:hover {\n      background-color: rgba(0, 0, 0, 0.15);\n      color: white; }\n", ""]);
-	
-	// exports
-	exports.locals = {
-		"container": "style_container_2GSWC",
-		"button": "style_button_24E5n"
-	};
-
-/***/ },
-/* 803 */
-/***/ function(module, exports, __webpack_require__) {
-
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
@@ -60677,7 +61627,11 @@
 	
 	var _rcQueueAnim2 = _interopRequireDefault(_rcQueueAnim);
 	
-	var _style = __webpack_require__(804);
+	var _is_js = __webpack_require__(793);
+	
+	var _is_js2 = _interopRequireDefault(_is_js);
+	
+	var _style = __webpack_require__(803);
 	
 	var _style2 = _interopRequireDefault(_style);
 	
@@ -60693,20 +61647,80 @@
 	
 	var FindPasswordForm = (_dec = (0, _reactRedux.connect)(function (state) {
 	  return {
-	    formState: state.account.formState
+	    formState: state.account.formState,
+	    vcode_sending: state.account.vcode_sending,
+	    vcode_sent: state.account.vcode_sent,
+	    vcode: state.account.vcode,
+	    vcode_msg: state.account.vcode_msg,
+	    vcode_count: state.account.vcode_count,
+	    finding: state.account.finding,
+	    find_msg: state.account.find_msg
 	  };
-	}, { changeForm: _account.changeForm }), _dec(_class = function (_React$Component) {
+	}, { changeForm: _account.changeForm, verifyEmail: _account.verifyEmail, findPassword: _account.findPassword }), _dec(_class = function (_React$Component) {
 	  _inherits(FindPasswordForm, _React$Component);
 	
-	  function FindPasswordForm() {
+	  function FindPasswordForm(props) {
 	    _classCallCheck(this, FindPasswordForm);
 	
-	    return _possibleConstructorReturn(this, Object.getPrototypeOf(FindPasswordForm).apply(this, arguments));
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(FindPasswordForm).call(this, props));
+	
+	    _this.state = {
+	      fields: {
+	        email: { touched: false, value: '', error: '此项为必填项。' },
+	        vcode: { touched: false, value: '', error: '此项为必填项。' }
+	      }
+	    };
+	    return _this;
 	  }
 	
 	  _createClass(FindPasswordForm, [{
+	    key: 'handleFindClick',
+	    value: function handleFindClick() {
+	      var _state$fields = this.state.fields;
+	      var email = _state$fields.email;
+	      var vcode = _state$fields.vcode;
+	
+	      if (email.error || vcode.error || this.props.vcode_msg || this.props.finding) return;
+	      this.props.findPassword(email.value);
+	    }
+	  }, {
+	    key: 'handleVcodeClick',
+	    value: function handleVcodeClick() {
+	      this.props.verifyEmail(this.state.fields.email.value);
+	    }
+	  }, {
+	    key: 'validate',
+	    value: function validate(key, val) {
+	      switch (key) {
+	        case 'email':
+	          return !val ? '此项为必填项。' : !_is_js2.default.email(val) ? '邮箱地址不合法。' : '';
+	        case 'vcode':
+	          return val !== this.props.vcode ? '验证码输入有误。' : !val ? '此项为必填项。' : '';
+	      }
+	    }
+	  }, {
+	    key: 'handleChange',
+	    value: function handleChange(key, event) {
+	      var fields = this.state.fields;
+	      var val = event.target.value;
+	      fields[key].value = val;
+	      fields[key].error = this.validate(key, val);
+	      this.setState({ fields: fields });
+	    }
+	  }, {
+	    key: 'handleBlur',
+	    value: function handleBlur(field) {
+	      var fields = this.state.fields;
+	      fields[field].touched = true;
+	      this.setState({ fields: fields });
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
+	      var _state$fields2 = this.state.fields;
+	      var email = _state$fields2.email;
+	      var vcode = _state$fields2.vcode;
+	
 	      return _react2.default.createElement(
 	        'form',
 	        null,
@@ -60724,16 +61738,17 @@
 	                null,
 	                _react2.default.createElement('i', { className: 'fa fa-envelope-o fa-fw', 'aria-hidden': 'true' })
 	              ),
-	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入邮箱地址' })
+	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入邮箱地址',
+	                onChange: this.handleChange.bind(this, 'email'), onBlur: this.handleBlur.bind(this, 'email') })
 	            ),
 	            _react2.default.createElement(
 	              _reactBootstrap.HelpBlock,
 	              null,
-	              '　'
+	              email.touched && email.error || '　'
 	            )
 	          ), _react2.default.createElement(
 	            _reactBootstrap.FormGroup,
-	            { controlId: 'formBasicText', key: 'input-code' },
+	            { controlId: 'formBasicText', key: 'input-vcode' },
 	            _react2.default.createElement(
 	              _reactBootstrap.InputGroup,
 	              null,
@@ -60742,19 +61757,42 @@
 	                null,
 	                _react2.default.createElement('i', { className: 'fa fa-key fa-fw', 'aria-hidden': 'true' })
 	              ),
-	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入验证码' })
+	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入验证码',
+	                onChange: this.handleChange.bind(this, 'vcode'), onBlur: this.handleBlur.bind(this, 'vcode') }),
+	              _react2.default.createElement(
+	                _reactBootstrap.InputGroup.Button,
+	                null,
+	                _react2.default.createElement(
+	                  _reactBootstrap.Button,
+	                  { onClick: this.handleVcodeClick.bind(this), disabled: this.props.vcode_sent || !!email.error },
+	                  this.props.vcode_sent ? this.props.vcode_count + '秒后重新获取' : '获取验证码',
+	                  this.props.vcode_sending && _react2.default.createElement('i', { className: 'fa fa-spinner fa-pulse fa-fw' })
+	                )
+	              )
 	            ),
 	            _react2.default.createElement(
 	              _reactBootstrap.HelpBlock,
 	              null,
-	              '　'
+	              this.props.vcode_msg || vcode.touched && vcode.error || '　'
 	            )
 	          ), _react2.default.createElement(
 	            'div',
 	            { className: _style2.default.container, key: 'input-btn' },
 	            _react2.default.createElement(
+	              'div',
+	              { className: _style2.default.error, key: 'input-error' },
+	              this.props.find_msg || '　'
+	            ),
+	            _react2.default.createElement(
 	              _reactBootstrap.SplitButton,
-	              { className: _style2.default.button, bsStyle: 'default', title: '找回密码', id: 'btn', onSelect: this.props.changeForm },
+	              { className: _style2.default.button, bsStyle: 'default', id: 'btn', onSelect: this.props.changeForm,
+	                title: _react2.default.createElement(
+	                  'span',
+	                  null,
+	                  '找回密码',
+	                  this.props.finding && _react2.default.createElement('i', { className: 'fa fa-spinner fa-spin fa-fw' })
+	                ),
+	                onClick: this.handleFindClick.bind(this) },
 	              _react2.default.createElement(
 	                _reactBootstrap.MenuItem,
 	                { eventKey: 'login' },
@@ -60783,16 +61821,16 @@
 	exports.default = FindPasswordForm;
 
 /***/ },
-/* 804 */
+/* 803 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(805);
+	var content = __webpack_require__(804);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(796)(content, {});
+	var update = __webpack_require__(797)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -60807,35 +61845,36 @@
 		// When the module is disposed, remove the <style> tags
 		module.hot.dispose(function() { update(); });
 	}
+
+/***/ },
+/* 804 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(796)();
+	// imports
+	
+	
+	// module
+	exports.push([module.id, ".style_container_3jH8F {\n  position: relative;\n  width: 100%;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-align-content: center;\n      -ms-flex-line-pack: center;\n          align-content: center;\n  margin-top: 20px; }\n  .style_container_3jH8F .style_error_2n0jn {\n    color: white;\n    text-align: center;\n    margin-bottom: 20px; }\n  .style_container_3jH8F .style_button_xudTI {\n    background-color: black;\n    color: white; }\n    .style_container_3jH8F .style_button_xudTI:hover {\n      background-color: rgba(0, 0, 0, 0.15);\n      color: white; }\n", ""]);
+	
+	// exports
+	exports.locals = {
+		"container": "style_container_3jH8F",
+		"error": "style_error_2n0jn",
+		"button": "style_button_xudTI"
+	};
 
 /***/ },
 /* 805 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(795)();
-	// imports
-	
-	
-	// module
-	exports.push([module.id, ".style_container_3jH8F {\n  position: relative;\n  width: 100%;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-align-content: center;\n      -ms-flex-line-pack: center;\n          align-content: center;\n  margin-top: 60px; }\n  .style_container_3jH8F .style_button_xudTI {\n    background-color: black;\n    color: white; }\n    .style_container_3jH8F .style_button_xudTI:hover {\n      background-color: rgba(0, 0, 0, 0.15);\n      color: white; }\n", ""]);
-	
-	// exports
-	exports.locals = {
-		"container": "style_container_3jH8F",
-		"button": "style_button_xudTI"
-	};
-
-/***/ },
-/* 806 */
-/***/ function(module, exports, __webpack_require__) {
-
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(807);
+	var content = __webpack_require__(806);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(796)(content, {});
+	var update = __webpack_require__(797)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -60852,10 +61891,10 @@
 	}
 
 /***/ },
-/* 807 */
+/* 806 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(795)();
+	exports = module.exports = __webpack_require__(796)();
 	// imports
 	
 	
@@ -60872,16 +61911,16 @@
 	};
 
 /***/ },
-/* 808 */
+/* 807 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(809);
+	var content = __webpack_require__(808);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(796)(content, {});
+	var update = __webpack_require__(797)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -60898,21 +61937,21 @@
 	}
 
 /***/ },
-/* 809 */
+/* 808 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(795)();
+	exports = module.exports = __webpack_require__(796)();
 	// imports
 	
 	
 	// module
-	exports.push([module.id, "html, body{\n  border: none;\n  margin: 0;\n  padding: 0;\n  position: relative;\n  font-family: \"Helvetica Neue\";\n  width: 100%;\n  height: 100%;\n  background-color: #000;\n}\n\n.btn {\n  color: white;\n  background-color: black;\n}\n\n.dropdown {\n  margin: 0 auto;\n}\n\n.caret {\n  color: white;\n}\n\n.dropdown-toggle {\n  background-color: black; \n}\n\n.dropdown-menu {\n  background-color: black;\n  border-color: white;\n}\n\n.dropdown-menu > li > a {\n  color: white;\n}\n\n.dropdown-menu > li > a :hover{\n  background-color: #555555;\n}\n\n.form-control {\n  background-color: black;\n}\n", ""]);
+	exports.push([module.id, "html, body{\n  border: none;\n  margin: 0;\n  padding: 0;\n  position: relative;\n  font-family: \"Helvetica Neue\";\n  width: 100%;\n  height: 100%;\n  background-color: #000;\n}\n\n.btn {\n  color: white;\n  background-color: black;\n}\n\n.dropdown {\n  margin: 0 auto;\n}\n\n.caret {\n  color: white;\n}\n\n.dropdown-toggle {\n  background-color: black; \n}\n\n.dropdown-menu {\n  background-color: black;\n  border-color: white;\n}\n\n.dropdown-menu > li > a {\n  color: white;\n}\n\n.dropdown-menu > li > a :hover{\n  background-color: #555555;\n}\n\n.form-control {\n  background-color: black;\n  color: white;\n}\n", ""]);
 	
 	// exports
 
 
 /***/ },
-/* 810 */
+/* 809 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -60927,15 +61966,15 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _Header = __webpack_require__(811);
+	var _Header = __webpack_require__(810);
 	
 	var _Header2 = _interopRequireDefault(_Header);
 	
-	var _Panel = __webpack_require__(813);
+	var _Panel = __webpack_require__(812);
 	
 	var _Panel2 = _interopRequireDefault(_Panel);
 	
-	var _Video = __webpack_require__(820);
+	var _Video = __webpack_require__(819);
 	
 	var _Video2 = _interopRequireDefault(_Video);
 	
@@ -60979,7 +62018,7 @@
 	exports.default = DevicePage;
 
 /***/ },
-/* 811 */
+/* 810 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -61000,7 +62039,7 @@
 	
 	var _device = __webpack_require__(564);
 	
-	var _socket = __webpack_require__(812);
+	var _socket = __webpack_require__(811);
 	
 	var _socket2 = _interopRequireDefault(_socket);
 	
@@ -61096,7 +62135,7 @@
 	exports.default = Header;
 
 /***/ },
-/* 812 */
+/* 811 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -61250,7 +62289,7 @@
 	exports.default = remote;
 
 /***/ },
-/* 813 */
+/* 812 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -61269,27 +62308,27 @@
 	
 	var _reactRedux = __webpack_require__(472);
 	
-	var _Buttons = __webpack_require__(814);
+	var _Buttons = __webpack_require__(813);
 	
 	var _Buttons2 = _interopRequireDefault(_Buttons);
 	
-	var _Switches = __webpack_require__(815);
+	var _Switches = __webpack_require__(814);
 	
 	var _Switches2 = _interopRequireDefault(_Switches);
 	
-	var _Upload = __webpack_require__(816);
+	var _Upload = __webpack_require__(815);
 	
 	var _Upload2 = _interopRequireDefault(_Upload);
 	
-	var _KeyStroke = __webpack_require__(817);
+	var _KeyStroke = __webpack_require__(816);
 	
 	var _KeyStroke2 = _interopRequireDefault(_KeyStroke);
 	
-	var _Comment = __webpack_require__(818);
+	var _Comment = __webpack_require__(817);
 	
 	var _Comment2 = _interopRequireDefault(_Comment);
 	
-	var _Setting = __webpack_require__(819);
+	var _Setting = __webpack_require__(818);
 	
 	var _Setting2 = _interopRequireDefault(_Setting);
 	
@@ -61341,7 +62380,7 @@
 	exports.default = Panel;
 
 /***/ },
-/* 814 */
+/* 813 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -61360,7 +62399,7 @@
 	
 	var _reactRedux = __webpack_require__(472);
 	
-	var _socket = __webpack_require__(812);
+	var _socket = __webpack_require__(811);
 	
 	var _socket2 = _interopRequireDefault(_socket);
 	
@@ -61456,7 +62495,7 @@
 	exports.default = Buttons;
 
 /***/ },
-/* 815 */
+/* 814 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -61475,7 +62514,7 @@
 	
 	var _reactRedux = __webpack_require__(472);
 	
-	var _socket = __webpack_require__(812);
+	var _socket = __webpack_require__(811);
 	
 	var _socket2 = _interopRequireDefault(_socket);
 	
@@ -61547,7 +62586,7 @@
 	exports.default = Switches;
 
 /***/ },
-/* 816 */
+/* 815 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -61685,7 +62724,7 @@
 	exports.default = Upload;
 
 /***/ },
-/* 817 */
+/* 816 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -61748,7 +62787,7 @@
 	exports.default = KeyStroke;
 
 /***/ },
-/* 818 */
+/* 817 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -61763,7 +62802,7 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _socket = __webpack_require__(812);
+	var _socket = __webpack_require__(811);
 	
 	var _socket2 = _interopRequireDefault(_socket);
 	
@@ -61836,7 +62875,7 @@
 	exports.default = Comment;
 
 /***/ },
-/* 819 */
+/* 818 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -62001,7 +63040,7 @@
 	exports.default = Setting;
 
 /***/ },
-/* 820 */
+/* 819 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -62090,6 +63129,319 @@
 	}(_react2.default.Component);
 	
 	exports.default = Video;
+
+/***/ },
+/* 820 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+	
+	// load the styles
+	var content = __webpack_require__(821);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(797)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../../node_modules/css-loader/index.js?modules&importLoaders=1&localIdentName=[name]_[local]_[hash:base64:5]!./../../../node_modules/postcss-loader/index.js?sourceMap!./../../../node_modules/sass-loader/index.js?sourceMap!./style.scss", function() {
+				var newContent = require("!!./../../../node_modules/css-loader/index.js?modules&importLoaders=1&localIdentName=[name]_[local]_[hash:base64:5]!./../../../node_modules/postcss-loader/index.js?sourceMap!./../../../node_modules/sass-loader/index.js?sourceMap!./style.scss");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 821 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(796)();
+	// imports
+	
+	
+	// module
+	exports.push([module.id, ".style_container_sxamD {\n  position: relative;\n  width: 100%;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-align-content: center;\n      -ms-flex-line-pack: center;\n          align-content: center;\n  margin-top: 20px; }\n  .style_container_sxamD .style_error_1Tss5 {\n    color: white;\n    text-align: center;\n    margin-bottom: 20px; }\n  .style_container_sxamD .style_button_1TCss {\n    background-color: black;\n    color: white; }\n    .style_container_sxamD .style_button_1TCss:hover {\n      background-color: rgba(0, 0, 0, 0.15);\n      color: white; }\n", ""]);
+	
+	// exports
+	exports.locals = {
+		"container": "style_container_sxamD",
+		"error": "style_error_1Tss5",
+		"button": "style_button_1TCss"
+	};
+
+/***/ },
+/* 822 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _dec, _class;
+	
+	var _react = __webpack_require__(299);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRedux = __webpack_require__(472);
+	
+	var _reactBootstrap = __webpack_require__(574);
+	
+	var _rcQueueAnim = __webpack_require__(788);
+	
+	var _rcQueueAnim2 = _interopRequireDefault(_rcQueueAnim);
+	
+	var _is_js = __webpack_require__(793);
+	
+	var _is_js2 = _interopRequireDefault(_is_js);
+	
+	var _style = __webpack_require__(823);
+	
+	var _style2 = _interopRequireDefault(_style);
+	
+	var _account = __webpack_require__(565);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var regex = /(?=.*\d)(?=.*[a-zA-Z])[\da-zA-Z]{8,20}/;
+	
+	var ChangePasswordForm = (_dec = (0, _reactRedux.connect)(function (state) {
+	  return {
+	    formState: state.account.formState,
+	    changing: state.account.changing,
+	    change_msg: state.account.change_msg
+	  };
+	}, { changeForm: _account.changeForm, changePassword: _account.changePassword }), _dec(_class = function (_React$Component) {
+	  _inherits(ChangePasswordForm, _React$Component);
+	
+	  function ChangePasswordForm(props) {
+	    _classCallCheck(this, ChangePasswordForm);
+	
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ChangePasswordForm).call(this, props));
+	
+	    _this.state = {
+	      fields: {
+	        email: { touched: false, value: '', error: '此项为必填项。' },
+	        oldpass: { touched: false, value: '', error: '此项为必填项。' },
+	        newpass: { touched: false, value: '', error: '此项为必填项。' }
+	      }
+	    };
+	    return _this;
+	  }
+	
+	  _createClass(ChangePasswordForm, [{
+	    key: 'validate',
+	    value: function validate(key, val) {
+	      switch (key) {
+	        case 'email':
+	          return !val ? '此项为必填项。' : !_is_js2.default.email(val) ? '邮箱地址不合法。' : '';
+	        case 'newpass':
+	          return !val ? '此项为必填项。' : !regex.test(val) ? '密码长度可为8至20位，其中必须包含数字和字母组合。' : '';
+	        case 'oldpass':
+	          return !val ? '此项为必填项。' : '';
+	      }
+	    }
+	  }, {
+	    key: 'handleChangeClick',
+	    value: function handleChangeClick() {
+	      var _state$fields = this.state.fields;
+	      var email = _state$fields.email;
+	      var oldpass = _state$fields.oldpass;
+	      var newpass = _state$fields.newpass;
+	
+	      if (email.error || oldpass.error || newpass.error || this.props.changing) return;
+	      this.props.changePassword(email.value, oldpass.value, newpass.value);
+	    }
+	  }, {
+	    key: 'handleChange',
+	    value: function handleChange(key, event) {
+	      var fields = this.state.fields;
+	      var val = event.target.value;
+	      fields[key].value = val;
+	      fields[key].error = this.validate(key, val);
+	      this.setState({ fields: fields });
+	    }
+	  }, {
+	    key: 'handleBlur',
+	    value: function handleBlur(field) {
+	      var fields = this.state.fields;
+	      fields[field].touched = true;
+	      this.setState({ fields: fields });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _state$fields2 = this.state.fields;
+	      var email = _state$fields2.email;
+	      var oldpass = _state$fields2.oldpass;
+	      var newpass = _state$fields2.newpass;
+	
+	      return _react2.default.createElement(
+	        'form',
+	        null,
+	        _react2.default.createElement(
+	          _rcQueueAnim2.default,
+	          { duration: 1000 },
+	          [_react2.default.createElement(
+	            _reactBootstrap.FormGroup,
+	            { controlId: 'formBasicText', key: 'input-mail' },
+	            _react2.default.createElement(
+	              _reactBootstrap.InputGroup,
+	              null,
+	              _react2.default.createElement(
+	                _reactBootstrap.InputGroup.Addon,
+	                null,
+	                _react2.default.createElement('i', { className: 'fa fa-envelope-o fa-fw', 'aria-hidden': 'true' })
+	              ),
+	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', placeholder: '请输入邮箱地址',
+	                onChange: this.handleChange.bind(this, 'email'), onBlur: this.handleBlur.bind(this, 'email') })
+	            ),
+	            _react2.default.createElement(
+	              _reactBootstrap.HelpBlock,
+	              null,
+	              email.touched && email.error || '　'
+	            )
+	          ), _react2.default.createElement(
+	            _reactBootstrap.FormGroup,
+	            { controlId: 'formBasicText', key: 'input-old' },
+	            _react2.default.createElement(
+	              _reactBootstrap.InputGroup,
+	              null,
+	              _react2.default.createElement(
+	                _reactBootstrap.InputGroup.Addon,
+	                null,
+	                _react2.default.createElement('i', { className: 'fa fa-unlock fa-fw', 'aria-hidden': 'true' })
+	              ),
+	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'password', placeholder: '请输入旧登录密码',
+	                onChange: this.handleChange.bind(this, 'oldpass'), onBlur: this.handleBlur.bind(this, 'oldpass') })
+	            ),
+	            _react2.default.createElement(
+	              _reactBootstrap.HelpBlock,
+	              null,
+	              oldpass.touched && oldpass.error || '　'
+	            )
+	          ), _react2.default.createElement(
+	            _reactBootstrap.FormGroup,
+	            { controlId: 'formBasicText', key: 'input-new' },
+	            _react2.default.createElement(
+	              _reactBootstrap.InputGroup,
+	              null,
+	              _react2.default.createElement(
+	                _reactBootstrap.InputGroup.Addon,
+	                null,
+	                _react2.default.createElement('i', { className: 'fa fa-lock fa-fw', 'aria-hidden': 'true' })
+	              ),
+	              _react2.default.createElement(_reactBootstrap.FormControl, { type: 'password', placeholder: '请输入新登录密码',
+	                onChange: this.handleChange.bind(this, 'newpass'), onBlur: this.handleBlur.bind(this, 'newpass') })
+	            ),
+	            _react2.default.createElement(
+	              _reactBootstrap.HelpBlock,
+	              null,
+	              newpass.touched && newpass.error || '　'
+	            )
+	          ), _react2.default.createElement(
+	            'div',
+	            { className: _style2.default.container, key: 'input-btn' },
+	            _react2.default.createElement(
+	              'div',
+	              { className: _style2.default.error, key: 'input-error' },
+	              this.props.change_msg || '　'
+	            ),
+	            _react2.default.createElement(
+	              _reactBootstrap.SplitButton,
+	              { className: _style2.default.button, bsStyle: 'default', id: 'btn', onSelect: this.props.changeForm,
+	                title: _react2.default.createElement(
+	                  'span',
+	                  null,
+	                  '修改密码',
+	                  this.props.changing && _react2.default.createElement('i', { className: 'fa fa-spinner fa-spin fa-fw' })
+	                ),
+	                onClick: this.handleChangeClick.bind(this) },
+	              _react2.default.createElement(
+	                _reactBootstrap.MenuItem,
+	                { eventKey: 'login' },
+	                '登录'
+	              ),
+	              _react2.default.createElement(
+	                _reactBootstrap.MenuItem,
+	                { eventKey: 'register' },
+	                '注册'
+	              ),
+	              _react2.default.createElement(_reactBootstrap.MenuItem, { divider: true }),
+	              _react2.default.createElement(
+	                _reactBootstrap.MenuItem,
+	                { eventKey: 'find' },
+	                '找回密码'
+	              )
+	            )
+	          )]
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return ChangePasswordForm;
+	}(_react2.default.Component)) || _class);
+	exports.default = ChangePasswordForm;
+
+/***/ },
+/* 823 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+	
+	// load the styles
+	var content = __webpack_require__(824);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(797)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../../node_modules/css-loader/index.js?modules&importLoaders=1&localIdentName=[name]_[local]_[hash:base64:5]!./../../../node_modules/postcss-loader/index.js?sourceMap!./../../../node_modules/sass-loader/index.js?sourceMap!./style.scss", function() {
+				var newContent = require("!!./../../../node_modules/css-loader/index.js?modules&importLoaders=1&localIdentName=[name]_[local]_[hash:base64:5]!./../../../node_modules/postcss-loader/index.js?sourceMap!./../../../node_modules/sass-loader/index.js?sourceMap!./style.scss");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 824 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(796)();
+	// imports
+	
+	
+	// module
+	exports.push([module.id, ".style_container_1soBO {\n  position: relative;\n  width: 100%;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-align-content: center;\n      -ms-flex-line-pack: center;\n          align-content: center;\n  margin-top: 20px; }\n  .style_container_1soBO .style_error_12ERo {\n    color: white;\n    text-align: center;\n    margin-bottom: 20px; }\n  .style_container_1soBO .style_button_2XQFo {\n    background-color: black;\n    color: white; }\n    .style_container_1soBO .style_button_2XQFo:hover {\n      background-color: rgba(0, 0, 0, 0.15);\n      color: white; }\n", ""]);
+	
+	// exports
+	exports.locals = {
+		"container": "style_container_1soBO",
+		"error": "style_error_12ERo",
+		"button": "style_button_2XQFo"
+	};
 
 /***/ }
 /******/ ]);
