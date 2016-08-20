@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*- 
+from __future__ import print_function
+import logging
+
 from handlers.base import BaseHandler
 from models import User
-import logging
 
 logger = logging.getLogger('server.' + __name__)
 
 
 class HomeHandler(BaseHandler):
 
-    def get(self):
+    def get(self, *args):
         self.render('index.html')

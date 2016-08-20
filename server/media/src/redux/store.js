@@ -73,6 +73,6 @@ const _routerMiddleware = routerMiddleware(browserHistory);
 
 export default createStore(combineReducers({account, device, routing}), compose(
     applyMiddleware(_ajaxMiddleware, _routerMiddleware),
-    window.devToolsExtension && window.devToolsExtension()
+    window.devToolsExtension ? window.devToolsExtension() : f => f
   )
 );

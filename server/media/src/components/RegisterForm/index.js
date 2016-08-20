@@ -1,12 +1,12 @@
 'use strict';
 import React from 'react';
 import { connect } from 'react-redux';
-import is from 'is_js';
 import {
   FormGroup, FormControl, HelpBlock, ControlLabel, SplitButton, MenuItem,
   InputGroup, Button
 } from 'react-bootstrap';
 import QueueAnim from 'rc-queue-anim';
+import is from 'is_js';
 
 import style from './style';
 

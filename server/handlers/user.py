@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*- 
+import logging
+from email.mime.text import MIMEText
+
 from tornado.options import options
 from tornado import gen
-from email.mime.text import MIMEText
+
 from async_mailer import mailer
+from handlers.base import BaseHandler
+from models import User
 from util import digest_password
 from util import gen_vcode
 from util import check_password
 from util import gen_password
-from handlers.base import BaseHandler
-from models import User
-import logging
 
 logger = logging.getLogger('server.' + __name__)
 
 
 class LoginHandler(BaseHandler):
     
-    @gen.coroutine
-    def post(self):
+    async def post(self):
         email = self.get_json_argument('email')
-        user = yield User.find_one({'email': email})
+        user = await User.find_one({'email': email})
         if not user:
             self.fail({'err': 'NO_USER'})
             return
@@ -37,22 +38,20 @@ class LogoutHandler(BaseHandler):
 
 class RegisterHandler(BaseHandler):
 
-    @gen.coroutine
-    def post(self):
+    async def post(self):
         email = self.get_json_argument('email')
-        user = yield User.find_one({'email': email})
+        user = await User.find_one({'email': email})
         if user:
             self.fail({'err': 'DUPLICATE_EMAIL'})
             return
         salt, cooked = digest_password(self.get_json_argument('password'))
-        yield User.insert({'email': email, 'password': cooked, 'salt': salt})
+        await User.insert({'email': email, 'password': cooked, 'salt': salt})
         self.succ({})
 
 
 class EmailHandler(BaseHandler):
 
-    @gen.coroutine
-    def post(self):
+    async def post(self):
         """
         Description:
             Send verification code to the given email.
@@ -67,7 +66,7 @@ class EmailHandler(BaseHandler):
         message['From'] = options.mail_addr
         message['To'] = user_mail
         try:
-            # yield mailer.sendmail(options.mail_addr, user_mail, message.as_string())
+            # await mailer.sendmail(options.mail_addr, user_mail, message.as_string())
             logger.info('Verification code: {}'.format(code))
             self.succ({'code': code})
         except Exception as e:
@@ -77,10 +76,9 @@ class EmailHandler(BaseHandler):
 
 class FindPasswordHandler(BaseHandler):
     
-    @gen.coroutine
-    def post(self):
+    async def post(self):
         email = self.get_json_argument('email')
-        user = yield User.find_one({'email': email})
+        user = await User.find_one({'email': email})
         if not user:
             self.fail({'err': 'NO_USER'})
             return
@@ -91,22 +89,21 @@ class FindPasswordHandler(BaseHandler):
         message['From'] = options.mail_addr
         message['To'] = email
         try:
-            # yield mailer.sendmail(options.mail_addr, user_mail, message.as_string())
+            # await mailer.sendmail(options.mail_addr, user_mail, message.as_string())
             logger.info('New password: {}'.format(password))
         except Exception as e:
             logger.error('Error: {}'.format(e), exc_info=True)
             self.fail({'err': 'SMTP_ERR'})
             return
-        yield User.update({'_id': user['_id']}, {'$set': {'password': cooked, 'salt': salt}})
+        await User.update({'_id': user['_id']}, {'$set': {'password': cooked, 'salt': salt}})
         self.succ({})
 
 
 class ChangePasswordHandler(BaseHandler):
     
-    @gen.coroutine
-    def post(self):
+    async def post(self):
         email = self.get_json_argument('email')
-        user = yield User.find_one({'email': email})
+        user = await User.find_one({'email': email})
         if not user:
             self.fail({'err': 'NO_USER'})
             return
@@ -115,5 +112,5 @@ class ChangePasswordHandler(BaseHandler):
             self.fail({'err': 'WRONG_PASSWORD'})
             return
         salt, cooked = digest_password(self.get_json_argument('newpass'))
-        yield User.update({'_id': user['_id']}, {'$set': {'password': cooked, 'salt': salt}})
+        await User.update({'_id': user['_id']}, {'$set': {'password': cooked, 'salt': salt}})
         self.succ({})

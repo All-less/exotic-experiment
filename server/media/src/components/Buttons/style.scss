@@ -1,0 +1,22 @@
+.button_border{
+  width:26px;
+  height:26px;
+  border:1px solid #fff;
+  margin:17px;
+  position: relative;
+  display: inline-block;
+
+  .button{
+    position: relative; /* TODO:            */
+    left: -1px;         /* temp solution to */
+    top: -1px;          /* CSS conflict     */
+    /*
+    width:18px;
+    height:18px;
+    border-radius:9px;
+    margin:4px;
+    */
+    background-color: #fff;
+    
+  }
+}

@@ -10,8 +10,8 @@ import {
 
 @connect(
   (state) => ({
-    occupied: state.occupied,
-    status: state.uploadStatus
+    occupied: state.device.occupied,
+    status: state.device.uploadStatus
   }),
   {
     startUpload,
@@ -55,7 +55,7 @@ class Upload extends React.Component {
     const color = this.props.occupied ? '#fff' : '#777';
     return (
       <div>
-        <p style={{color: color }}>Bit file <span id="status">{this.props.status}</span></p>
+        <p style={{color: color }}>Bit 文件 <span id="status">{this.props.status}</span></p>
         <div id="bitfile_contain">
           <ul id="about_file">
             <li id="path_for_file" style={{color: color, borderColor: color}}>
@@ -64,23 +64,21 @@ class Upload extends React.Component {
             <li id="file_input" style={{backgroundColor: color, borderColor: color}}>
               <input type="file" 
                      id="input_file" 
-                     onChange={this.handleChange} />···
+                     onChange={this.handleChange} />
+              <span id="file_hint">···</span>
             </li>
           </ul>
           <ul id="about_button">
             <li id="upload" className="click_button" onClick={this.handleUpload}
                 style={{
                   backgroundColor: color,
-                  borderColor: color,
-                  width: 218
-                }}>UPLOAD</li>
-            {/*
+                  borderColor: color
+                }}>上传</li>
             <li id="program" className="click_button" onClick={this.handleProgram}
                 style={{
                   backgroundColor: color,
                   borderColor: color
-                }}>PROGRAM</li>
-            */}
+                }}>烧录</li>
           </ul>
         </div>
       </div>

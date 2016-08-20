@@ -3,6 +3,7 @@ import React from 'react';
 
 class Video extends React.Component {
   componentDidMount() {
+    /*
     jwplayer('mediaspace').setup({
       'flashplayer': '/static/javascript/player.swf',
       'file': config.streamName,
@@ -32,7 +33,7 @@ class Video extends React.Component {
     });
     
     $('#danmu').danmu('danmuStart');
-    
+    */
   }
 
   render() {

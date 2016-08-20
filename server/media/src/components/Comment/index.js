@@ -1,6 +1,8 @@
 'use strict'
 import React from 'react';
-import remote from '../socket';
+import remote from '../../socket';
+
+import style from './style';
 
 const handleClick = () => {
   const content = $("#input_biu").val();
@@ -25,10 +27,10 @@ class Comment extends React.Component {
   render() {
     return (
       <div id="div_discuss">
-        <p>Discuss</p>
-        <div id="discuss_contain">
-          <li id="text"><input type="text" id="input_biu" onKeyDown={handleKey}/></li>
-          <li id="biu" className="click_button" onClick={handleClick}>BIU</li>
+        <p>讨论</p>
+        <div className={style.discuss_contain}>
+          <div className={style.text}><input type="text" className={style.input_biu} onKeyDown={handleKey}/></div>
+          <div className={style.biu} onClick={handleClick}>发送</div>
         </div>
       </div>
     );

@@ -1,0 +1,45 @@
+.wrapper {
+  height: 50px;
+  width: 100%;
+  min-width: 670px;
+  position: fixed;
+  background-color: #000;
+  z-index: 1;
+}
+
+.logo {
+  width: 123px;
+  height: 25px;
+  position: relative;
+  top: 15px;
+  left: 100px;
+  cursor: default;
+
+  .path {
+    fill: white;
+    stroke: white;
+  }
+}
+
+.nav {
+  float: right;
+  padding-right: 100px;
+  margin:0;
+
+  li {
+    list-style: none;
+    float:left;
+    padding-left: 30px;
+    margin-top: 5px;
+    line-height: 45px;
+  }
+
+  a {
+    color:#b3b3b3;
+    text-decoration: none;
+
+    &:hover{
+      color:white;
+    }
+  } 
+}

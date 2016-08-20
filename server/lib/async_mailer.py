@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from async_smtp import SMTP
-from async_smtp import SMTPException
 from tornado import gen
 from tornado.options import options
+
+from async_smtp import SMTP
+from async_smtp import SMTPException
+
 
 class Mailer:
 

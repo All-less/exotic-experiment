@@ -11,7 +11,7 @@ import Setting from './Setting';
 
 @connect(
   (state) => ({
-    setting: state.setting
+    setting: state.device.setting
   })
 )
 class Panel extends React.Component {

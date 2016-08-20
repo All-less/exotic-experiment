@@ -1,17 +1,19 @@
 'use strict'
 import React from 'react';
 import { connect } from 'react-redux'
-import remote from '../socket'; 
-import { state } from '../redux/device';
+import remote from '../../socket'; 
+import { state } from '../../redux/device';
+
+import style from './style';
 
 /* BTN_UP, BTN_DOWN和BTN_WAIT对应的尺寸*/
 const size = [5, 9, 7];
 
 @connect(
   (state) => ({
-    status: state.buttons,
-    occupied: state.occupied,
-    buttons: state.buttons
+    status: state.device.buttons,
+    occupied: state.device.occupied,
+    buttons: state.device.buttons
   })
 )
 class Buttons extends React.Component {
@@ -32,15 +34,15 @@ class Buttons extends React.Component {
     const { status, occupied } = this.props;
     return (
       <div>
-        <p style={{color: occupied ? '#fff' : '#777' }}>Button</p>
-        <ul id="button_contain">
+        <p style={{color: occupied ? '#fff' : '#777' }}>虚拟按钮</p>
+        <div id="button_contain">
           {
             Array(4).fill(0).map((e, i) => (
-              <li key={i} className="button_border" 
-                  style={{borderColor: occupied ? '#fff' : '#777' }}>
+              <div key={i} className={style.button_border}
+                   onClick={this.getClickCallback(i)}
+                   style={{borderColor: occupied ? '#fff' : '#777' }}>
                 <div id={`button${i+1}`}
-                     className="button" 
-                     onClick={this.getClickCallback(i)}
+                     className={style.button}
                      style={{ 
                       height: size[status[i]] * 2,
                       width: size[status[i]] * 2,
@@ -48,10 +50,10 @@ class Buttons extends React.Component {
                       margin: 13 - size[status[i]],
                       backgroundColor: occupied ? '#fff' : '#777'
                      }}/>
-              </li>
+              </div>
             ))
           }
-        </ul>
+        </div>
       </div>
     );
   }

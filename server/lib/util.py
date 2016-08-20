@@ -1,7 +1,8 @@
 import hashlib
-from tornado.options import options
 from random import choice
 from string import ascii_uppercase, digits, ascii_letters
+
+from tornado.options import options
 
 
 def cook_password(password, salt):

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*- 
 import json
-import tornado.web
 import uuid
 import logging
+
+import tornado.web
 
 logger = logging.getLogger('server.' + __name__)
 

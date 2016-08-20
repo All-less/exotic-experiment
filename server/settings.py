@@ -12,7 +12,8 @@ import logconfig
 path = lambda root,*a: os.path.join(root, *a)
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
-define("port", default=6060, help="run on the given port", type=int)
+define("http_port", default=6060, help="port for http service", type=int)
+define("tcp_port", default=6061, help="port for tcp connection", type=int)
 define("config", default="config.py", help="tornado config file")
 define("debug", default=True, help="debug mode")
 define("mail_addr", default=None, help="email address to send system mail", type=str)
