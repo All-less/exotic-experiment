@@ -127,7 +127,6 @@ class ChangePasswordHandler(BaseHandler):
 class StatusHandler(BaseHandler):
 
     def get(self):
-        print(self.get_secure_cookie('user'))
         if self.get_secure_cookie('user'):
             self.succ({'status': 
                 {'devices': list(DevicePool.get_authed_list())}

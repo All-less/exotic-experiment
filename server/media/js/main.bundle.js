@@ -40577,7 +40577,6 @@
 	        find_msg: action.error.err === 'NO_USER' ? '该邮箱未注册。' : action.error.err === 'SMTP_ERR' ? '密码重置邮件发送失败。' : '出现未知错误。'
 	      });
 	    case LOAD_STATUS_SUCC:
-	      console.log(action.result);
 	      setTimeout(function () {
 	        _store2.default.dispatch((0, _device.updateDevices)(action.result.status.devices));
 	      }, 0);
@@ -40598,7 +40597,7 @@
 	      }
 	      return state;
 	    case LOGOUT_FAIL:
-	    // TODO
+	    // TODO: Add some notification.
 	    default:
 	      return state;
 	  }
@@ -41614,9 +41613,7 @@
 	
 	var _style2 = _interopRequireDefault(_style);
 	
-	var _reset = __webpack_require__(927);
-	
-	var _reset2 = _interopRequireDefault(_reset);
+	__webpack_require__(927);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -65556,13 +65553,11 @@
 	
 	var _Panel2 = _interopRequireDefault(_Panel);
 	
-	var _Video = __webpack_require__(949);
+	var _Simulation = __webpack_require__(954);
 	
-	var _Video2 = _interopRequireDefault(_Video);
+	var _Simulation2 = _interopRequireDefault(_Simulation);
 	
-	var _reset = __webpack_require__(950);
-	
-	var _reset2 = _interopRequireDefault(_reset);
+	__webpack_require__(950);
 	
 	var _style = __webpack_require__(952);
 	
@@ -65596,7 +65591,7 @@
 	          'div',
 	          { id: 'main' },
 	          _react2.default.createElement(_Panel2.default, null),
-	          _react2.default.createElement(_Video2.default, null)
+	          _react2.default.createElement(_Simulation2.default, null)
 	        )
 	      );
 	    }
@@ -66818,98 +66813,7 @@
 	};
 
 /***/ },
-/* 949 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _react = __webpack_require__(299);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var Video = function (_React$Component) {
-	  _inherits(Video, _React$Component);
-	
-	  function Video() {
-	    _classCallCheck(this, Video);
-	
-	    return _possibleConstructorReturn(this, Object.getPrototypeOf(Video).apply(this, arguments));
-	  }
-	
-	  _createClass(Video, [{
-	    key: 'componentDidMount',
-	    value: function componentDidMount() {
-	      /*
-	      jwplayer('mediaspace').setup({
-	        'flashplayer': '/static/javascript/player.swf',
-	        'file': config.streamName,
-	        'streamer': config.streamUrl,
-	        'controlbar': 'bottom',
-	        'width': '640',
-	        'height': '360'
-	      });
-	      
-	      $("danmu").danmu({
-	        height: 450,  //弹幕区高度
-	        width: 550,   //弹幕区宽度
-	        zindex :100,   //弹幕区域z-index属性
-	        speed:7000,      //滚动弹幕的默认速度，这是数值值得是弹幕滚过每672像素所需要的时间（毫秒）
-	        sumTime:65535,   //弹幕流的总时间
-	        danmuLoop:false,   //是否循环播放弹幕
-	        defaultFontColor:"#7777777",   //弹幕的默认颜色
-	        fontSizeSmall:16,     //小弹幕的字号大小
-	        FontSizeBig:24,       //大弹幕的字号大小
-	        opacity:"0.9",          //默认弹幕透明度
-	        topBottonDanmuTime:6000,   // 顶部底部弹幕持续时间（毫秒）
-	        SubtitleProtection:false,     //是否字幕保护
-	        positionOptimize:false,         //是否位置优化，位置优化是指像AB站那样弹幕主要漂浮于区域上半部分
-	         maxCountInScreen: 40,   //屏幕上的最大的显示弹幕数目,弹幕数量过多时,优先加载最新的。
-	        maxCountPerSec: 10      //每分秒钟最多的弹幕数目,弹幕数量过多时,优先加载最新的。
-	      });
-	      
-	      $('#danmu').danmu('danmuStart');
-	      */
-	    }
-	  }, {
-	    key: 'render',
-	    value: function render() {
-	      return _react2.default.createElement(
-	        'div',
-	        { id: 'right' },
-	        _react2.default.createElement(
-	          'ul',
-	          { id: 'video_border' },
-	          _react2.default.createElement(
-	            'li',
-	            { id: 'video' },
-	            _react2.default.createElement('div', { id: 'mediaspace' }),
-	            _react2.default.createElement('div', { id: 'danmu' })
-	          )
-	        )
-	      );
-	    }
-	  }]);
-	
-	  return Video;
-	}(_react2.default.Component);
-	
-	exports.default = Video;
-
-/***/ },
+/* 949 */,
 /* 950 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -66944,7 +66848,7 @@
 	
 	
 	// module
-	exports.push([module.id, "html,body{\n  border: none;\n  margin: 0;\n  padding: 0;\n  position: relative;\n  font-family: \"Helvetica Neue\";\n  width:100%;\n  height:100%;\n  background-color: #000;\n  min-width: 670px;\n}\nli{\n  list-style: none;\n}\nul,li{\n  padding:0;\n  margin:0;\n}\ninput:focus{\n  outline: none;\n}\n\n.click_button{\n  cursor: pointer;\n}\n\n#main{\n  width:100%;\n  height:100%;\n}\n  #left, #right{\n    height:100%;\n    position: absolute;\n    top:0;\n  }\n  #left{\n    width:45%;\n    left:0;\n  }\n  #right{\n    width:55%;\n    right:0;\n  }\n    #left_contain{\n      position: absolute;\n      left: 50%;\n      top: 50%;\n      margin-left: -131px;\n      margin-top: -219px;\n    }\n    #left_contain p{\n      color:#fff;\n      margin:20px 0 5px;\n      padding-left: 10px;\n    }\n      \n      \n    #bitfile_contain{\n      padding-left: 20px;\n    }\n    #bitfile_contain li{\n      display: inline-block;\n      border: 1px solid #fff;\n      height:20px;\n      text-align: center;\n      margin-top: 5px;\n      margin-bottom: 5px;\n    }\n      #status {\n        color: #777;\n        font-size: 15px;\n      }\n      #file_hint {\n        position: relative;\n        top: -20px;\n        pointer-events: none;\n      }\n      #about_file input{\n        height: 20px;\n        width: 48px;\n        /*\n        height:2000px;\n        width:2000px;\n        */\n        filter:alpha(opacity=0); /*IE滤镜，透明度50%*/\n        -moz-opacity:0; /*Firefox私有，透明度50%*/\n        opacity:0;/*其他，透明度50%*/\n        /*\n        position: absolute;\n        left: 0;\n        top: 0;\n        */\n      }\n      #path_for_file{\n        width:170px;\n        line-height: 20px;\n        color: #fff;\n        overflow: hidden;\n      }\n      #file_input{\n        width:48px;\n        background-color: #fff;\n        overflow: hidden; \n        position: relative;\n        line-height: 20px;\n        letter-spacing: 5px;\n        font-weight: bold;\n      }\n      #about_button li{\n        background-color: #fff;\n        font-weight: lighter;\n        width:95px; \n        margin-left: 14px;\n        margin-right: 14px;\n      }\n      #about_button li:first-child{\n        margin-left: 0;\n      }\n      #about_button li:last-child{\n        margin-right: 0;\n      }\n\n  #right{}\n    #video_border{\n      position: absolute;\n      left:0%;\n      top: 50%;\n      margin-top: -225px;\n      width:550px;\n      height:450px;\n      border: 1px solid #fff;\n    }\n    #damu {\n      position: relative;\n      top: 0;\n      left: 0;\n      width: 550px;\n      height: 450px;\n    }\n    #mediaspace{\n      position: relative;\n      top: 0;\n      left: 0;\n      /* margin: 25px; */\n      width:550px;\n      height:450px;\n      /* background-color: #bbb; */\n    }\n  #div_key_stroke{\n    display:;\n  }\n    #key{\n      height:40px;\n      line-height: 40px;\n      border: 1px solid #fff;\n      border-radius: 3px;\n      padding: 5px 10px;\n      margin-left: 10px;\n      margin-right: 10px;\n      font-size: 20px;\n      font-weight: bolder;\n    }\n\n \n", ""]);
+	exports.push([module.id, "html,body{\n  border: none;\n  margin: 0;\n  padding: 0;\n  position: relative;\n  font-family: \"Helvetica Neue\";\n  width:100%;\n  height:100%;\n  background-color: #000;\n  min-width: 670px;\n}\nli{\n  list-style: none;\n}\nul,li{\n  padding:0;\n  margin:0;\n}\ninput:focus{\n  outline: none;\n}\n\n.click_button{\n  cursor: pointer;\n}\n\n#main{\n  width:100%;\n  height:100%;\n}\n  #left, #right{\n    height:100%;\n    position: absolute;\n    top:0;\n  }\n  #left{\n    width:45%;\n    left:0;\n  }\n  #right{\n    width:55%;\n    right:0;\n  }\n    #left_contain{\n      position: absolute;\n      left: 50%;\n      top: 50%;\n      margin-left: -131px;\n      margin-top: -239px;\n    }\n    #left_contain p{\n      color:#fff;\n      margin:20px 0 5px;\n      padding-left: 10px;\n    }\n      \n      \n    #bitfile_contain{\n      padding-left: 20px;\n    }\n    #bitfile_contain li{\n      display: inline-block;\n      border: 1px solid #fff;\n      height:20px;\n      text-align: center;\n      margin-top: 5px;\n      margin-bottom: 5px;\n    }\n      #status {\n        color: #777;\n        font-size: 15px;\n      }\n      #file_hint {\n        position: relative;\n        top: -20px;\n        pointer-events: none;\n      }\n      #about_file input{\n        height: 20px;\n        width: 48px;\n        /*\n        height:2000px;\n        width:2000px;\n        */\n        filter:alpha(opacity=0); /*IE滤镜，透明度50%*/\n        -moz-opacity:0; /*Firefox私有，透明度50%*/\n        opacity:0;/*其他，透明度50%*/\n        /*\n        position: absolute;\n        left: 0;\n        top: 0;\n        */\n      }\n      #path_for_file{\n        width:170px;\n        line-height: 20px;\n        color: #fff;\n        overflow: hidden;\n      }\n      #file_input{\n        width:48px;\n        background-color: #fff;\n        overflow: hidden; \n        position: relative;\n        line-height: 20px;\n        letter-spacing: 5px;\n        font-weight: bold;\n      }\n      #about_button li{\n        background-color: #fff;\n        font-weight: lighter;\n        width:95px; \n        margin-left: 14px;\n        margin-right: 14px;\n      }\n      #about_button li:first-child{\n        margin-left: 0;\n      }\n      #about_button li:last-child{\n        margin-right: 0;\n      }\n\n  #right{}\n    #video_border{\n      position: absolute;\n      left:0%;\n      top: 50%;\n      margin-top: -225px;\n      width:550px;\n      height:450px;\n      border: 1px solid #fff;\n    }\n    #damu {\n      position: relative;\n      top: 0;\n      left: 0;\n      width: 550px;\n      height: 450px;\n    }\n    #mediaspace{\n      position: relative;\n      top: 0;\n      left: 0;\n      /* margin: 25px; */\n      width:550px;\n      height:450px;\n      /* background-color: #bbb; */\n    }\n  #div_key_stroke{\n    display:;\n  }\n    #key{\n      height:40px;\n      line-height: 40px;\n      border: 1px solid #fff;\n      border-radius: 3px;\n      padding: 5px 10px;\n      margin-left: 10px;\n      margin-right: 10px;\n      font-size: 20px;\n      font-weight: bolder;\n    }\n\n \n", ""]);
 	
 	// exports
 
@@ -66988,6 +66892,307 @@
 	
 	// exports
 
+
+/***/ },
+/* 954 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(299);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _FpgaSimulation = __webpack_require__(957);
+	
+	var _FpgaSimulation2 = _interopRequireDefault(_FpgaSimulation);
+	
+	var _style = __webpack_require__(955);
+	
+	var _style2 = _interopRequireDefault(_style);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Simulation = function (_React$Component) {
+	  _inherits(Simulation, _React$Component);
+	
+	  function Simulation() {
+	    _classCallCheck(this, Simulation);
+	
+	    return _possibleConstructorReturn(this, Object.getPrototypeOf(Simulation).apply(this, arguments));
+	  }
+	
+	  _createClass(Simulation, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        { className: _style2.default.right },
+	        _react2.default.createElement(
+	          'div',
+	          { className: _style2.default.border },
+	          _react2.default.createElement(_FpgaSimulation2.default, null),
+	          _react2.default.createElement('div', { className: _style2.default.bullet })
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return Simulation;
+	}(_react2.default.Component);
+	
+	exports.default = Simulation;
+
+/***/ },
+/* 955 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+	
+	// load the styles
+	var content = __webpack_require__(956);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(915)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../../node_modules/css-loader/index.js?modules&importLoaders=1&localIdentName=[name]_[local]_[hash:base64:5]!./../../../node_modules/postcss-loader/index.js?sourceMap!./../../../node_modules/sass-loader/index.js?sourceMap!./style.scss", function() {
+				var newContent = require("!!./../../../node_modules/css-loader/index.js?modules&importLoaders=1&localIdentName=[name]_[local]_[hash:base64:5]!./../../../node_modules/postcss-loader/index.js?sourceMap!./../../../node_modules/sass-loader/index.js?sourceMap!./style.scss");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 956 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(914)();
+	// imports
+	
+	
+	// module
+	exports.push([module.id, ".style_right_2aOt1 {\n  height: 100%;\n  width: 55%;\n  position: absolute;\n  top: 0;\n  right: 0; }\n  .style_right_2aOt1 .style_border_2Zu59 {\n    position: absolute;\n    left: 0%;\n    top: 50%;\n    margin-top: -225px;\n    width: 550px;\n    height: 450px;\n    border: 1px solid #fff; }\n    .style_right_2aOt1 .style_border_2Zu59 .style_bullet_3vc7h {\n      position: absolute;\n      top: 0;\n      left: 0;\n      width: 550px;\n      height: 450px; }\n", ""]);
+	
+	// exports
+	exports.locals = {
+		"right": "style_right_2aOt1",
+		"border": "style_border_2Zu59",
+		"bullet": "style_bullet_3vc7h"
+	};
+
+/***/ },
+/* 957 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(299);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _style = __webpack_require__(958);
+	
+	var _style2 = _interopRequireDefault(_style);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var seg_styles = [{ fill: 'white' }, { fill: 'tomato', filter: 'url(#glow)' }];
+	
+	var FpgaSimulation = function (_React$Component) {
+	  _inherits(FpgaSimulation, _React$Component);
+	
+	  function FpgaSimulation() {
+	    _classCallCheck(this, FpgaSimulation);
+	
+	    return _possibleConstructorReturn(this, Object.getPrototypeOf(FpgaSimulation).apply(this, arguments));
+	  }
+	
+	  _createClass(FpgaSimulation, [{
+	    key: 'render',
+	    value: function render() {
+	      var _led$segs = { led: 0x1234, segs: [1, 2, 4, 8, 16, 32, 64, 128] };
+	      var led = _led$segs.led;
+	      var segs = _led$segs.segs;
+	
+	      return _react2.default.createElement(
+	        'div',
+	        { className: _style2.default.media },
+	        _react2.default.createElement('img', { className: _style2.default.logo, alt: 'ZJU LOGO', src: '/static/images/zju-logo.png' }),
+	        _react2.default.createElement(
+	          'svg',
+	          { className: _style2.default.board, width: '548', height: '448', xmlns: 'http://www.w3.org/2000/svg', version: '1.1' },
+	          _react2.default.createElement(
+	            'defs',
+	            null,
+	            _react2.default.createElement(
+	              'filter',
+	              { id: 'glow' },
+	              _react2.default.createElement('feGaussianBlur', { stdDeviation: '2.5', result: 'coloredBlur' }),
+	              _react2.default.createElement(
+	                'feMerge',
+	                null,
+	                _react2.default.createElement('feMergeNode', { 'in': 'coloredBlur' }),
+	                _react2.default.createElement('feMergeNode', { 'in': 'SourceGraphic' })
+	              )
+	            )
+	          ),
+	          _react2.default.createElement('rect', { x: '0', y: '0', width: '548', height: '448', fill: '#233387' }),
+	
+	          /* PMOD */
+	          Array(5).fill(0).map(function (e, i) {
+	            return _react2.default.createElement(
+	              'g',
+	              { key: i },
+	              _react2.default.createElement('rect', { x: '0', y: 48 + i * 80, width: '20',
+	                height: '40', fill: 'black' }),
+	
+	              /* PMOD pins */
+	              Array(5).fill(0).map(function (e, j) {
+	                return _react2.default.createElement('rect', { key: j, x: '20', y: 48 + i * 80 + 5 + j * 7,
+	                  width: '4', height: '2', fill: 'gray' });
+	              })
+	            );
+	          }),
+	          _react2.default.createElement('rect', { x: '238', y: '50', width: '260', height: '200', fill: 'black' }),
+	          _react2.default.createElement('rect', { x: '248', y: '60', width: '60', height: '180', fill: 'red' }),
+	          _react2.default.createElement('rect', { x: '308', y: '60', width: '60', height: '180', fill: 'limegreen' }),
+	          _react2.default.createElement('rect', { x: '368', y: '60', width: '60', height: '180', fill: 'blue' }),
+	          _react2.default.createElement('rect', { x: '428', y: '60', width: '60', height: '180', fill: 'white' }),
+	
+	          /* seven-seg display */
+	          Array(8).fill(0).map(function (e, i) {
+	            return _react2.default.createElement(
+	              'g',
+	              { key: i, transform: 'translate(' + (60 + 40 * i) + ',300)' },
+	              _react2.default.createElement('rect', { x: '0', y: '0', width: '30', height: '60', fill: 'gray' }),
+	              _react2.default.createElement('polygon', { points: '6,5 8.5,7 21.5,7 24,5 21.5,3 8.5,3',
+	                style: seg_styles[(segs[i] & Math.pow(2, 0)) >> 0] }),
+	              _react2.default.createElement('polygon', { points: '25,6 23,8.5 23,26.5 25,29 27,26.5 27,8.5',
+	                style: seg_styles[(segs[i] & Math.pow(2, 1)) >> 1] }),
+	              _react2.default.createElement('polygon', { points: '25,31 23,33.5 23,51.5 25,54 27,51.5 27,33.5',
+	                style: seg_styles[(segs[i] & Math.pow(2, 2)) >> 2] }),
+	              _react2.default.createElement('polygon', { points: '6,55 8.5,57 21.5,57 24,55 21.5,53 8.5,53',
+	                style: seg_styles[(segs[i] & Math.pow(2, 3)) >> 3] }),
+	              _react2.default.createElement('polygon', { points: '5,31 3,33.5 3,51.5 5,54 7,51.5 7,33.5',
+	                style: seg_styles[(segs[i] & Math.pow(2, 4)) >> 4] }),
+	              _react2.default.createElement('polygon', { points: '5,6 3,8.5 3,26.5 5,29 7,26.5 7,8.5',
+	                style: seg_styles[(segs[i] & Math.pow(2, 5)) >> 5] }),
+	              _react2.default.createElement('polygon', { points: '6,30 8.5,32 21.5,32 24,30 21.5,28 8.5,28',
+	                style: seg_styles[(segs[i] & Math.pow(2, 6)) >> 6] })
+	            );
+	          }),
+	
+	          /* LED and switches */
+	          Array(16).fill(0).map(function (e, i) {
+	            return _react2.default.createElement(
+	              'g',
+	              { key: i },
+	              (led & Math.pow(2, i)) >> i ? [_react2.default.createElement('rect', { key: '1', x: 62.5 + 20 * i, y: '380', width: '3', height: '5', fill: 'lawngreen' }), _react2.default.createElement('rect', { key: '2', x: 62.5 + 20 * i - 2, y: '378', width: '7', height: '9', fill: 'lawngreen',
+	                filter: 'url(#glow)', fillOpacity: '0.4', rx: '2', ry: '2' })] : _react2.default.createElement('rect', { x: 62.5 + 20 * i, y: '380', width: '3', height: '5', style: { fill: 'white' } }),
+	              _react2.default.createElement('rect', { x: 60 + 20 * i, y: '400', width: '8', height: '20', fill: 'gray' }),
+	              _react2.default.createElement('rect', { x: 61.5 + 20 * i, y: '405', width: '5', height: '10', fill: 'black' })
+	            );
+	          }),
+	
+	          /* Buttons */
+	          Array(4).fill(0).map(function (e, i) {
+	            return _react2.default.createElement(
+	              'g',
+	              { key: i },
+	              Array(5).fill(0).map(function (e, j) {
+	                return _react2.default.createElement(
+	                  'g',
+	                  { key: j },
+	                  _react2.default.createElement('rect', { x: 400 + i * 30, y: 303 + j * 25, width: '15', height: '15', fill: 'grey' }),
+	                  _react2.default.createElement('circle', { cx: 400 + i * 30 + 7.5, cy: 303 + j * 25 + 7.5, r: '5', fill: 'black' })
+	                );
+	              })
+	            );
+	          })
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return FpgaSimulation;
+	}(_react2.default.Component);
+	
+	exports.default = FpgaSimulation;
+
+/***/ },
+/* 958 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+	
+	// load the styles
+	var content = __webpack_require__(959);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(915)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../../node_modules/css-loader/index.js?modules&importLoaders=1&localIdentName=[name]_[local]_[hash:base64:5]!./../../../node_modules/postcss-loader/index.js?sourceMap!./../../../node_modules/sass-loader/index.js?sourceMap!./style.scss", function() {
+				var newContent = require("!!./../../../node_modules/css-loader/index.js?modules&importLoaders=1&localIdentName=[name]_[local]_[hash:base64:5]!./../../../node_modules/postcss-loader/index.js?sourceMap!./../../../node_modules/sass-loader/index.js?sourceMap!./style.scss");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 959 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(914)();
+	// imports
+	
+	
+	// module
+	exports.push([module.id, ".style_media_dFYuC {\n  position: absolute;\n  top: 0;\n  left: 0;\n  /* margin: 25px; */\n  width: 550px;\n  height: 450px;\n  /* background-color: #bbb; */ }\n  .style_media_dFYuC .style_logo_XfNKG {\n    height: 100px;\n    position: absolute;\n    top: 100px;\n    left: 60px;\n    z-index: 1; }\n  .style_media_dFYuC .style_board_2A2N8 {\n    position: absolute;\n    top: 0;\n    left: 0; }\n", ""]);
+	
+	// exports
+	exports.locals = {
+		"media": "style_media_dFYuC",
+		"logo": "style_logo_XfNKG",
+		"board": "style_board_2A2N8"
+	};
 
 /***/ }
 /******/ ]);

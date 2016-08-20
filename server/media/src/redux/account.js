@@ -223,7 +223,6 @@ export default (state=init, action) => {
                                                     '出现未知错误。'
       }
     case LOAD_STATUS_SUCC:
-      console.log(action.result);
       setTimeout(() => {
         store.dispatch(updateDevices(action.result.status.devices));
       }, 0);
@@ -243,7 +242,7 @@ export default (state=init, action) => {
       }
       return state;
     case LOGOUT_FAIL:
-      // TODO
+      // TODO: Add some notification.
     default:
       return state;
   }

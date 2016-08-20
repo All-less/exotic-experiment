@@ -7,7 +7,7 @@ import ChangePasswordForm from '../ChangePasswordForm';
 import FindPasswordForm from '../FindPasswordForm';
 
 import style from './style';
-import reset from './reset';
+import './reset';
 
 @connect(
   (state) => ({

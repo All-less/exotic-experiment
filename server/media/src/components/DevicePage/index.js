@@ -2,9 +2,9 @@
 import React from 'react';
 import Header from '../Header';
 import Panel from '../Panel';
-import Video from '../Video';
+import Simulation from '../Simulation';
 
-import reset from './reset';
+import './reset';
 import style from './style';
 
 class DevicePage extends React.Component {
@@ -14,7 +14,7 @@ class DevicePage extends React.Component {
         <Header />
         <div id="main">
           <Panel />
-          <Video />
+          <Simulation />
         </div>
       </div>
     );
