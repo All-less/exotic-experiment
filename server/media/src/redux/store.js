@@ -3,6 +3,7 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import { browserHistory } from 'react-router';
 import { routerMiddleware } from 'react-router-redux';
 import { combineReducers } from 'redux';
+import { reducer as reduxAsyncConnect } from 'redux-connect'
 import { routerReducer as routing } from 'react-router-redux';
 
 import device from './device';
@@ -71,7 +72,9 @@ function ajaxMiddleware(client) {
 const _ajaxMiddleware = ajaxMiddleware(ajax);
 const _routerMiddleware = routerMiddleware(browserHistory);
 
-export default createStore(combineReducers({account, device, routing}), compose(
+export default createStore(
+  combineReducers({account, device, routing, reduxAsyncConnect}), 
+  compose(
     applyMiddleware(_ajaxMiddleware, _routerMiddleware),
     window.devToolsExtension ? window.devToolsExtension() : f => f
   )

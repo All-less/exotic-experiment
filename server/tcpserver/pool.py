@@ -40,5 +40,9 @@ class DevicePool:
             del cls.devices_to_auth[device.id_]
 
     @classmethod
-    def get_authed_device(device_id):
-        return devices_auth_yet[device_id]
+    def get_authed_device(cls, device_id):
+        return cls.devices_auth_yet[device_id]
+
+    @classmethod
+    def get_authed_list(cls):
+        return cls.devices_auth_yet.keys()

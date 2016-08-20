@@ -65,6 +65,7 @@ class Device(JsonStream):
         self.audience.remove(handler)
 
     def on_close(self):
+        logger.info('Device "{}" disconnected.'.format(self.device_id))
         if self.device_id:
             DevicePool.remove_authed_device(self)
         else:

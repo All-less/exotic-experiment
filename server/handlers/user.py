@@ -12,6 +12,7 @@ from util import digest_password
 from util import gen_vcode
 from util import check_password
 from util import gen_password
+from tcpserver.pool import DevicePool
 
 logger = logging.getLogger('server.' + __name__)
 
@@ -28,12 +29,17 @@ class LoginHandler(BaseHandler):
         if not check_password(password, user['salt'], user['password']):
             self.fail({'err': 'WRONG_PASSWORD'})
             return
-        self.succ({})
+        self.set_secure_cookie('user', email, 0.01)
+        self.succ({'status': 
+            {'devices': list(DevicePool.get_authed_list())}
+        })
 
 
 class LogoutHandler(BaseHandler):
-    # TODO: Implement LogoutHandler
-    pass
+    
+    def post(self):
+        self.clear_cookie('user')
+        self.succ({})
 
 
 class RegisterHandler(BaseHandler):
@@ -46,7 +52,9 @@ class RegisterHandler(BaseHandler):
             return
         salt, cooked = digest_password(self.get_json_argument('password'))
         await User.insert({'email': email, 'password': cooked, 'salt': salt})
-        self.succ({})
+        self.succ({'status': 
+            {'devices': list(DevicePool.get_authed_list())}
+        })
 
 
 class EmailHandler(BaseHandler):
@@ -114,3 +122,15 @@ class ChangePasswordHandler(BaseHandler):
         salt, cooked = digest_password(self.get_json_argument('newpass'))
         await User.update({'_id': user['_id']}, {'$set': {'password': cooked, 'salt': salt}})
         self.succ({})
+
+
+class StatusHandler(BaseHandler):
+
+    def get(self):
+        print(self.get_secure_cookie('user'))
+        if self.get_secure_cookie('user'):
+            self.succ({'status': 
+                {'devices': list(DevicePool.get_authed_list())}
+            })
+        else:
+            self.fail({})

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Exotic</title>
+	<link rel="stylesheet" href="./style/setting.css">
+	<script src="./javascript/lib/jquery-2.2.0.min.js"></script>
+</head>
+<body>
+	<header>
+		<span id="word_exotic">Exotic</span>
+		<ul id="nav">
+			<li><a href="#">Release</a></li>
+			<li><a href="#">Setting</a></li>
+			<li><a href="#">Support</a></li>
+			<li><a href="#">Logout</a></li>
+		</ul>
+	</header>
+	<div id="main">
+		<div id="left">
+			<div id="left_contain">
+				<div id="buttons_contain">
+					<p class="classify">Input using</p>
+					<div class="setting">
+						<div class="button_border">
+							<div class="button"></div>
+						</div>
+						<div class="setting_word">buttons & switches</div>
+					</div>
+					<div class="setting">
+						<div class="button_border">
+							<div class="button button_choosen"></div>
+						</div>
+						<div class="setting_word">script input</div>
+					</div>
+					<p class="classify">Key-stroke should be</p>
+					<div class="setting">
+						<div class="button_border">
+							<div class="button"></div>
+						</div>
+						<div class="setting_word">read and simulated</div>
+					</div>
+					<div class="setting">
+						<div class="button_border">
+							<div class="button"></div>
+						</div>
+						<div class="setting_word">ignored</div>
+					</div>
+					<p class="classify">Switch to</p>
+					<div id="device_contain">
+						<select name="device" id="device">
+						<option value="1">Device 0</option>
+						<option value="2">Device 1</option>
+						<option value="3">Device 2</option>
+						<option value="4">Device 3</option>
+						</select>
+					</div>
+					<div id="confirm_cancel">
+						<ul id="about_button">
+							<li id="upload" class="click_button">CONFIRM</li>
+							<li id="program" class="click_button">CANCEL</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="right">
+			<ul id="video_border">
+				<li id="video"></li>
+			</ul>
+		</div>
+	</div>
+	<script src="./javascript/setting.js"></script>
+</body>
+</html>

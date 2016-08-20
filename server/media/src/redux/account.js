@@ -1,4 +1,7 @@
 import store from './store';
+import { push } from 'react-router-redux';
+
+import { updateDevices } from './device';
 
 const CHANGE_FORM = 'Exotic/account/CHANGE_FORM';
 const VERIFY_EMAIL = 'Exotic/account/VERIFY_EMAIL';
@@ -17,6 +20,12 @@ const FIND_FAIL = 'Exotic/account/FIND_FAIL';
 const CHANGE = 'Exotic/account/CHANGE';
 const CHANGE_SUCC = 'Exotic/account/CHANGE_SUCC';
 const CHANGE_FAIL = 'Exotic/account/CHANGE_FAIL';
+const LOAD_STATUS = 'Exotic/account/LOAD_STATUS';
+const LOAD_STATUS_SUCC = 'Exotic/account/LOAD_STATUS_SUCC';
+const LOAD_STATUS_FAIL = 'Exotic/account/LOAD_STATUS_FAIL';
+const LOGOUT = 'Exotic/account/LOGOUT';
+const LOGOUT_SUCC = 'Exotic/account/LOGOUT_SUCC';
+const LOGOUT_FAIL = 'Exotic/account/LOGOUT_FAIL';
 
 const init = {
   formState: 'login',
@@ -55,6 +64,16 @@ export const findPassword = (email) => ({
 export const changePassword = (email, oldpass, newpass) => ({
   types: [CHANGE, CHANGE_SUCC, CHANGE_FAIL],
   promise: (client) => client.post('/api/change', { email, oldpass, newpass })
+});
+
+export const loadStatus = () => ({
+  types: [LOAD_STATUS, LOAD_STATUS_SUCC, LOAD_STATUS_FAIL],
+  promise: (client) => client.get('/api/status')
+});
+
+export const logout = () => ({
+  types: [LOGOUT, LOGOUT_SUCC, LOGOUT_FAIL],
+  promise: (client) => client.post('/api/logout')
 });
 
 export default (state=init, action) => {
@@ -112,10 +131,21 @@ export default (state=init, action) => {
         reg_msg: ''
       };
     case REGISTER_SUCC:
-      return {
-        ...state,
-        registering: false
-      };
+      setTimeout(() => {
+        store.dispatch({...action, type: LOAD_STATUS_SUCC });
+      }, 0);
+      if (action.result.status.devices.length === 0) {
+        return {
+          ...state,
+          registering: false,
+          reg_msg: '当前无可用设备。'
+        };
+      } else {
+        return {
+          ...state,
+          registering: false
+        };
+      }
     case REGISTER_FAIL:
       return {
         ...state,
@@ -129,10 +159,21 @@ export default (state=init, action) => {
         login_msg: null
       };
     case LOGIN_SUCC:
-      return {
-        ...state,
-        loggingIn: false,
-      };
+      setTimeout(() => {
+        store.dispatch({...action, type: LOAD_STATUS_SUCC });
+      }, 0);
+      if (action.result.status.devices.length === 0) {
+        return {
+          ...state,
+          loggingIn: false,
+          login_msg: '当前无可用设备。'
+        };
+      } else {
+        return {
+          ...state,
+          loggingIn: false
+        };
+      }
     case LOGIN_FAIL:
       return {
         ...state,
@@ -181,6 +222,28 @@ export default (state=init, action) => {
                   action.error.err === 'SMTP_ERR' ? '密码重置邮件发送失败。' :
                                                     '出现未知错误。'
       }
+    case LOAD_STATUS_SUCC:
+      console.log(action.result);
+      setTimeout(() => {
+        store.dispatch(updateDevices(action.result.status.devices));
+      }, 0);
+      if (action.result.status.devices.length > 0 &&
+          !location.pathname.startsWith('/device')) {
+        setTimeout(() => {
+          const len = action.result.status.devices.length;
+          const index = Math.floor(Math.random() * len);
+          store.dispatch(push(`device/${action.result.status.devices[index]}`));
+        }, 0);
+      }
+      return state;
+    case LOAD_STATUS_FAIL:
+    case LOGOUT_SUCC:
+      if (location.pathname !== '/') {
+        setTimeout(() => { store.dispatch(push('/')); }, 0);
+      }
+      return state;
+    case LOGOUT_FAIL:
+      // TODO
     default:
       return state;
   }

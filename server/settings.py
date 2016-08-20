@@ -61,9 +61,6 @@ LOGGERS = {
         'tornado.application': {}, # 
         'tornado.access': {},      # enable default logging
         'tornado.general': {},     #
-        'server.handlers.user': {
-            'handlers': ['console']
-        }
     }
 }
 

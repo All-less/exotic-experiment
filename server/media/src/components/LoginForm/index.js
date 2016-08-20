@@ -96,7 +96,7 @@ class LoginForm extends React.Component {
               <MenuItem divider />
               <MenuItem eventKey="find">找回密码</MenuItem>
               <MenuItem eventKey="reset">修改密码</MenuItem>
-            </SplitButton>
+            </SplitButton>  
           </div>
         ]}
         </QueueAnim>

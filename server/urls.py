@@ -9,6 +9,7 @@ from handlers.base import BaseHandler
 from handlers.user import EmailHandler
 from handlers.user import FindPasswordHandler
 from handlers.user import ChangePasswordHandler
+from handlers.user import StatusHandler
 from handlers.platform import PlatformHandler
 
 url_patterns = [
@@ -20,6 +21,7 @@ url_patterns = [
     (r'/api/verify', EmailHandler),
     (r'/api/find', FindPasswordHandler),
     (r'/api/change', ChangePasswordHandler),
+    (r'/api/status', StatusHandler),
     (r'/socket/(.+)', PlatformHandler),
     (r'/(.*)', HomeHandler)
 ]

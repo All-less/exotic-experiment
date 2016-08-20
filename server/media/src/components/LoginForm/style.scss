@@ -2,8 +2,8 @@
   position: relative;
   width: 100%;
   display: flex;
-  flex-direction: row;
-  align-content: center;
+  flex-direction: column;
+  align-items: center;
   margin-top: 20px;
 
   .error {
@@ -11,7 +11,7 @@
     text-align: center;
     margin-bottom: 20px;
   }
-
+  
   .button {
     background-color: black;
     color: white;

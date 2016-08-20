@@ -17,6 +17,7 @@ const UPLOAD_START = 'Exotic/UPLOAD_START';
 const UPLOAD_PROGRESS = 'Exotic/UPLOAD_PROGRESS';
 const UPLOAD_SUCC = 'Exotic/UPLOAD_SUCC';
 const UPLOAD_FAIL = 'Exotic/UPLOAD_FAIL';
+const UPDATE_DEVICES = 'Exotic/UPDATE_DEVICES';
 
 const BTN_DOWN = 0;
 const BTN_UP = 1;
@@ -139,6 +140,11 @@ export const uploadFail = () => ({
   type: UPLOAD_FAIL
 });
 
+export const updateDevices = (list) => ({
+  type: UPDATE_DEVICES,
+  list
+});
+
 export default (state=init, action) => {
   const switches = Array(...state.switches);
   const buttons = Array(...state.buttons);
@@ -219,7 +225,12 @@ export default (state=init, action) => {
     return {
       ...state,
       uploadStatus: 'Uploading file failed.'
-    }
+    };
+  case UPDATE_DEVICES:
+    return {
+      ...state,
+      list: action.list
+    };
   default:
     return state;
   }

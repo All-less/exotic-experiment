@@ -21,7 +21,8 @@ class JsonStream:
 
     async def on_read(self, data):
         try:
-            dict_ = json_decode(data)
+            if data:
+                dict_ = json_decode(data)
             await self.on_read_json(dict_)
         except Exception as e:
             logger.error('Error occurs during decoding data from device.\n\

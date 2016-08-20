@@ -3,25 +3,17 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
 import { toggleSetting } from '../../redux/device';
+import { logout } from '../../redux/account';
 
 import style from './style';
 import remote from '../../socket';
-
-const logout = () => {
-  $.get('/logout', (res) => {
-    const obj = JSON.parse(res)
-    if (obj.redirect) {
-      location.href = obj.redirect;
-    }
-  });
-};
 
 @connect(
   (state) => ({
     occupied: state.device.occupied
   }),
   {
-    toggleSetting
+    toggleSetting, logout
   }
 )
 class Header extends React.Component {
@@ -38,7 +30,7 @@ class Header extends React.Component {
              { this.props.occupied ? '释放控制' : '获取控制' }
             </a>
           </li>
-          <li><a onClick={logout}>注销登录</a></li>
+          <li><a onClick={this.props.logout}>注销登录</a></li>
           <li><a href="#">使用帮助</a></li>
         </ul>
       </header>
