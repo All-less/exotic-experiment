@@ -9,8 +9,9 @@ fi
 # install third-party packages
 cd ../third-party
 
-# install digilent adept tool for downloading bit file
-dpkg -i "$(ls | grep digilent | grep deb)"
+# install digilent adept tool for programming bit file
+dpkg -i "$(ls | grep digilent.adept.runtime | grep deb)"
+dpkg -i "$(ls | grep digilent.adept.utilities | grep deb)"
 
 # install bcm2835 library for operating GPIO
 BCM2835="$(ls | grep bcm2835- | sed 's/.tar.gz//')"
