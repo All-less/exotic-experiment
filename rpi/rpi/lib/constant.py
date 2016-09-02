@@ -1,0 +1,20 @@
+# -*- coding: utf-8 -*-
+DELIMITER = '\n'
+bDELIMITER = b'\n'
+
+# Pin configuration
+PIN_JAI1 = 5
+PIN_JAI2 = 0
+PIN_JAI3 = 3
+PIN_JAI4 = 4
+PIN_JAO1 = 7
+PIN_JAO2 = 0
+PIN_JAO3 = 2
+PIN_JAO4 = 1
+RPI_INPUTS = []
+RPI_OUTPUTS = [PIN_JAO1, PIN_JAO2, PIN_JAO3, PIN_JAO4, PIN_JAI1, PIN_JAI2, PIN_JAI3, PIN_JAI4]
+switches = {0: PIN_JAI1, 1: PIN_JAI2, 2: PIN_JAI3, 3: PIN_JAI4}
+buttons = {0: PIN_JAO1, 1: PIN_JAO2, 2: PIN_JAO3, 3: PIN_JAO4}
+
+# Communication protocol
+CODE_AUTH = 1
