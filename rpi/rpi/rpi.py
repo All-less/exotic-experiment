@@ -26,7 +26,7 @@ def init():
 
 def write(pin, val):
     if options.deploy == 'DEV':
-        logger.debug('Function "rpi.write()" called with pin={}, val={}'
+        logger.debug('Function "rpi.write()" called with pin={}, val={} '
                      'in development mode.'.format(pin, val))
         return
     sp.check_output('gpio write {} {}'.format(pin, val), shell=True)

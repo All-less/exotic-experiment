@@ -17,11 +17,11 @@ class JsonStream:
         self._stream = stream
         self._stream.read_until(bDELIMITER, self.on_read)
 
-    async def on_read(self, data):
+    def on_read(self, data):
         try:
             if data:
                 dict_ = json_decode(data)
-            await self.on_read_json(dict_)
+            self.on_read_json(dict_)
         except Exception as e:
             logger.error('Error occurs during decoding data from device.\n'
                          '{}'.format(e), exc_info=True)
