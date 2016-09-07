@@ -33,6 +33,9 @@ define('platform', help='FPGA platform connected to this rpi', type=str)
 define('cmd_read', default='lib/fpga_reader.py', help='command to start FPGA serial reader program', type=str)
 tornado.options.parse_command_line()
 
+if options.config:
+    tornado.options.parse_config_file(options.config)
+
 
 SYSLOG_TAG = "exotic_rpi"
 SYSLOG_FACILITY = logging.handlers.SysLogHandler.LOG_LOCAL2
@@ -58,9 +61,8 @@ logconfig.initialize_logging(SYSLOG_TAG, SYSLOG_FACILITY, LOGGERS,
         LOG_LEVEL, USE_SYSLOG)
 
 
-if options.config:
-    tornado.options.parse_config_file(options.config)
-
-
 if not Path(options.tmp_dir).exists():
-    Path(options.tmp_dir).mkdir(parents=True, exist_ok=True)
+    try:
+        Path(options.tmp_dir).mkdir(parents=True)  # 'exist_ok' not exists in Python3.4
+    except FileExistsError:
+        pass

@@ -40,7 +40,7 @@ def start_streaming():
         return
     if not env['process']:
         rtmp_url = ('rtmp://{rtmp_host}:{rtmp_port}/{rtmp_app}/'
-                    '{rtmp_stream}').format(env)
+                    '{rtmp_stream}').format(**env)
         env['process'] = sp.Popen(
             'raspivid '
             '-n '
@@ -110,11 +110,13 @@ def start_reading():
         env['process'] = proc.proc
         logger.info('Start reading serial input from FPGA.')
 
+
 def stop_reading():
     if env['process']:
         os.killpg(os.getpgid(env['process'].pid), signal.SIGTERM)
         env['process'] = None
         logger.info('Stop reading serial input from FPGA.')
+
 
 def switch_mode(mode):
     if env['mode'] == mode:
@@ -126,11 +128,13 @@ def switch_mode(mode):
         stop_streaming()
         start_reading()
 
+
 def start_feedback(mode):
     if mode == 'video':
         start_streaming()
     elif mode == 'digital':
         start_reading()
+
 
 def stop_feedback(mode):
     if mode == 'video':

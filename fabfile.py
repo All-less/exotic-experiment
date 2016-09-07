@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from fabric.api import local
+from fabric.api import sudo, run, cd, local, put, get, warn
 
 
 def commit(message='', push='n'):
@@ -10,3 +10,19 @@ def commit(message='', push='n'):
     local("git add . && git commit -m '{}'".format(message))
     if push == 'y':
         local("git push")
+
+
+def deploy():
+    stop()
+    with cd('/var/www/exotic-rpi'):
+        run('git checkout .')
+        run('git pull')
+    start()
+
+
+def start():
+    sudo('supervisorctl start exotic_rpi:*')
+
+
+def stop():
+    sudo('supervisorctl stop exotic_rpi:*')

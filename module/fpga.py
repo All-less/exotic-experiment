@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import importlib
+import subprocess as sp
 
 from tornado.options import options
 
@@ -38,7 +39,7 @@ def check_djtgcfg():
     except sp.CalledProcessError as e:
         res = e.output
 
-    if not res.startswith('ERROR: no command specified'):
+    if not res.startswith(b'ERROR: no command specified'):
         logger.error('The output of command "djtgcfg" is unexpected. '
                      'Please check whether it is correctly installed.')
         util.exit(1)
