@@ -1,0 +1,5 @@
+DELIMITER = '\n'
+bDELIMITER = b'\n'
+
+TYPE_STATUS = 0
+TYPE_INFO = 3

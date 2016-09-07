@@ -1,0 +1,25 @@
+.right {
+  height:100%;
+  width:55%;
+  position: absolute;
+  top:0;
+  right:0;
+
+  .border {
+    position: absolute;
+    left:0%;
+    top: 50%;
+    margin-top: -225px;
+    width:550px;
+    height:450px;
+    border: 1px solid #fff;
+
+    .bullet {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 550px;
+      height: 450px;
+    }
+  }
+}

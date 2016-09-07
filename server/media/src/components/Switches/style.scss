@@ -1,0 +1,18 @@
+.switch_border{
+  width:20px;
+  height:40px;
+  border:1px solid #fff;
+  margin: 10px 20px;
+  position: relative;
+  display: inline-block;
+
+  .switch{
+    position: relative;
+    width:20px;
+    height: 20px;
+    margin-left: -1px; /* TODO: temp solution to CSS conflict */
+    background-color: #fff;
+  }
+}
+
+

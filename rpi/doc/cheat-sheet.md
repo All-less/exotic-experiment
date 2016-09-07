@@ -32,8 +32,6 @@ except socket.error:
 	# ...
 ```
 
-#### 
-
 ## JSON
 
 #### Convert string to json
@@ -47,7 +45,3 @@ json.dumps()
 ```python
 json.loads()
 ```
-
-## Download file
-
-

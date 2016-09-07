@@ -1,0 +1,88 @@
+.title {
+  color: #fff;
+  font-weight: lighter;
+  margin: 30px 0 10px;
+  padding-left: 10px;
+}
+
+.item {
+  width: 100%;
+  padding-left: 54px;
+  position: relative;
+
+  .button {
+    width: 10px;
+    height: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    display: none;
+  }
+
+  .button_border {
+    min-width: 18px;  /* here min-xxx makes empty div  */
+    min-height: 18px; /* display with width and height */
+    display:inline-block;
+    position: absolute;
+    left: 20px;
+    border: 1px solid #fff;
+    border-radius: 3px;
+    margin:4px 8px 4px 0px;
+    padding: 3px;
+    cursor: pointer;
+  }
+
+  .button_chosen {
+    display: block;
+  }
+
+  .option {
+    color:#fff;
+    font-weight: lighter;
+    display: inline-block;
+    height:26px;
+    line-height: 26px;
+  }
+}
+
+.device_wrapper {
+  padding-left: 30px;
+  padding-right: 20px;
+
+  .device_selector {
+    width:100%;
+    height:24px;
+    margin: 16px 0;
+    border: 1px solid #fff;
+    padding: 0;
+    outline: none;
+    background-color: #000;
+    color:#fff;
+    font-weight: lighter;
+  }
+}
+
+.button_wrapper {
+  padding-left: 20px;
+  margin-top: 30px;
+
+  .buttons {
+
+    li {
+      display: inline-block;
+      background-color: #fff;
+      font-weight: lighter;
+      width:95px;
+      margin-left: 14px;
+      margin-right: 14px;
+      text-align: center;
+    }
+
+    li:first-child{
+      margin-left: 0;
+    }
+
+    li:last-child{
+      margin-right: 0;
+    }   
+  }
+}

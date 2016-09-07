@@ -1,0 +1,164 @@
+html,body{
+  border: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  font-family: "Helvetica Neue";
+  width:100%;
+  height:100%;
+  background-color: #000;
+  min-width: 670px;
+}
+li{
+  list-style: none;
+}
+ul,li{
+  padding:0;
+  margin:0;
+}
+input:focus{
+  outline: none;
+}
+
+.click_button{
+  cursor: pointer;
+}
+
+#main{
+  width:100%;
+  height:100%;
+}
+  #left, #right{
+    height:100%;
+    position: absolute;
+    top:0;
+  }
+  #left{
+    width:45%;
+    left:0;
+  }
+  #right{
+    width:55%;
+    right:0;
+  }
+    #left_contain{
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      margin-left: -131px;
+      margin-top: -239px;
+    }
+    #left_contain p{
+      color:#fff;
+      margin:20px 0 5px;
+      padding-left: 10px;
+    }
+      
+      
+    #bitfile_contain{
+      padding-left: 20px;
+    }
+    #bitfile_contain li{
+      display: inline-block;
+      border: 1px solid #fff;
+      height:20px;
+      text-align: center;
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
+      #status {
+        color: #777;
+        font-size: 15px;
+      }
+      #file_hint {
+        position: relative;
+        top: -20px;
+        pointer-events: none;
+      }
+      #about_file input{
+        height: 20px;
+        width: 48px;
+        /*
+        height:2000px;
+        width:2000px;
+        */
+        filter:alpha(opacity=0); /*IE滤镜，透明度50%*/
+        -moz-opacity:0; /*Firefox私有，透明度50%*/
+        opacity:0;/*其他，透明度50%*/
+        /*
+        position: absolute;
+        left: 0;
+        top: 0;
+        */
+      }
+      #path_for_file{
+        width:170px;
+        line-height: 20px;
+        color: #fff;
+        overflow: hidden;
+      }
+      #file_input{
+        width:48px;
+        background-color: #fff;
+        overflow: hidden; 
+        position: relative;
+        line-height: 20px;
+        letter-spacing: 5px;
+        font-weight: bold;
+      }
+      #about_button li{
+        background-color: #fff;
+        font-weight: lighter;
+        width:95px; 
+        margin-left: 14px;
+        margin-right: 14px;
+      }
+      #about_button li:first-child{
+        margin-left: 0;
+      }
+      #about_button li:last-child{
+        margin-right: 0;
+      }
+
+  #right{}
+    #video_border{
+      position: absolute;
+      left:0%;
+      top: 50%;
+      margin-top: -225px;
+      width:550px;
+      height:450px;
+      border: 1px solid #fff;
+    }
+    #damu {
+      position: relative;
+      top: 0;
+      left: 0;
+      width: 550px;
+      height: 450px;
+    }
+    #mediaspace{
+      position: relative;
+      top: 0;
+      left: 0;
+      /* margin: 25px; */
+      width:550px;
+      height:450px;
+      /* background-color: #bbb; */
+    }
+  #div_key_stroke{
+    display:;
+  }
+    #key{
+      height:40px;
+      line-height: 40px;
+      border: 1px solid #fff;
+      border-radius: 3px;
+      padding: 5px 10px;
+      margin-left: 10px;
+      margin-right: 10px;
+      font-size: 20px;
+      font-weight: bolder;
+    }
+
+ 
