@@ -46,6 +46,7 @@ class _Client(JsonStream):
 
     def on_close(self):
         env['auth'] = False
+        env['feedback'] = None
         self.failures += 1
         IOLoop.current().call_later(5, self.connect)
 
@@ -74,11 +75,19 @@ class _Client(JsonStream):
                 del dict_['type']
                 env.update(dict_)
                 env['auth'] = True
+                env['feedback'] = self.report_output
                 logger.info('Authentication succeeded.')
             elif code == STAT_AUTH_FAIL:
                 logger.error('Authentication failed.')
                 util.exit(1)
         else:
+            if code == INFO_USER_CHANGED:
+                env['operator'] = dict_.get('user', None)
+                if env['operator']:
+                    rpi.start_feedback(env['mode'])
+                else:
+                    rpi.stop_feedback(env['mode'])
+                return
             if code == OP_PROG:
                 fpga.program_file(env['bit_file'])
                 self.send_json({'type': STAT_PROGRAMMED})
@@ -88,9 +97,9 @@ class _Client(JsonStream):
                 AsyncHTTPClient().fetch(env['file_url'], self.handle_file)
                 return
             if code == ACT_CHANGE_MODE:
-                # TODO
-                mode = dict_.get('mode', 'sim')
+                mode = dict_.get('mode', 'digital')
                 logger.info('Feedback mode changed to "{}".'.format(mode))
+                rpi.switch_mode(mode)
                 env['mode'] = mode
                 self.send_json({'type': INFO_MODE_CHANGED, 'mode': mode})
                 return
@@ -135,6 +144,13 @@ class _Client(JsonStream):
             'switches': env['switches']
         })
 
+    def report_output(self, led, segs):
+        self.send_json({
+            'type': STAT_OUTPUT,
+            'led': led,
+            'segs': segs
+        })
+
     def handle_file(self, response):
         if response.code != 200:
             logger.warning('Error downloading file.')
@@ -145,9 +161,8 @@ class _Client(JsonStream):
             f.write(response.body)
         logger.info('File saved to {}.'.format(file_path))
         env['bit_file'] = str(file_path)
-        self.send_json({
-            'type': STAT_DOWNLOADED
-        })
+        self.send_json({'type': STAT_DOWNLOADED})
+
 
 def init(host, port):
     _Client(host, port)

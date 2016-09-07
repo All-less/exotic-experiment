@@ -26,6 +26,8 @@ define('config', default=None, help='program configuration', type=str)
 define('tmp_dir', default='/tmp/exotic-rpi', help='location for temporary files', type=str)
 
 define('platform', help='FPGA platform connected to this rpi', type=str)
+
+defind('cmd_read', default='rpi/lib/fpga_reader.py', help='command to start FPGA serial reader program', type=str)
 tornado.options.parse_command_line()
 
 

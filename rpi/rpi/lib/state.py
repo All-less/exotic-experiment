@@ -4,6 +4,10 @@ env = {
     'auth': False,    # authentication status
     'operator': None, # current operator ('None' means idle)
     'mode': 'digital',
+    'feedback': None, # callback function for feedback 
+                      # with following signature
+                      #     def feedback(led, segs):
+                      #         ...
 
     'buttons': 0x0,   # buttons status
     'switches': 0x0   # switches status
