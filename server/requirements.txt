@@ -1,4 +1,0 @@
-# Requirements for Exotic_server
---index https://pypi.python.org/simple/
-
-tornado>=4.0.0

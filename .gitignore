@@ -90,3 +90,4 @@ tmp/
 
 # cofiguration
 config_override.py
+config.py
