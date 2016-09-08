@@ -43,11 +43,11 @@ def start_streaming():
                     '{rtmp_stream}').format(**env)
         env['process'] = sp.Popen(
             'raspivid '
-            '-n '
-            '-mm matrix '
-            '-w 1280 '
-            '-h 720 '
-            '-fps 25 '
+            '--nopreview '
+            '--metering matrix '
+            '-w 800 '
+            '-h 600 '
+            '-fps 15 '
             '-g 250 '
             '-t 0 '
             '-b 10000000 '
@@ -63,7 +63,7 @@ def start_streaming():
             '-rtmp_buffer 100 '
             '-rtmp_live live '
             '{0}'.format(rtmp_url)
-            , stdout=sp.PIPE, shell=True, preexec_fn=os.setsid)
+            , shell=True, preexec_fn=os.setsid)
         logger.info('Start streaming to {}.'.format(rtmp_url))
 
 
@@ -86,7 +86,7 @@ def start_reading():
     segs: an array of 8 integers
     """
     if not env['process']:
-        proc = Subprocess(options.cmd_read, shell=True, 
+        proc = Subprocess(options.cmd_read, shell=True,
                           stdout=Subprocess.STREAM, preexec_fn=os.setsid)
 
         def on_read(content):
