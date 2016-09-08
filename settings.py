@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 import logging
 import os
 from pathlib import Path
@@ -15,22 +15,48 @@ path = lambda root,*a: os.path.join(root, *a)
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
-define('host', help='host of the server', type=str)
-define('port', default=6060, help='port of the server', type=int)
+define('host',
+    help='host of the server',
+    type=str)
+define('port',
+    default=6060,
+    help='port of the server',
+    type=int)
 
-define('debug', default=True, help='debug mode for development', type=bool)
-define('deploy', default='DEV', help='DEVelopment or PRODuction mode', type=str)
+define('debug',
+    default=True,
+    help='debug mode for development',
+    type=bool)
+define('deploy',
+    default='DEV',
+    help='DEVelopment or PRODuction mode',
+    type=str)
 
-define('device_id', help='Device ID of RPi for authentication', type=str)
-define('auth_key', help='Key phrase for authentication', type=str)
+define('device_id',
+    help='Device ID of RPi for authentication',
+    type=str)
+define('auth_key',
+    help='Key phrase for authentication',
+    type=str)
 
-define('config', default=None, help='program configuration', type=str)
+define('config',
+    help='program configuration',
+    type=str)
 
-define('tmp_dir', default='/tmp/exotic-rpi', help='location for temporary files', type=str)
+define('tmp_dir',
+    default='/tmp/exotic-rpi',
+    help='location for temporary files',
+    type=str)
 
-define('platform', help='FPGA platform connected to this rpi', type=str)
+define('platform',
+    help='FPGA platform connected to this rpi',
+    type=str)
 
-define('cmd_read', default='lib/fpga_reader.py', help='command to start FPGA serial reader program', type=str)
+define('cmd_read',
+    default='lib/fpga_reader.py',
+    help='command to start FPGA serial reader program',
+    type=str)
+
 tornado.options.parse_command_line()
 
 if options.config:
@@ -48,7 +74,7 @@ USE_SYSLOG = options.deploy == 'PROD'
 # unless propagate: True is set.
 LOGGERS = {
    'loggers': {
-        'tornado.application': {}, # 
+        'tornado.application': {}, #
         'tornado.access': {},      # enable default logging
         'tornado.general': {},     #
         'rpi': {

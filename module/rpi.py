@@ -61,7 +61,7 @@ def start_streaming():
             '-map 0:0 '
             '-f flv '
             '-rtmp_buffer 100 '
-            # '-rtmp_live live '
+            '-rtmp_live live '
             '{0}'.format(rtmp_url)
             , stdout=sp.PIPE, shell=True, preexec_fn=os.setsid)
         logger.info('Start streaming to {}.'.format(rtmp_url))
