@@ -29,8 +29,8 @@ class UTF8SafeFormatter(RemoteAddressFormatter):
     
     def formatException(self, e):
         r = logging.Formatter.formatException(self, e)
-        if type(r) == str:
-            r = r.encode(self.encoding, 'replace') # Convert to bytes
+        if type(r) == bytes:
+            r = r.decode(self.encoding, 'replace') # Convert to str
         return r
     
     def format(self, record):
