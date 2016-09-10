@@ -21,8 +21,11 @@ def deploy():
 
 
 def start():
-    sudo('supervisorctl start exotic_rpi:*')
+    with cd('/var/www/exotic-rpi'):
+        sudo('bash scripts/daemon.sh start')
+        sudo('bash scripts/daemon.sh status')
 
 
 def stop():
-    sudo('supervisorctl stop exotic_rpi:*')
+    with cd('/var/www/exotic-rpi'):
+        sudo('bash scripts/daemon.sh stop')
