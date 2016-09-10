@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 from fabric.api import sudo, run, cd, local, put, get, warn
 
 
@@ -28,4 +30,6 @@ def start():
 
 def stop():
     with cd('/var/www/exotic-rpi'):
-        sudo('bash scripts/daemon.sh stop')
+        output = sudo('bash scripts/daemon.sh status', warn_only=True)
+        if re.search(r'.+is running\.', output):
+            sudo('bash scripts/daemon.sh stop')
