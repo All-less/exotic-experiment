@@ -157,6 +157,8 @@ class _Client(JsonStream):
     def handle_file(self, response):
         if response.code != 200:
             logger.warning('Error downloading file.')
+            logger.warning(response.code)
+            logger.warning(response.reason)
             return
         file_name = "{}.bit".format(options.device_id)
         file_path = Path(options.tmp_dir) / file_name

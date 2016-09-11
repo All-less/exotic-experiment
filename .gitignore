@@ -91,3 +91,6 @@ tmp/
 # cofiguration
 config_override.py
 config.py
+
+# process id
+*.pid

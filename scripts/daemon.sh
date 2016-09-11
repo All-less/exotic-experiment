@@ -20,7 +20,7 @@ NAME=EXOTIC_RPI
 DAEMON_OPTS='/var/www/exotic-rpi/main.py --config=/var/www/exotic-rpi/config.py'
 
 # options to pass to start-stop-daemon
-INIT_OPTS='--quiet --background --chuid=root --chdir=/var/www/exotic-rpi'
+INIT_OPTS='--background --chuid=root --chdir=/var/www/exotic-rpi'
 
 # options to redirect output
 REDIR_OPTS='1>>/var/log/exotic-rpi/stdout.log 2>>/var/log/exotic-rpi/stderr.log'

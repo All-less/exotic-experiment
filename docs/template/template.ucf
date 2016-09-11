@@ -1,0 +1,18 @@
+NET "clk"              LOC = AC18      | IOSTANDARD = LVCMOS18 ;
+NET "clk"              TNM_NET = TM_CLK_100M;
+TIMESPEC TS_SYS_CLK    = PERIOD "TM_CLK_100M"  10 ns HIGH 50%;
+
+NET "rst_n"            LOC = W13       | IOSTANDARD = LVCMOS18 ;
+NET "rst_n"            CLOCK_DEDICATED_ROUTE = FALSE;
+
+NET "uart_rx"          LOC = L25       | IOSTANDARD = LVCMOS33 | SLEW = FAST |              PULLUP ;
+NET "uart_tx"          LOC = P24       | IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 16 | PULLUP ;
+
+NET "btn[1]"           LOC = W26       | IOSTANDARD = LVCMOS33 ;
+NET "btn[2]"           LOC = V21       | IOSTANDARD = LVCMOS33 ;
+NET "btn[3]"           LOC = W21       | IOSTANDARD = LVCMOS33 ;
+NET "btn[4]"           LOC = AA25      | IOSTANDARD = LVCMOS33 ;
+NET "sw[1]"            LOC = AB25      | IOSTANDARD = LVCMOS33 ;
+NET "sw[2]"            LOC = W23       | IOSTANDARD = LVCMOS33 ;
+NET "sw[3]"            LOC = W24       | IOSTANDARD = LVCMOS33 ;
+NET "sw[4]"            LOC = AB26      | IOSTANDARD = LVCMOS33 ;
