@@ -4,7 +4,7 @@ import socket
 from pathlib import Path
 
 import tornado.iostream
-from tornado.ioloop import IOLoop
+from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado.options import options
 from tornado.httpclient import AsyncHTTPClient
 
@@ -22,17 +22,20 @@ class _Client(JsonStream):
 
     host = None
     port = None
-    failures = 0  # number of reconnection
-                  # it will be checked in connect(), incremented in 
-                  # on_close(), cleared in on_connect()
+    connection_failures = 0  # number of reconnection
+                             # it will be checked in connect(), incremented in
+                             # on_close(), cleared in on_connect()
+    download_failures = 0
+    keep_alive = None  # Periodical callback to keep connection alive
 
     def __init__(self, host, port):
         self.host = host
         self.port = port
+        self.keep_alive = PeriodicCallback(self.report_input, 120000)
         self.connect()
 
     def connect(self):
-        if self.failures > 3:
+        if self.connection_failures > 3:
             logger.error('Reconnection failed for three times.')
             util.exit(1)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
@@ -47,11 +50,13 @@ class _Client(JsonStream):
     def on_close(self):
         env['auth'] = False
         env['feedback'] = None
-        self.failures += 1
+        self.connection_failures += 1
+        self.keep_alive.stop()
         IOLoop.current().call_later(5, self.connect)
 
     def on_connect(self):
-        self.failures = 0
+        self.connection_failures = 0
+        self.keep_alive.start()
         logger.info('Connected to {}:{}.'.format(
             self.host, self.port))
         self.try_authenticate()
@@ -97,6 +102,7 @@ class _Client(JsonStream):
                 return
             if code == STAT_UPLOADED:
                 logger.info('Start downloading file from {}'.format(env['file_url']))
+                self.download_failures = 0
                 AsyncHTTPClient().fetch(env['file_url'], self.handle_file)
                 return
             if code == ACT_CHANGE_MODE:
@@ -156,9 +162,14 @@ class _Client(JsonStream):
 
     def handle_file(self, response):
         if response.code != 200:
-            logger.warning('Error downloading file.')
-            logger.warning(response.code)
-            logger.warning(response.reason)
+            self.download_failures += 1
+            logger.warning('Error downloading file: {}, {}'.format(
+                response.code, response.reason))
+            if self.download_failures > 3:
+                logger.warning('Failed to download file for 3 times.')
+                self.send_json({'type': STAT_DOWNLOAD_FAIL})
+                return
+            AsyncHTTPClient().fetch(env['file_url'], self.handle_file)
             return
         file_name = "{}.bit".format(options.device_id)
         file_path = Path(options.tmp_dir) / file_name

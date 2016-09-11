@@ -33,3 +33,8 @@ def stop():
         output = sudo('bash scripts/daemon.sh status', warn_only=True)
         if re.search(r'.+is running\.', output):
             sudo('bash scripts/daemon.sh stop')
+
+
+def restart():
+    stop()
+    start()
