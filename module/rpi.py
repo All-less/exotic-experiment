@@ -88,6 +88,10 @@ def start_reading():
     segs: an array of 8 integers
     """
     if not env['process']:
+        if not options.cmd_read:
+            logger.waring('No command found for reading output from FPGA.')
+            return
+
         proc = Subprocess(options.cmd_read, shell=True,
                           stdout=Subprocess.STREAM, preexec_fn=os.setsid)
 
