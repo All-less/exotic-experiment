@@ -2,6 +2,7 @@
 import logging
 import socket
 from pathlib import Path
+from concurrent.futures import ProcessPoolExecutor
 
 import tornado.iostream
 from tornado.ioloop import IOLoop, PeriodicCallback
@@ -10,6 +11,7 @@ from tornado.httpclient import AsyncHTTPClient
 
 from lib.json_stream import JsonStream
 from lib.state import env
+from lib.download import download
 from lib.constant import *
 from lib import util
 from . import rpi
@@ -103,7 +105,7 @@ class _Client(JsonStream):
             if code == STAT_UPLOADED:
                 logger.info('Start downloading file from {}'.format(env['file_url']))
                 self.download_failures = 0
-                AsyncHTTPClient().fetch(env['file_url'], self.handle_file)
+                self.download_file()
                 return
             if code == ACT_CHANGE_MODE:
                 mode = dict_.get('mode', 'digital')
@@ -160,25 +162,29 @@ class _Client(JsonStream):
             'segs': segs
         })
 
-    def handle_file(self, response):
-        if response.code != 200:
+    def download_file(self):
+        with ProcessPoolExecutor(max_workers=1) as executor:
+            file_name = "{}.bit".format(options.device_id)
+            file_path = str(Path(options.tmp_dir) / file_name)
+            future = executor.submit(download, env['file_url'], file_path)
+            IOLoop.current().add_future(future, self.handle_download_res)
+
+    def handle_download_res(self, future):
+        exc = future.exception()
+        if exc:
+            logger.warning('Error downloading file: {}.'.format(e))
             self.download_failures += 1
-            logger.warning('Error downloading file: {}, {}'.format(
-                response.code, response.reason))
             if self.download_failures > 3:
                 logger.warning('Failed to download file for 3 times.')
                 self.send_json({'type': STAT_DOWNLOAD_FAIL})
                 return
-            AsyncHTTPClient().fetch(env['file_url'], self.handle_file)
+            self.download_file()
             return
         file_name = "{}.bit".format(options.device_id)
         file_path = Path(options.tmp_dir) / file_name
-        with file_path.open('wb') as f:
-            f.write(response.body)
-        logger.info('File saved to {}.'.format(file_path))
+        logger.info('File downloaded to {}.'.format(file_path))
         env['bit_file'] = str(file_path)
         self.send_json({'type': STAT_DOWNLOADED})
-
 
 def init(host, port):
     _Client(host, port)
