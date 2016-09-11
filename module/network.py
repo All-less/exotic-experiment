@@ -11,7 +11,6 @@ from tornado.httpclient import AsyncHTTPClient
 
 from lib.json_stream import JsonStream
 from lib.state import env
-from lib.download import download
 from lib.constant import *
 from lib import util
 from . import rpi
@@ -166,7 +165,7 @@ class _Client(JsonStream):
         with ProcessPoolExecutor(max_workers=1) as executor:
             file_name = "{}.bit".format(options.device_id)
             file_path = str(Path(options.tmp_dir) / file_name)
-            future = executor.submit(download, env['file_url'], file_path)
+            future = executor.submit(util.download, env['file_url'], file_path)
             IOLoop.current().add_future(future, self.handle_download_res)
 
     def handle_download_res(self, future):

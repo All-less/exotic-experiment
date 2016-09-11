@@ -9,59 +9,56 @@ from tornado.options import define, options
 from lib import logconfig
 import environment
 
-
 # Make filepaths relative to settings.
-path = lambda root,*a: os.path.join(root, *a)
+path = lambda root, *a: os.path.join(root, *a)
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
-
 define('host',
-    help='host of the server',
-    type=str)
+       help='host of the server',
+       type=str)
 define('port',
-    default=6060,
-    help='port of the server',
-    type=int)
+       default=6060,
+       help='port of the server',
+       type=int)
 
 define('debug',
-    default=True,
-    help='debug mode for development',
-    type=bool)
+       default=True,
+       help='debug mode for development',
+       type=bool)
 define('deploy',
-    default='DEV',
-    help='DEVelopment or PRODuction mode',
-    type=str)
+       default='DEV',
+       help='DEVelopment or PRODuction mode',
+       type=str)
 
 define('device_id',
-    help='Device ID of RPi for authentication',
-    type=str)
+       help='Device ID of RPi for authentication',
+       type=str)
 define('auth_key',
-    help='Key phrase for authentication',
-    type=str)
+       help='Key phrase for authentication',
+       type=str)
 
 define('config',
-    help='program configuration',
-    type=str)
+       help='program configuration',
+       type=str)
 
 define('tmp_dir',
-    default='/tmp/exotic-rpi',
-    help='location for temporary files',
-    type=str)
+       default='/tmp/exotic-rpi',
+       help='location for temporary files',
+       type=str)
 
 define('platform',
-    help='FPGA platform connected to this rpi',
-    type=str)
+       help='FPGA platform connected to this rpi',
+       type=str)
 
 define('cmd_read',
-    default='lib/fpga_reader.py',
-    help='command to start FPGA serial reader program',
-    type=str)
+       default='lib/fpga_reader.py',
+       help='command to start FPGA serial reader program',
+       type=str)
 
 tornado.options.parse_command_line()
 
 if options.config:
     tornado.options.parse_config_file(options.config)
-
 
 SYSLOG_TAG = "exotic_rpi"
 SYSLOG_FACILITY = logging.handlers.SysLogHandler.LOG_LOCAL2
@@ -73,10 +70,10 @@ USE_SYSLOG = options.deploy == 'PROD'
 # unless you set them here.  Messages will not propagate through a logger
 # unless propagate: True is set.
 LOGGERS = {
-   'loggers': {
-        'tornado.application': {}, #
-        'tornado.access': {},      # enable default logging
-        'tornado.general': {},     #
+    'loggers': {
+        'tornado.application': {},  #
+        'tornado.access': {},  # enable default logging
+        'tornado.general': {},  #
         'rpi': {
             'level': LOG_LEVEL
         }
@@ -84,8 +81,7 @@ LOGGERS = {
 }
 
 logconfig.initialize_logging(SYSLOG_TAG, SYSLOG_FACILITY, LOGGERS,
-        LOG_LEVEL, USE_SYSLOG)
-
+                             LOG_LEVEL, USE_SYSLOG)
 
 if not Path(options.tmp_dir).exists():
     try:
