@@ -11,14 +11,12 @@ from module import network
 
 
 def main():
+    util.setup_trap()
     rpi.init()
     fpga.init()
     network.init(options.host, options.port)
-    try:
-        IOLoop.current().start()
-    except:  # make sure resources can be released
-        util.exit(0)
-    
+    IOLoop.current().start()
+
 
 if '__main__' == __name__:
     main()
